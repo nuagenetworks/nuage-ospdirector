@@ -1,0 +1,112 @@
+heat_template_version: 2015-04-30
+
+description: >
+  OpenStack controller node post deployment for Puppet.
+
+parameters:
+  servers:
+    type: json
+  NodeConfigIdentifiers:
+     type: json
+     description: Value which changes if the node configuration may need to be re-applied
+
+
+resources:
+
+  ControllerPuppetConfig:
+    type: OS::TripleO::ControllerConfig
+
+  # Step through a series of Puppet runs using the same manifest.
+  # NOTE: To enable stepping through the deployments via heat hooks,
+  # you must observe the glob naming defined in overcloud-steps.yaml
+  # e.g all Deployment resources should have a *Deployment_StepN suffix
+  ControllerLoadBalancerDeployment_Step1:
+    type: OS::Heat::StructuredDeployments
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 1
+        update_identifier: {get_param: NodeConfigIdentifiers}
+      actions: ['CREATE'] # no need for two passes on an UPDATE
+
+  ControllerServicesBaseDeployment_Step2:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerLoadBalancerDeployment_Step1
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 2
+        update_identifier: {get_param: NodeConfigIdentifiers}
+      actions: ['CREATE'] # no need for two passes on an UPDATE
+
+  ControllerRingbuilderPuppetConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: puppet
+      options:
+        enable_hiera: True
+        enable_facter: False
+      inputs:
+      outputs:
+      - name: result
+      config:
+        get_file: manifests/ringbuilder.pp
+
+  ControllerRingbuilderDeployment_Step3:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerServicesBaseDeployment_Step2
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerRingbuilderPuppetConfig}
+      input_values:
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  ControllerOvercloudServicesDeployment_Step4:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerRingbuilderDeployment_Step3
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 3
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  ControllerOvercloudServicesDeployment_Step5:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerOvercloudServicesDeployment_Step4
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 4
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  ControllerOvercloudServicesDeployment_Step6:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerOvercloudServicesDeployment_Step5
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 5
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  ControllerOvercloudServicesDeployment_Step7:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ControllerOvercloudServicesDeployment_Step6
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ControllerPuppetConfig}
+      input_values:
+        step: 6
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  # Note, this should come last, so use depends_on to ensure
+  # this is created after any other resources.
+  ExtraConfig:
+    depends_on: ControllerOvercloudServicesDeployment_Step7
+    type: OS::TripleO::NodeExtraConfigPost
+    properties:
+        servers: {get_param: servers}

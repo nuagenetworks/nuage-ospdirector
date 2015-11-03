@@ -1,0 +1,99 @@
+resource_registry:
+  OS::TripleO::BlockStorage: puppet/cinder-storage-puppet.yaml
+  OS::TripleO::BlockStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::Compute: puppet/compute-puppet.yaml
+  OS::TripleO::Compute::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::SoftwareDeployment: OS::Heat::StructuredDeployment
+  OS::TripleO::Controller: puppet/controller-puppet.yaml
+  OS::TripleO::Controller::Net::SoftwareConfig: net-config-bridge.yaml
+  OS::TripleO::ObjectStorage: puppet/swift-storage-puppet.yaml
+  OS::TripleO::ObjectStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::CephStorage: puppet/ceph-storage-puppet.yaml
+  OS::TripleO::CephStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::ControllerPostDeployment: puppet/controller-post-puppet.yaml
+  # set to controller-config-pacemaker.yaml to enable pacemaker
+  # OS::TripleO::ControllerConfig: puppet/controller-config.yaml
+  OS::TripleO::ControllerConfig: puppet/controller-config-pacemaker.yaml
+  OS::TripleO::ComputePostDeployment: puppet/compute-post-puppet.yaml
+  OS::TripleO::ObjectStoragePostDeployment: puppet/swift-storage-post.yaml
+  OS::TripleO::BlockStoragePostDeployment: puppet/cinder-storage-post.yaml
+  OS::TripleO::CephStoragePostDeployment: puppet/ceph-storage-post-puppet.yaml
+  OS::TripleO::SwiftDevicesAndProxy::SoftwareConfig: puppet/swift-devices-and-proxy-config.yaml
+  OS::TripleO::CephClusterConfig::SoftwareConfig: puppet/ceph-cluster-config.yaml
+  OS::TripleO::AllNodes::SoftwareConfig: puppet/all-nodes-config.yaml
+  OS::TripleO::BootstrapNode::SoftwareConfig: puppet/bootstrap-config.yaml
+  OS::TripleO::Tasks::PackageUpdate: extraconfig/tasks/yum_update.yaml
+
+  # Hooks for operator extra config
+  # NodeUserData == Cloud-init additional user-data, e.g cloud-config
+  # ControllerExtraConfigPre == Controller configuration pre service deployment
+  # NodeExtraConfig == All nodes configuration pre service deployment
+  # NodeExtraConfigPost == All nodes configuration post service deployment
+  OS::TripleO::NodeUserData: firstboot/userdata_default.yaml
+  OS::TripleO::ControllerExtraConfigPre: puppet/extraconfig/pre_deploy/default.yaml
+  OS::TripleO::ComputeExtraConfigPre: puppet/extraconfig/pre_deploy/default.yaml
+  OS::TripleO::NodeExtraConfig: puppet/extraconfig/pre_deploy/default.yaml
+  OS::TripleO::NodeExtraConfigPost: extraconfig/post_deploy/default.yaml
+
+  # "AllNodes" Extra cluster config, runs on all nodes prior to the post_deploy
+  # phase, e.g when puppet is applied, but after the pre_deploy phase.  Useful when
+  # configuration with knowledge of all nodes in the cluster is required vs single
+  # node configuration in the pre_deploy step.
+  OS::TripleO::AllNodesExtraConfig: extraconfig/all_nodes/default.yaml
+
+  # TripleO overcloud networks
+  OS::TripleO::Network: network/networks.yaml
+  OS::TripleO::VipConfig: puppet/vip-config.yaml
+
+
+  OS::TripleO::Network::External: network/noop.yaml
+  OS::TripleO::Network::InternalApi: network/noop.yaml
+  OS::TripleO::Network::StorageMgmt: network/noop.yaml
+  OS::TripleO::Network::Storage: network/noop.yaml
+  OS::TripleO::Network::Tenant: network/noop.yaml
+
+  OS::TripleO::Network::Ports::NetVipMap: network/ports/net_ip_map.yaml
+  OS::TripleO::Network::Ports::NetIpMap: network/ports/net_ip_map.yaml
+  OS::TripleO::Network::Ports::NetIpSubnetMap: network/ports/net_ip_subnet_map.yaml
+  OS::TripleO::Network::Ports::NetIpListMap: network/ports/net_ip_list_map.yaml
+
+  # Port assignments for the VIPs
+  OS::TripleO::Network::Ports::CtlplaneVipPort: network/ports/ctlplane_vip.yaml
+  OS::TripleO::Network::Ports::ExternalVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::InternalApiVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageMgmtVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::TenantVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::RedisVipPort: network/ports/noop.yaml
+
+  # Port assignments for the controller role
+  OS::TripleO::Controller::Ports::ExternalPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::StorageMgmtPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::TenantPort: network/ports/noop.yaml
+
+  # Port assignments for the compute role
+  OS::TripleO::Compute::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::Compute::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::Compute::Ports::TenantPort: network/ports/noop.yaml
+
+  # Port assignments for the ceph storage role
+  OS::TripleO::CephStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::CephStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # Port assignments for the swift storage role
+  OS::TripleO::SwiftStorage::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::SwiftStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::SwiftStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # Port assignments for the block storage role
+  OS::TripleO::BlockStorage::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::BlockStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::BlockStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # validation resources
+  OS::TripleO::AllNodes::Validation: all-nodes-validation.yaml
+
+parameter_defaults:
+  EnablePackageInstall: false

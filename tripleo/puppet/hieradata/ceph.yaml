@@ -1,0 +1,28 @@
+ceph::profile::params::osd_journal_size: 50000
+ceph::profile::params::osd_pool_default_pg_num: 256
+ceph::profile::params::osd_pool_default_pgp_num: 256
+ceph::profile::params::osd_pool_default_size: 3
+ceph::profile::params::osd_pool_default_min_size: 1
+ceph::profile::params::manage_repo: false
+ceph::profile::params::authentication_type: cephx
+
+ceph_pools:
+  - "%{hiera('cinder_rbd_pool_name')}"
+  - "%{hiera('nova::compute::rbd::libvirt_images_rbd_pool')}"
+  - "%{hiera('glance::backend::rbd::rbd_store_pool')}"
+  - backups
+
+ceph_osd_selinux_permissive: true
+
+#ceph::profile::params::osds: {/srv/data: {}}
+ceph::profile::params::osds:
+  '/dev/sdc':
+    journal: '/dev/sdb'
+  '/dev/sdd':
+    journal: '/dev/sdb'
+  '/dev/sde':
+    journal: '/dev/sdb'
+  '/dev/sdf':
+    journal: '/dev/sdb'
+  '/dev/sdg':
+    journal: '/dev/sdb'

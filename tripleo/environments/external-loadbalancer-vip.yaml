@@ -1,0 +1,44 @@
+resource_registry:
+  OS::TripleO::Network::Ports::NetVipMap: ../network/ports/net_vip_map_external.yaml
+  OS::TripleO::Network::Ports::CtlplaneVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::ExternalVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::InternalApiVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageMgmtVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::TenantVipPort: ../network/ports/noop.yaml
+  OS::TripleO::Network::Ports::RedisVipPort: ../network/ports/from_service.yaml
+  OS::TripleO::Controller::Ports::ExternalPort: ../network/ports/from_pool.yaml
+  OS::TripleO::Controller::Ports::InternalApiPort: ../network/ports/from_pool.yaml
+  OS::TripleO::Controller::Ports::StoragePort: ../network/ports/from_pool.yaml
+  OS::TripleO::Controller::Ports::StorageMgmtPort: ../network/ports/from_pool.yaml
+  OS::TripleO::Controller::Ports::TenantPort: ../network/ports/from_pool.yaml
+
+parameter_defaults:
+  # When using an external loadbalancer set the following in parameter_defaults
+  # to control your VIPs (currently one per network)
+  # NOTE: we will eventually move to one VIP per service
+  #
+  # ControlPlaneIP:
+  # ExternalNetworkVip:
+  # InternalApiNetworkVip:
+  # StorageNetworkVip:
+  # StorageMgmtNetworkVip:
+  # ServiceVips:
+  #   redis: 172.16.2.6
+  # ControllerIPs:
+  #   external_cidr: "24"
+  #   internal_api_cidr: "24"
+  #   storage_cidr: "24"
+  #   storage_mgmt_cidr: "24"
+  #   tenant_cidr: "24"
+  #   external:
+  #   - 10.0.0.251
+  #   internal_api:
+  #   - 172.16.2.251
+  #   storage:
+  #   - 172.16.1.251
+  #   storage_mgmt:
+  #   - 172.16.3.251
+  #   tenant:
+  #   - 172.16.0.251
+  EnableLoadBalancer: false

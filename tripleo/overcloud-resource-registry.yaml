@@ -1,0 +1,83 @@
+resource_registry:
+  OS::TripleO::BlockStorage: cinder-storage.yaml
+  OS::TripleO::BlockStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::Compute: compute.yaml
+  OS::TripleO::Compute::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::SoftwareDeployment: OS::Heat::StructuredDeployment
+  OS::TripleO::Controller: controller.yaml
+  OS::TripleO::Controller::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::ObjectStorage: swift-storage.yaml
+  OS::TripleO::ObjectStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::CephStorage: ceph-storage.yaml
+  OS::TripleO::CephStorage::Net::SoftwareConfig: net-config-noop.yaml
+  OS::TripleO::ControllerPostDeployment: controller-post.yaml
+  OS::TripleO::ComputePostDeployment: compute-post.yaml
+  OS::TripleO::ObjectStoragePostDeployment: swift-storage-post.yaml
+  OS::TripleO::BlockStoragePostDeployment: cinder-storage-post.yaml
+  OS::TripleO::CephStoragePostDeployment: ceph-storage-post.yaml
+  OS::TripleO::SwiftDevicesAndProxy::SoftwareConfig: swift-devices-and-proxy-config.yaml
+  OS::TripleO::CephClusterConfig::SoftwareConfig: ceph-cluster-config.yaml
+  OS::TripleO::AllNodes::SoftwareConfig: all-nodes-config.yaml
+  OS::TripleO::BootstrapNode::SoftwareConfig: bootstrap-config.yaml
+  OS::TripleO::NodeUserData: firstboot/userdata_default.yaml
+  OS::TripleO::NodeExtraConfigPost: extraconfig/post_deploy/default.yaml
+  OS::TripleO::Tasks::PackageUpdate: extraconfig/tasks/yum_update.yaml
+
+  # "AllNodes" Extra cluster config, runs on all nodes prior to the post_deploy
+  # phase, e.g when puppet is applied, but after the pre_deploy phase.  Useful when
+  # configuration with knowledge of all nodes in the cluster is required vs single
+  # node configuration in the pre_deploy step.
+  OS::TripleO::AllNodesExtraConfig: extraconfig/all_nodes/default.yaml
+
+  # TripleO overcloud networks
+  OS::TripleO::Network: network/networks.yaml
+  OS::TripleO::VipConfig: vip-config.yaml
+
+  OS::TripleO::Network::External: network/noop.yaml
+  OS::TripleO::Network::InternalApi: network/noop.yaml
+  OS::TripleO::Network::StorageMgmt: network/noop.yaml
+  OS::TripleO::Network::Storage: network/noop.yaml
+  OS::TripleO::Network::Tenant: network/noop.yaml
+
+  OS::TripleO::Network::Ports::NetVipMap: network/ports/net_ip_map.yaml
+  OS::TripleO::Network::Ports::NetIpMap: network/ports/net_ip_map.yaml
+  OS::TripleO::Network::Ports::NetIpSubnetMap: network/ports/net_ip_subnet_map.yaml
+  OS::TripleO::Network::Ports::NetIpListMap: network/ports/net_ip_list_map.yaml
+
+  # Port assignments for the VIPs
+  OS::TripleO::Network::Ports::CtlplaneVipPort: network/ports/ctlplane_vip.yaml
+  OS::TripleO::Network::Ports::ExternalVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::InternalApiVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::StorageMgmtVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::TenantVipPort: network/ports/noop.yaml
+  OS::TripleO::Network::Ports::RedisVipPort: network/ports/noop.yaml
+
+  # Port assignments for the controller role
+  OS::TripleO::Controller::Ports::ExternalPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::StorageMgmtPort: network/ports/noop.yaml
+  OS::TripleO::Controller::Ports::TenantPort: network/ports/noop.yaml
+
+  # Port assignments for the compute role
+  OS::TripleO::Compute::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::Compute::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::Compute::Ports::TenantPort: network/ports/noop.yaml
+
+  # Port assignments for the ceph storage role
+  OS::TripleO::CephStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::CephStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # Port assignments for the swift storage role
+  OS::TripleO::SwiftStorage::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::SwiftStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::SwiftStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # Port assignments for the block storage role
+  OS::TripleO::BlockStorage::Ports::InternalApiPort: network/ports/noop.yaml
+  OS::TripleO::BlockStorage::Ports::StoragePort: network/ports/noop.yaml
+  OS::TripleO::BlockStorage::Ports::StorageMgmtPort: network/ports/noop.yaml
+
+  # validation resources
+  OS::TripleO::AllNodes::Validation: all-nodes-validation.yaml

@@ -1,0 +1,15 @@
+# A Heat environment file which can be used to enable a
+# a Nuage backend on the compute, configured via puppet
+resource_registry:
+  OS::TripleO::ComputeExtraConfigPre: ../puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml
+
+parameter_defaults:
+  NuageActiveController: '192.0.2.101'
+  NuageMetadataPort: '9697'
+  NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+  NuageNovaMetadataPort: '8775'
+  NuageNovaClientVersion: '2'
+  NuageNovaOsUsername: 'nova'
+  NuageMetadataAgentStartWithOvs: true
+  NuageNovaApiEndpoint: 'publicURL'
+  NuageNovaRegionName: 'regionOne'

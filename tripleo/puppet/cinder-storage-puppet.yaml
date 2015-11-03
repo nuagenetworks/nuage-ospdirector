@@ -1,0 +1,328 @@
+heat_template_version: 2015-04-30
+description: 'OpenStack cinder storage configured by Puppet'
+parameters:
+  Image:
+    default: overcloud-cinder-volume
+    type: string
+  CinderEnableIscsiBackend:
+    default: true
+    description: Whether to enable or not the Iscsi backend for Cinder
+    type: boolean
+  CinderISCSIHelper:
+    default: tgtadm
+    description: The iSCSI helper to use with cinder.
+    type: string
+  CinderLVMLoopDeviceSize:
+    default: 5000
+    description: The size of the loopback file used by the cinder LVM driver.
+    type: number
+  CinderPassword:
+    default: unset
+    description: The password for the cinder service and db account, used by cinder-api.
+    type: string
+    hidden: true
+  Debug:
+    default: ''
+    description: Set to True to enable debugging on all services.
+    type: string
+  VirtualIP: # deprecated. Use per service VIPs instead.
+    default: ''
+    type: string
+  ExtraConfig:
+    default: {}
+    description: |
+      Additional configuration to inject into the cluster. The JSON should have
+      the following structure:
+        {"FILEKEY":
+          {"config":
+            [{"section": "SECTIONNAME",
+              "values":
+                [{"option": "OPTIONNAME",
+                  "value": "VALUENAME"
+                 }
+                ]
+             }
+            ]
+          }
+        }
+      For instance:
+        {"nova":
+          {"config":
+            [{"section": "default",
+              "values":
+                [{"option": "force_config_drive",
+                  "value": "always"
+                 }
+                ]
+             },
+             {"section": "cells",
+              "values":
+                [{"option": "driver",
+                  "value": "nova.cells.rpc_driver.CellsRPCDriver"
+                 }
+                ]
+             }
+            ]
+          }
+        }
+    type: json
+  Flavor:
+    description: Flavor for block storage nodes to request when deploying.
+    type: string
+    constraints:
+      - custom_constraint: nova.flavor
+  GlancePort:
+    default: "9292"
+    description: Glance port.
+    type: string
+  GlanceProtocol:
+    default: http
+    description: Protocol to use when connecting to glance, set to https for SSL.
+    type: string
+  KeyName:
+    default: default
+    description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    type: string
+  RabbitPassword:
+    default: 'guest'
+    type: string
+  RabbitUserName:
+    default: 'guest'
+    type: string
+  RabbitClientUseSSL:
+    default: false
+    description: >
+        Rabbit client subscriber parameter to specify
+        an SSL connection to the RabbitMQ host.
+    type: string
+  RabbitClientPort:
+    default: 5672
+    description: Set rabbit subscriber port, change this if using SSL
+    type: number
+  SnmpdReadonlyUserName:
+    default: ro_snmp_user
+    description: The user name for SNMPd with readonly rights running on all Overcloud nodes
+    type: string
+  SnmpdReadonlyUserPassword:
+    default: unset
+    description: The user password for SNMPd with readonly rights running on all Overcloud nodes
+    type: string
+    hidden: true
+  NtpServer:
+    type: string
+    default: ''
+  EnablePackageInstall:
+    default: 'false'
+    description: Set to true to enable package installation via Puppet
+    type: boolean
+  UpdateIdentifier:
+    default: ''
+    type: string
+    description: >
+      Setting to a previously unused value during stack-update will trigger
+      package update on all nodes
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  GlanceApiVirtualIP:
+    type: string
+    default: ''
+  MysqlVirtualIP:
+    type: string
+    default: ''
+  Hostname:
+    type: string
+    default: '' # Defaults to Heat created hostname
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  GlanceApiVirtualIP:
+    type: string
+    default: ''
+  MysqlVirtualIP:
+    type: string
+    default: ''
+
+resources:
+  BlockStorage:
+    type: OS::Nova::Server
+    properties:
+      image:
+        {get_param: Image}
+      flavor: {get_param: Flavor}
+      key_name: {get_param: KeyName}
+      networks:
+        - network: ctlplane
+      user_data_format: SOFTWARE_CONFIG
+      user_data: {get_resource: NodeUserData}
+      name: {get_param: Hostname}
+
+  NodeUserData:
+    type: OS::TripleO::NodeUserData
+
+  InternalApiPort:
+    type: OS::TripleO::BlockStorage::Ports::InternalApiPort
+    properties:
+      ControlPlaneIP: {get_attr: [BlockStorage, networks, ctlplane, 0]}
+
+  StoragePort:
+    type: OS::TripleO::BlockStorage::Ports::StoragePort
+    properties:
+      ControlPlaneIP: {get_attr: [BlockStorage, networks, ctlplane, 0]}
+
+  StorageMgmtPort:
+    type: OS::TripleO::BlockStorage::Ports::StorageMgmtPort
+    properties:
+      ControlPlaneIP: {get_attr: [BlockStorage, networks, ctlplane, 0]}
+
+  NetworkConfig:
+    type: OS::TripleO::BlockStorage::Net::SoftwareConfig
+    properties:
+      ControlPlaneIp: {get_attr: [BlockStorage, networks, ctlplane, 0]}
+      InternalApiIpSubnet: {get_attr: [InternalApiPort, ip_subnet]}
+      StorageIpSubnet: {get_attr: [StoragePort, ip_subnet]}
+      StorageMgmtIpSubnet: {get_attr: [StorageMgmtPort, ip_subnet]}
+
+  NetIpMap:
+    type: OS::TripleO::Network::Ports::NetIpMap
+    properties:
+      ControlPlaneIp: {get_attr: [BlockStorage, networks, ctlplane, 0]}
+      InternalApiIp: {get_attr: [InternalApiPort, ip_address]}
+      StorageIp: {get_attr: [StoragePort, ip_address]}
+      StorageMgmtIp: {get_attr: [StorageMgmtPort, ip_address]}
+
+  NetworkDeployment:
+    type: OS::TripleO::SoftwareDeployment
+    properties:
+      config: {get_resource: NetworkConfig}
+      server: {get_resource: BlockStorage}
+
+  BlockStorageDeployment:
+    type: OS::Heat::StructuredDeployment
+    depends_on: NetworkDeployment
+    properties:
+      server: {get_resource: BlockStorage}
+      config: {get_resource: BlockStorageConfig}
+      input_values:
+        debug: {get_param: Debug}
+        cinder_dsn: {list_join: ['', ['mysql://cinder:', {get_param: CinderPassword}, '@', {get_param: MysqlVirtualIP} , '/cinder']]}
+        snmpd_readonly_user_name: {get_param: SnmpdReadonlyUserName}
+        snmpd_readonly_user_password: {get_param: SnmpdReadonlyUserPassword}
+        cinder_lvm_loop_device_size:
+          str_replace:
+            template: sizeM
+            params:
+              size: {get_param: CinderLVMLoopDeviceSize}
+        cinder_enable_iscsi_backend: {get_param: CinderEnableIscsiBackend}
+        cinder_iscsi_helper: {get_param: CinderISCSIHelper}
+        cinder_iscsi_ip_address: {get_attr: [NetIpMap, net_ip_map, {get_param: [ServiceNetMap, CinderIscsiNetwork]}]}
+        glance_api_servers:
+          list_join:
+            - ''
+            - - {get_param: GlanceProtocol}
+              - '://'
+              - {get_param: GlanceApiVirtualIP}
+              - ':'
+              - {get_param: GlancePort}
+        rabbit_username: {get_param: RabbitUserName}
+        rabbit_password: {get_param: RabbitPassword}
+        rabbit_client_use_ssl: {get_param: RabbitClientUseSSL}
+        rabbit_client_port: {get_param: RabbitClientPort}
+        ntp_servers:
+          str_replace:
+            template: '["server"]'
+            params:
+              server: {get_param: NtpServer}
+        enable_package_install: {get_param: EnablePackageInstall}
+        enable_package_upgrade: {get_attr: [UpdateDeployment, update_managed_packages]}
+
+  # Map heat metadata into hiera datafiles
+  BlockStorageConfig:
+    type: OS::Heat::StructuredConfig
+    properties:
+      group: os-apply-config
+      config:
+        hiera:
+          hierarchy:
+            - '"%{::uuid}"'
+            - heat_config_%{::deploy_config_name}
+            - volume
+            - all_nodes # provided by allNodesConfig
+            - RedHat # Workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1236143
+            - common
+          datafiles:
+            common:
+              raw_data: {get_file: hieradata/common.yaml}
+            volume:
+              raw_data: {get_file: hieradata/volume.yaml}
+              mapped_data:
+                # Cinder
+                cinder::debug: {get_input: debug}
+                cinder::setup_test_volume::size: {get_input: cinder_lvm_loop_device_size}
+                cinder_iscsi_helper: {get_input: cinder_iscsi_helper}
+                cinder::database_connection: {get_input: cinder_dsn}
+                cinder::rabbit_userid: {get_input: rabbit_username}
+                cinder::rabbit_password: {get_input: rabbit_password}
+                cinder::rabbit_use_ssl: {get_input: rabbit_client_use_ssl}
+                cinder::rabbit_port: {get_input: rabbit_client_port}
+                cinder_enable_iscsi_backend: {get_input: cinder_enable_iscsi_backend}
+                cinder_iscsi_ip_address: {get_input: cinder_iscsi_ip_address}
+                cinder::glance::glance_api_servers: {get_input: glance_api_servers}
+                ntp::servers: {get_input: ntp_servers}
+                tripleo::packages::enable_install: {get_input: enable_package_install}
+                tripleo::packages::enable_upgrade: {get_input: enable_package_upgrade}
+                snmpd_readonly_user_name: {get_input: snmpd_readonly_user_name}
+                snmpd_readonly_user_password: {get_input: snmpd_readonly_user_password}
+
+  # Hook for site-specific additional pre-deployment config,
+  # applying to all nodes, e.g node registration/unregistration
+  NodeExtraConfig:
+    depends_on: BlockStorageDeployment
+    type: OS::TripleO::NodeExtraConfig
+    properties:
+        server: {get_resource: BlockStorage}
+
+  UpdateConfig:
+    type: OS::TripleO::Tasks::PackageUpdate
+
+  UpdateDeployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      config: {get_resource: UpdateConfig}
+      server: {get_resource: BlockStorage}
+      input_values:
+        update_identifier:
+          get_param: UpdateIdentifier
+
+outputs:
+  hosts_entry:
+    value:
+      str_replace:
+        template: "IP HOST.localdomain HOST"
+        params:
+          IP: {get_attr: [NetIpMap, net_ip_map, {get_param: [ServiceNetMap, BlockStorageHostnameResolveNetwork]}]}
+          HOST: {get_attr: [BlockStorage, name]}
+  nova_server_resource:
+    description: Heat resource handle for the block storage server
+    value:
+      {get_resource: BlockStorage}
+  internal_api_ip_address:
+    description: IP address of the server in the internal_api network
+    value: {get_attr: [InternalApiPort, ip_address]}
+  storage_ip_address:
+    description: IP address of the server in the storage network
+    value: {get_attr: [StoragePort, ip_address]}
+  storage_mgmt_ip_address:
+    description: IP address of the server in the storage_mgmt network
+    value: {get_attr: [StorageMgmtPort, ip_address]}
+  config_identifier:
+    description: identifier which changes if the node configuration may need re-applying
+    value:
+      list_join:
+        - ''
+        - - {get_attr: [BlockStorageDeployment, deploy_stdout]}
+          - {get_param: UpdateIdentifier}

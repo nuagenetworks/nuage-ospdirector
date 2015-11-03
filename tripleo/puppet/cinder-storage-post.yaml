@@ -1,0 +1,26 @@
+heat_template_version: 2015-04-30
+description: 'OpenStack cinder storage post deployment for Puppet'
+
+parameters:
+  servers:
+    type: json
+  NodeConfigIdentifiers:
+     type: json
+     description: Value which changes if the node configuration may need to be re-applied
+
+resources:
+
+  VolumePuppetConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: puppet
+      outputs:
+      - name: result
+      config:
+        get_file: manifests/overcloud_volume.pp
+
+  VolumeDeployment_Step1:
+    type: OS::Heat::StructuredDeployments
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: VolumePuppetConfig}

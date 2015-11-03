@@ -1,0 +1,92 @@
+heat_template_version: 2015-04-30
+
+description: Configure hieradata for Nuage configuration on the Controller
+
+parameters:
+  server:
+    description: ID of the controller node to apply this config to
+    type: string
+
+  # Config specific parameters, to be provided via parameter_defaults
+  NeutronNuageOSControllerIp:
+    description: IP address of the OpenStack Controller
+    type: string
+    default: '0.0.0.0'
+
+  NeutronNuageNetPartitionName:
+    description: Specifies the title that you will see on the VSD
+    type: string
+    default: 'Default_Name'
+
+  NeutronNuageVSDIp:
+    description: IP address of the Virtual Services Directory
+    type: string
+    default: '0.0.0.0'
+
+  NeutronNuageVSDUsername:
+    description: Username to be used to log into VSD
+    type: string
+    default: 'username'
+
+  NeutronNuageVSDPassword:
+    description: Password to be used to log into VSD
+    type: string
+    default: 'password'
+
+  NeutronNuageVSDOrganization:
+    description: Organization parameter required to log into VSD
+    type: string
+    default: 'organization'
+
+  NeutronNuageBaseURIVersion:
+    description: URI version to be used based on the VSD release
+    type: string
+    default: 'default_uri_version'
+
+  NeutronNuageCMSId:
+    description: Cloud Management System ID (CMS ID) to distinguish between OS instances on the same VSD
+    type: string
+    default: ''
+
+# Declaration of resources for the template.
+# At least one resource should be defined.
+resources:
+  NeutronNuageConfig:
+    type: OS::Heat::StructuredConfig
+    properties:
+      group: os-apply-config
+      config:
+        hiera:
+          datafiles:
+            neutron_nuage_data:
+              mapped_data:
+               neutron::plugins::nuage::nuage_oscontroller_ip: {get_input: NuageOSControllerIp}
+               neutron::plugins::nuage::nuage_net_partition_name: {get_input: NuageNetPartitionName}
+               neutron::plugins::nuage::nuage_vsd_ip: {get_input: NuageVSDIp}
+               neutron::plugins::nuage::nuage_vsd_username: {get_input: NuageVSDUsername}
+               neutron::plugins::nuage::nuage_vsd_password: {get_input: NuageVSDPassword}
+               neutron::plugins::nuage::nuage_vsd_organization: {get_input: NuageVSDOrganization}
+               neutron::plugins::nuage::nuage_base_uri_version: {get_input: NuageBaseURIVersion}
+               neutron::plugins::nuage::nuage_cms_id: {get_input: NuageCMSId}
+
+  NeutronNuageDeployment:
+    type: OS::Heat::StructuredDeployment
+    properties:
+      config: {get_resource: NeutronNuageConfig}
+      server: {get_param: server}
+      input_values: # Values that can be specified later
+        NuageOSControllerIp: {get_param: NeutronNuageOSControllerIp}
+        NuageNetPartitionName: {get_param: NeutronNuageNetPartitionName}
+        NuageVSDIp: {get_param: NeutronNuageVSDIp}
+        NuageVSDUsername: {get_param: NeutronNuageVSDUsername}
+        NuageVSDPassword: {get_param: NeutronNuageVSDPassword}
+        NuageVSDOrganization: {get_param: NeutronNuageVSDOrganization}
+        NuageBaseURIVersion: {get_param: NeutronNuageBaseURIVersion}
+        NuageCMSId: {get_param: NeutronNuageCMSId}
+
+# Specify output parameters that will be available
+# after the template is instantiated.
+outputs:
+  deploy_stdout:
+    description: Deployment reference, used to trigger puppet apply on changes
+    value: {get_attr: [NeutronNuageDeployment, deploy_stdout]}
