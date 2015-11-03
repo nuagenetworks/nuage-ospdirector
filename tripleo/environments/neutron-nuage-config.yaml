@@ -11,4 +11,3 @@ parameter_defaults:
   NeutronNuageVSDPassword: 'csproot'
   NeutronNuageVSDOrganization: 'csp'
   NeutronNuageBaseURIVersion: 'v3_2'
-  NeutronNuageCMSId: '4ed7863b-ef91-4cca-9097-0940a58e4a1d'

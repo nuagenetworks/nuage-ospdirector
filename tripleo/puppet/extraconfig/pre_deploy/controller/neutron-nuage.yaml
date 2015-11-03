@@ -43,11 +43,6 @@ parameters:
     type: string
     default: 'default_uri_version'
 
-  NeutronNuageCMSId:
-    description: Cloud Management System ID (CMS ID) to distinguish between OS instances on the same VSD
-    type: string
-    default: ''
-
 # Declaration of resources for the template.
 # At least one resource should be defined.
 resources:
@@ -67,7 +62,6 @@ resources:
                neutron::plugins::nuage::nuage_vsd_password: {get_input: NuageVSDPassword}
                neutron::plugins::nuage::nuage_vsd_organization: {get_input: NuageVSDOrganization}
                neutron::plugins::nuage::nuage_base_uri_version: {get_input: NuageBaseURIVersion}
-               neutron::plugins::nuage::nuage_cms_id: {get_input: NuageCMSId}
 
   NeutronNuageDeployment:
     type: OS::Heat::StructuredDeployment
@@ -82,7 +76,6 @@ resources:
         NuageVSDPassword: {get_param: NeutronNuageVSDPassword}
         NuageVSDOrganization: {get_param: NeutronNuageVSDOrganization}
         NuageBaseURIVersion: {get_param: NeutronNuageBaseURIVersion}
-        NuageCMSId: {get_param: NeutronNuageCMSId}
 
 # Specify output parameters that will be available
 # after the template is instantiated.
