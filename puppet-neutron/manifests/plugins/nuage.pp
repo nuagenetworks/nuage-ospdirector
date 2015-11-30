@@ -34,9 +34,6 @@
 #   (optional) Flag to determine whether to use ssl connection
 #   to connect to VSD. The default is True
 #
-# [*package_ensure*]
-#  (optional) Ensure that neutron plugin package is present.
-#  Default is True
 #
 class neutron::plugins::nuage (
   $nuage_net_partition_name,
@@ -48,45 +45,44 @@ class neutron::plugins::nuage (
   $nuage_cms_id,
   $nuage_auth_resource    = '/me',
   $nuage_server_ssl       = true,
-  $package_ensure         = 'present'
 ) {
 
   include ::neutron::params
 
-
-# After modifying the plugin.ini file and the installation of
-# Nuage plugin , we need to restart the neutron server.
-
   Neutron_plugin_nuage<||> ~> Service['neutron-server']
+  Neutron_plugin_nuage<||> ~> Exec<| title == 'neutron-db-sync' |>
 
-  package { 'nuage-openstack-neutron':
-    ensure => $package_ensure,
-    name   => $::neutron::params::nuage_plugin_package
-  }
-
-  ensure_resource('file', $::neutron::params::nuage_config_file, {
+  file { '/etc/neutron/plugins/nuage':
     ensure => directory,
     owner  => 'root',
     group  => 'neutron',
-    mode   => '0640'}
-  )
+    mode   => '0640'
+  }
 
   if $::osfamily == 'Debian' {
     file_line { '/etc/default/neutron-server:NEUTRON_PLUGIN_CONFIG':
       path    => '/etc/default/neutron-server',
       match   => '^NEUTRON_PLUGIN_CONFIG=(.*)$',
       line    => "NEUTRON_PLUGIN_CONFIG=${::neutron::params::nuage_config_file}",
-      require => [ Package['neutron-server'], Package['nuage-openstack-neutron'] ],
       notify  => Service['neutron-server'],
     }
   }
 
   if $::osfamily == 'Redhat' {
+    File['/etc/neutron/plugin.ini'] -> Neutron_plugin_nuage<||>
     file { '/etc/neutron/plugin.ini':
       ensure  => link,
+      require => File['/etc/neutron/plugins/nuage/plugin.ini'],
       target  => $::neutron::params::nuage_config_file,
-      require => Package['nuage-openstack-neutron'],
     }
+  }
+
+  file { '/etc/neutron/plugins/nuage/plugin.ini':
+    ensure => file,
+    owner  => 'root',
+    group  => 'neutron',
+    require => File['/etc/neutron/plugins/nuage'],
+    mode   => '0644'
   }
 
   $nuage_base_uri_base = '/nuage/api'
@@ -105,8 +101,4 @@ class neutron::plugins::nuage (
     ($::neutron::core_plugin != 'nuage') {
     fail('Nuage plugin should be the core_plugin in neutron.conf')
   }
-
-  Neutron_plugin_nuage<||> ~> Exec<| title == 'neutron-db-sync' |>
-
 }
-

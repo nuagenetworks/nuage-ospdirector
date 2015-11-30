@@ -280,9 +280,7 @@ if hiera('step') >= 3 {
   # include nuage core plugin,
   # else use the default value of 'ml2'
   if hiera('neutron::core_plugin') == 'neutron.plugins.nuage.plugin.NuagePlugin' {
-    class { 'neutron::plugins::nuage':
-      package_ensure => 'present',
-    }
+    include ::neutron::plugins::nuage
   } else {
     include ::neutron::agents::l3
     include ::neutron::agents::dhcp

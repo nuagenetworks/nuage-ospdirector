@@ -630,9 +630,7 @@ if hiera('step') >= 3 {
     enabled => false,
   }
   if  hiera('neutron::core_plugin') == 'neutron.plugins.nuage.plugin.NuagePlugin' {
-    class { 'neutron::plugins::nuage':
-      package_ensure => 'present',
-    }
+    include ::neutron::plugins::nuage
   }
   if hiera('neutron::enable_dhcp_agent',true) {
     class { '::neutron::agents::dhcp' :
@@ -1140,63 +1138,65 @@ if hiera('step') >= 4 {
         clone_params => "interleave=true",
       }
     }
-    pacemaker::resource::ocf { $::neutron::params::ovs_cleanup_service:
-      ocf_agent_name => "neutron:OVSCleanup",
-      clone_params => "interleave=true",
-    }
-    pacemaker::resource::ocf { 'neutron-netns-cleanup':
-      ocf_agent_name => "neutron:NetnsCleanup",
-      clone_params => "interleave=true",
-    }
-    pacemaker::constraint::base { 'keystone-to-neutron-server-constraint':
-      constraint_type => "order",
-      first_resource => "${::keystone::params::service_name}-clone",
-      second_resource => "${::neutron::params::server_service}-clone",
-      first_action => "start",
-      second_action => "start",
-      require => [Pacemaker::Resource::Service[$::keystone::params::service_name],
-                  Pacemaker::Resource::Service[$::neutron::params::server_service]],
-    }
-    pacemaker::constraint::base { 'neutron-server-to-neutron-ovs-cleanup-constraint':
-      constraint_type => "order",
-      first_resource => "${::neutron::params::server_service}-clone",
-      second_resource => "${::neutron::params::ovs_cleanup_service}-clone",
-      first_action => "start",
-      second_action => "start",
-      require => [Pacemaker::Resource::Service[$::neutron::params::server_service],
-                  Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"]],
-    }
-    pacemaker::constraint::base { 'neutron-ovs-cleanup-to-netns-cleanup-constraint':
-      constraint_type => "order",
-      first_resource => "${::neutron::params::ovs_cleanup_service}-clone",
-      second_resource => "neutron-netns-cleanup-clone",
-      first_action => "start",
-      second_action => "start",
-      require => [Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"],
-                  Pacemaker::Resource::Ocf['neutron-netns-cleanup']],
-    }
-    pacemaker::constraint::colocation { 'neutron-ovs-cleanup-to-netns-cleanup-colocation':
-      source => "neutron-netns-cleanup-clone",
-      target => "${::neutron::params::ovs_cleanup_service}-clone",
-      score => "INFINITY",
-      require => [Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"],
-                  Pacemaker::Resource::Ocf['neutron-netns-cleanup']],
-    }
-    pacemaker::constraint::base { 'neutron-netns-cleanup-to-openvswitch-agent-constraint':
-      constraint_type => "order",
-      first_resource => "neutron-netns-cleanup-clone",
-      second_resource => "${::neutron::params::ovs_agent_service}-clone",
-      first_action => "start",
-      second_action => "start",
-      require => [Pacemaker::Resource::Ocf["neutron-netns-cleanup"],
-                  Pacemaker::Resource::Service["${::neutron::params::ovs_agent_service}"]],
-    }
-    pacemaker::constraint::colocation { 'neutron-netns-cleanup-to-openvswitch-agent-colocation':
-      source => "${::neutron::params::ovs_agent_service}-clone",
-      target => "neutron-netns-cleanup-clone",
-      score => "INFINITY",
-      require => [Pacemaker::Resource::Ocf["neutron-netns-cleanup"],
-                  Pacemaker::Resource::Service["${::neutron::params::ovs_agent_service}"]],
+    if hiera('neutron::enable_ovs_agent', true) {
+      pacemaker::resource::ocf { $::neutron::params::ovs_cleanup_service:
+        ocf_agent_name => "neutron:OVSCleanup",
+        clone_params => "interleave=true",
+      }
+      pacemaker::resource::ocf { 'neutron-netns-cleanup':
+        ocf_agent_name => "neutron:NetnsCleanup",
+        clone_params => "interleave=true",
+      }
+      pacemaker::constraint::base { 'keystone-to-neutron-server-constraint':
+        constraint_type => "order",
+        first_resource => "${::keystone::params::service_name}-clone",
+        second_resource => "${::neutron::params::server_service}-clone",
+        first_action => "start",
+        second_action => "start",
+        require => [Pacemaker::Resource::Service[$::keystone::params::service_name],
+                    Pacemaker::Resource::Service[$::neutron::params::server_service]],
+      }
+      pacemaker::constraint::base { 'neutron-server-to-neutron-ovs-cleanup-constraint':
+        constraint_type => "order",
+        first_resource => "${::neutron::params::server_service}-clone",
+        second_resource => "${::neutron::params::ovs_cleanup_service}-clone",
+        first_action => "start",
+        second_action => "start",
+        require => [Pacemaker::Resource::Service[$::neutron::params::server_service],
+                    Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"]],
+      }
+      pacemaker::constraint::base { 'neutron-ovs-cleanup-to-netns-cleanup-constraint':
+        constraint_type => "order",
+        first_resource => "${::neutron::params::ovs_cleanup_service}-clone",
+        second_resource => "neutron-netns-cleanup-clone",
+        first_action => "start",
+        second_action => "start",
+        require => [Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"],
+                    Pacemaker::Resource::Ocf['neutron-netns-cleanup']],
+      }
+      pacemaker::constraint::colocation { 'neutron-ovs-cleanup-to-netns-cleanup-colocation':
+        source => "neutron-netns-cleanup-clone",
+        target => "${::neutron::params::ovs_cleanup_service}-clone",
+        score => "INFINITY",
+        require => [Pacemaker::Resource::Ocf["${::neutron::params::ovs_cleanup_service}"],
+                    Pacemaker::Resource::Ocf['neutron-netns-cleanup']],
+      }
+      pacemaker::constraint::base { 'neutron-netns-cleanup-to-openvswitch-agent-constraint':
+        constraint_type => "order",
+        first_resource => "neutron-netns-cleanup-clone",
+        second_resource => "${::neutron::params::ovs_agent_service}-clone",
+        first_action => "start",
+        second_action => "start",
+        require => [Pacemaker::Resource::Ocf["neutron-netns-cleanup"],
+                    Pacemaker::Resource::Service["${::neutron::params::ovs_agent_service}"]],
+      }
+      pacemaker::constraint::colocation { 'neutron-netns-cleanup-to-openvswitch-agent-colocation':
+        source => "${::neutron::params::ovs_agent_service}-clone",
+        target => "neutron-netns-cleanup-clone",
+        score => "INFINITY",
+        require => [Pacemaker::Resource::Ocf["neutron-netns-cleanup"],
+                    Pacemaker::Resource::Service["${::neutron::params::ovs_agent_service}"]],
+      }
     }
     if hiera('neutron::enable_dhcp_agent',true) and hiera('neutron::enable_ovs_agent',true) {
       pacemaker::constraint::base { 'neutron-openvswitch-agent-to-dhcp-agent-constraint':

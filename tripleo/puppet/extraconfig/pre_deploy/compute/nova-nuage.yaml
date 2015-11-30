@@ -2,26 +2,21 @@ heat_template_version: 2015-04-30
 
 description: Configure hieradata for Nuage configuration on the Compute
 
-# Specify input parameters that have to be provided while
-# instantiating the template.
 parameters:
   server:
     description: ID of the compute node to apply this config to
     type: string
 
-  # Config specific parameters, to be provided via parameter_defaults
   NuageActiveController:
-    description: IP address of the Virtualized Services Controller (VSC)
+    description: IP address of the Active Virtualized Services Controller (VSC)
     type: string
-    default: '0.0.0.0'
+  NuageStandbyController:
+    description: IP address of the Standby Virtualized Services Controller (VSC)
+    type: string
   NuageMetadataPort:
     description: TCP Port to listen for metadata server requests
     type: string
     default: '9697'
-  NuageNovaMetadataIp:
-    description: IP address used by Nova metadata server
-    type: string
-    default: '0.0.0.0'
   NuageNovaMetadataPort:
     description: TCP Port used by Nova metadata server
     type: string
@@ -29,7 +24,6 @@ parameters:
   NuageMetadataProxySharedSecret:
     description: Shared secret to sign the instance-id request
     type: string
-    default: 'test'
   NuageNovaClientVersion:
     description: Client Version Nova
     type: string
@@ -37,23 +31,11 @@ parameters:
   NuageNovaOsUsername:
     description: Nova username in keystone_authtoken
     type: string
-    default: 'user'
-  NuageNovaOsPassword:
-    description: Nova password in keystone_authtoken
-    type: string
-    default: 'pass'
-  NuageNovaOsTennantName:
-    description: Nova tenant_name in keystone_authtoken
-    type: string
-    default: 'user'
-  NuageNovaOsAuthUrl:
-    description: Nova authentication_url in keystone_authtoken
-    type: string
-    default: 'http://<url-here>:5000/v2.0'
+    default: 'nova'
   NuageMetadataAgentStartWithOvs:
     description: Set to True if nuage-metadata-agent needs to be started with nuage-openvswitch-switch
     type: string
-    default: 'false'
+    default: 'True'
   NuageNovaApiEndpoint:
     description: One of publicURL, internalURL, adminURL in "keystone endpoint-list"
     type: string
@@ -61,10 +43,9 @@ parameters:
   NuageNovaRegionName:
     description: Region name in "keystone endpoint-list"
     type: string
-    default: 'RegionOne'
+    default: 'regionOne'
 
 # Declaration of resources for the template.
-# At least one resource should be defined.
 resources:
   NovaNuageConfig:
     type: OS::Heat::StructuredConfig
@@ -76,6 +57,7 @@ resources:
             nova_nuage_data:
               mapped_data:
                nuage::vrs::active_controller: {get_input: ActiveController}
+               nuage::vrs::standby_controller: {get_input: StandbyController}
                nuage::metadataagent::metadata_port: {get_input: MetadataPort}
                nuage::metadataagent::nova_metadata_port: {get_input: NovaMetadataPort}
                nuage::metadataagent::metadata_secret: {get_input: SharedSecret}
@@ -92,6 +74,7 @@ resources:
       server: {get_param: server}
       input_values: # Values that can be specified later
         ActiveController: {get_param: NuageActiveController}
+        StandbyController: {get_param: NuageStandbyController}
         MetadataPort: {get_param: NuageMetadataPort}
         NovaMetadataPort: {get_param: NuageNovaMetadataPort}
         SharedSecret: {get_param: NuageMetadataProxySharedSecret}

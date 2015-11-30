@@ -85,7 +85,7 @@ rm -f rhel_unsubscribe
 #####
 
 function uninstall_packages {
-
+virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
 virt-customize --run-command 'yum remove openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
 
 }

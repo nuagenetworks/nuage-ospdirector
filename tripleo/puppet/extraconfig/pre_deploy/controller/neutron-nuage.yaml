@@ -11,27 +11,23 @@ parameters:
   NeutronNuageOSControllerIp:
     description: IP address of the OpenStack Controller
     type: string
-    default: '0.0.0.0'
 
   NeutronNuageNetPartitionName:
     description: Specifies the title that you will see on the VSD
     type: string
-    default: 'Default_Name'
+    default: 'default_Name'
 
   NeutronNuageVSDIp:
     description: IP address of the Virtual Services Directory
     type: string
-    default: '0.0.0.0'
 
   NeutronNuageVSDUsername:
     description: Username to be used to log into VSD
     type: string
-    default: 'username'
 
   NeutronNuageVSDPassword:
     description: Password to be used to log into VSD
     type: string
-    default: 'password'
 
   NeutronNuageVSDOrganization:
     description: Organization parameter required to log into VSD
@@ -42,6 +38,10 @@ parameters:
     description: URI version to be used based on the VSD release
     type: string
     default: 'default_uri_version'
+
+  NeutronNuageCMSId:
+    description: Cloud Management System ID (CMS ID) to distinguish between OS instances on the same VSD
+    type: string
 
 # Declaration of resources for the template.
 # At least one resource should be defined.
@@ -62,6 +62,7 @@ resources:
                neutron::plugins::nuage::nuage_vsd_password: {get_input: NuageVSDPassword}
                neutron::plugins::nuage::nuage_vsd_organization: {get_input: NuageVSDOrganization}
                neutron::plugins::nuage::nuage_base_uri_version: {get_input: NuageBaseURIVersion}
+               neutron::plugins::nuage::nuage_cms_id: {get_input: NuageCMSId}
 
   NeutronNuageDeployment:
     type: OS::Heat::StructuredDeployment
@@ -76,6 +77,7 @@ resources:
         NuageVSDPassword: {get_param: NeutronNuageVSDPassword}
         NuageVSDOrganization: {get_param: NeutronNuageVSDOrganization}
         NuageBaseURIVersion: {get_param: NeutronNuageBaseURIVersion}
+        NuageCMSId: {get_param: NeutronNuageCMSId}
 
 # Specify output parameters that will be available
 # after the template is instantiated.
