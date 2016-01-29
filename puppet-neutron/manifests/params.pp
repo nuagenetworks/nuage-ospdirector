@@ -44,7 +44,6 @@ class neutron::params {
 
     $nvp_server_package = 'openstack-neutron-nicira'
 
-    $nuage_plugin_package = 'nuage-openstack-neutron'
     $nuage_config_file    = '/etc/neutron/plugins/nuage/plugin.ini'
 
     $dhcp_agent_package = false
@@ -125,7 +124,6 @@ class neutron::params {
 
     $nvp_server_package = 'neutron-plugin-nicira'
 
-    $nuage_plugin_package = 'nuage-openstack-neutron'
     $nuage_config_file    = '/etc/neutron/plugins/nuage/plugin.ini'
 
     $dhcp_agent_package = 'neutron-dhcp-agent'
