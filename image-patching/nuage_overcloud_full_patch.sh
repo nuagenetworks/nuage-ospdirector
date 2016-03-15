@@ -4,6 +4,7 @@
 # image with Nuage components
 #
 # This script takes in following input parameters:
+# ImageName   : Name of the qcow2 image
 # RhelUserName: User name for the RHEL subscription
 # RhelPassword: Password for the RHEL subscription
 # RhelPool    : RHEL Pool to subscribe
@@ -21,7 +22,7 @@
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules"
+NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules"
 NUAGE_DEPENDENCIES="libvirt python-twisted-core perl-JSON qemu-kvm vconfig python-novaclient"
 NUAGE_VRS_PACKAGE="nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE="2048"
@@ -58,7 +59,7 @@ subscription-manager subscribe --pool=$3
 subscription-manager repos --enable=rhel-7-server-optional-rpms
 subscription-manager repos --enable=rhel-7-server-rpms
 EOT
-virt-customize --run rhel_subscription -a $4 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run rhel_subscription -a $4 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 rm -f rhel_subscription
 
@@ -74,7 +75,7 @@ cat <<EOT >> rhel_unsubscribe
 subscription-manager unregister
 EOT
 
-virt-customize --run rhel_unsubscribe -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run rhel_unsubscribe -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 rm -f rhel_unsubscribe
 }
@@ -85,8 +86,8 @@ rm -f rhel_unsubscribe
 #####
 
 function uninstall_packages {
-virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
-virt-customize --run-command 'yum remove openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+virt-customize --run-command 'yum remove openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 }
 
@@ -102,7 +103,7 @@ yum install $NUAGE_DEPENDENCIES -y
 yum install $NUAGE_PACKAGES -y
 EOT
 
-virt-customize --run nuage_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run nuage_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 rm -f nuage_packages
 }
@@ -120,7 +121,7 @@ rpm -Uvh epel-release-7*.rpm
 yum install $NUAGE_VRS_PACKAGE -y
 EOT
 
-virt-customize --run vrs_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run vrs_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 rm -f vrs_packages
 
@@ -144,7 +145,7 @@ echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo
 echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo
 EOT
 
-virt-customize --run create_repo -a $3 --memsize $VIRT_CUSTOMIZE_MEMSIZE
+virt-customize --run create_repo -a $3 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 }
 
@@ -154,11 +155,12 @@ virt-customize --run create_repo -a $3 --memsize $VIRT_CUSTOMIZE_MEMSIZE
 #####
 function delete_repo_file {
 
-virt-customize --run-command "rm -f /etc/yum.repos.d/nuage.repo" -a $1
+virt-customize --run-command "rm -f /etc/yum.repos.d/nuage.repo" -a $1 --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 rm -f create_repo 
 }
 
-if [ $# -eq 0 ]; then
+if [ $# -lt 6 ]; then
+  CONTINUE_SCRIPT=false
   show_help
 fi
 
@@ -185,7 +187,7 @@ case $i in
     ;;
     -h|--help)
     show_help
-    CONTRINUE_SCRIPT=false
+    CONTINUE_SCRIPT=false
     return
     ;;
     *)

@@ -7,6 +7,10 @@ Puppet::Type.newtype(:neutron_plugin_nuage) do
     newvalues(/\S+\/\S+/)
   end
 
+  autorequire(:file) do
+    ['/etc/neutron/plugins/nuage']
+  end
+
   newproperty(:value) do
     desc 'The value of the settings to be defined.'
     munge do |value|
@@ -16,9 +20,4 @@ Puppet::Type.newtype(:neutron_plugin_nuage) do
     end
   end
 
-  autorequire(:package) do
-    'neutron-plugin-nuage'
-  end
-
 end
-
