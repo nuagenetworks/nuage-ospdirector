@@ -116,7 +116,7 @@ function install_vrs {
 
 cat <<EOT >> vrs_packages
 yum install wget -y
-wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
 rpm -Uvh epel-release-7*.rpm
 yum install $NUAGE_VRS_PACKAGE -y
 EOT
