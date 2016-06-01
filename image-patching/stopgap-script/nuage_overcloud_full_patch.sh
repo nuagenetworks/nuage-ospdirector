@@ -73,11 +73,9 @@ rm -f rhel_subscription
 
 function add_files {
 
-virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/8_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
-
-virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/7_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
-
 if [ $2 -eq 7 ]; then
+
+  virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/7_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
   virt-copy-in -a $1 7_files/neutron_plugin_nuage.rb /etc/puppet/modules/nuage/manifests/7_files
   virt-copy-in -a $1 7_files/impl_ifcfg.py /etc/puppet/modules/nuage/manifests/7_files
@@ -90,6 +88,8 @@ if [ $2 -eq 7 ]; then
 fi
 
 if [ $2 -eq 8 ]; then
+
+  virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/8_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
   virt-copy-in -a $1 8_files/neutron_plugin_nuage.rb /etc/puppet/modules/nuage/manifests/8_files
 
