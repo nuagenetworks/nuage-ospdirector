@@ -3,11 +3,11 @@ GENERATE CMS ID
 
 Steps:
 
-1. Copy the folder to a machine that can reach VSD
+1. Copy the folder to a machine that can reach VSD (typically the undercloud node)
 
 2. From the folder run the following command to generate CMS\_ID:
 
-   "python configure\_vsd\_cms\_id.py --server <vsd_ip_address>:<vsd_port> --serverauth <vsd_username>:<vsd_password> --organization <vsd_organization> --auth\_resource /me --serverssl True --base\_uri /nuage/api/<vsp_version (3.2/4.0)>"
+   "python configure\_vsd\_cms\_id.py --server <vsd-ip-address>:<vsd-port> --serverauth <vsd-username>:<vsd-password> --organization <vsd-organization> --auth\_resource /me --serverssl True --base\_uri /nuage/api/<vsp-version>"
 
    example command : 
      "python configure_vsd_cms_id.py --server 0.0.0.0:0 --serverauth username:password --organization organization --auth_resource /me --serverssl True --base_uri /nuage/api/v3_2"
