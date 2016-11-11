@@ -45,7 +45,7 @@ echo " --RhelPassword=Password for the RHEL Subscription"
 echo " --RhelPool=Pool to subscribe to for base packages"
 echo " --RepoName=Name for the local repo hosting the Nuage RPMs"
 echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"
-echo " --Version=OSP-Director version (7 or 8)?"
+echo " --Version=OSP-Director version (7, 8 or 9)?"
 echo " -h or --help: Show this message"
 }
 
@@ -95,6 +95,10 @@ if [ $2 -eq 8 ]; then
 
   virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/8_files/neutron_plugin_nuage.rb /etc/puppet/modules/neutron/lib/puppet/type/neutron_plugin_nuage.rb' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
+fi
+
+if [ $2 -eq 9 ]; then
+  :
 fi
 
 }
@@ -175,7 +179,6 @@ echo "name=$1" >> /etc/yum.repos.d/nuage.repo
 echo "baseurl=$2" >> /etc/yum.repos.d/nuage.repo
 echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo
 echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo
-
 EOT
 
 virt-customize --run create_repo -a $3 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
@@ -237,6 +240,13 @@ done
 
 
 if [ "$CONTINUE_SCRIPT" = true ]; then
+
+    echo "Verifying pre-requisite packages for script"
+    if ! rpm -q --quiet libguestfs-tools-c ; then
+        echo "Please install libguestfs-tools-c package for the script to run"
+        return
+    fi
+
     echo "Creating the RHEL subscription"
 
     rhel_subscription $RhelUserName $RhelPassword $RhelPool $ImageName
