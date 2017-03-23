@@ -1,0 +1,22 @@
+resource_registry:
+  # Docker container with heat agents for containerized compute node.
+  OS::TripleO::ComputePostDeployment: ../docker/compute-post.yaml
+  OS::TripleO::NodeUserData: ../docker/firstboot/install_docker_agents.yaml
+
+parameters:
+  NovaImage: atomic-image
+
+parameter_defaults:
+  # Defaults to 'registry.access.redhat.com'.  Specify a local docker registry
+  # Example: 192.168.122.131:8787
+  DockerNamespace: registry.access.redhat.com
+  # Enable local Docker registry
+  DockerNamespaceIsRegistry: false
+  # Compute Node Images
+  DockerComputeImage: openstack-nova-compute:latest
+  DockerAgentImage: openstack-heat-docker-agents:latest
+  DockerComputeDataImage: openstack-data:latest
+  DockerLibvirtImage: openstack-nova-libvirt:latest
+  DockerOpenvswitchImage: openstack-neutron-openvswitch-agent:latest
+  DockerOvsVswitchdImage: openstack-openvswitch-vswitchd:latest
+  DockerOpenvswitchDBImage: openstack-openvswitch-db-server:latest

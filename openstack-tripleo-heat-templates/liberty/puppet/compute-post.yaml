@@ -1,0 +1,59 @@
+heat_template_version: 2015-04-30
+
+description: >
+  OpenStack compute node post deployment for Puppet.
+
+parameters:
+  ConfigDebug:
+    default: false
+    description: Whether to run config management (e.g. Puppet) in debug mode.
+    type: boolean
+  servers:
+    type: json
+  NodeConfigIdentifiers:
+     type: json
+     description: Value which changes if the node configuration may need to be re-applied
+
+
+resources:
+
+  ComputeArtifactsConfig:
+    type: deploy-artifacts.yaml
+
+  ComputeArtifactsDeploy:
+    type: OS::Heat::StructuredDeployments
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ComputeArtifactsConfig}
+      input_values:
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  ComputePuppetConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: puppet
+      options:
+        enable_debug: {get_param: ConfigDebug}
+      outputs:
+      - name: result
+      config:
+        get_file: manifests/overcloud_compute.pp
+
+  ComputePuppetDeployment:
+    type: OS::Heat::StructuredDeployments
+    depends_on: ComputeArtifactsDeploy
+    properties:
+      name: ComputePuppetDeployment
+      servers:  {get_param: servers}
+      config: {get_resource: ComputePuppetConfig}
+      input_values:
+        update_identifier: {get_param: NodeConfigIdentifiers}
+
+  # Note, this should come last, so use depends_on to ensure
+  # this is created after any other resources.
+  ExtraConfig:
+    depends_on: ComputePuppetDeployment
+    type: OS::TripleO::NodeExtraConfigPost
+    properties:
+        servers: {get_param: servers}
+

@@ -1,0 +1,23 @@
+# A Heat environment file which can be used to enable a
+# a Neutron Nuage backend on the controller, configured via puppet
+resource_registry:
+  OS::TripleO::ControllerExtraConfigPre: ../puppet/extraconfig/pre_deploy/controller/neutron-nuage.yaml
+
+parameter_defaults:
+  NeutronNuageOSControllerIp: '0.0.0.0'
+  NeutronNuageNetPartitionName: 'Nuage_Partition'
+  NeutronNuageVSDIp: '192.0.2.112:8443'
+  NeutronNuageVSDUsername: 'csproot'
+  NeutronNuageVSDPassword: 'csproot'
+  NeutronNuageVSDOrganization: 'csp'
+  NeutronNuageBaseURIVersion: 'v4_0'
+  NeutronNuageCMSId: 'e52717dd-251c-475a-b1aa-7bb689d1c9de'
+  UseForwardedFor: true
+  NeutronNuageDBSyncExtraParams: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --config-file /etc/neutron/plugins/nuage/plugin.ini'
+  NeutronFlatNetworks: '*'
+  NeutronNuagePluginsML2FirewallDriver: ''
+#  NeutronNuagePluginsML2FirewallDriver: 'neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver'
+  NeutronNuagePluginsML2SupportedPCIVendorDevs: "8086:1572, 8086:1521"
+  NeutronNuagePluginsML2SriovAgentRequired: true
+  NovaNuageMonkeyPatch: true
+  NovaNuageMonkeyPatchModules: 'nova.network.neutronv2.api:nuage_nova_extensions.nova.network.neutronv2.api.decorator'

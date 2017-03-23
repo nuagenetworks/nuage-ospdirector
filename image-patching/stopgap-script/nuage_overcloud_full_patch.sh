@@ -23,9 +23,10 @@
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon"
-NUAGE_DEPENDENCIES="libvirt python-twisted-core perl-JSON qemu-kvm vconfig python-novaclient"
+NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon nuage-nova-extensions"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE="nuage-openvswitch"
+NUAGE_EXTRA_PACKAGES="ansible"
 VIRT_CUSTOMIZE_MEMSIZE="2048"
 
 
@@ -60,6 +61,7 @@ subscription-manager register --username=$1 --password='$2'
 subscription-manager subscribe --pool=$3
 subscription-manager repos --enable=rhel-7-server-optional-rpms
 subscription-manager repos --enable=rhel-7-server-rpms
+subscription-manager repos --enable=rhel-7-server-openstack-9-rpms
 EOT
 virt-customize --run rhel_subscription -a $4 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
@@ -98,7 +100,24 @@ if [ $2 -eq 8 ]; then
 fi
 
 if [ $2 -eq 9 ]; then
-  :
+  virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/9_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+
+  virt-copy-in -a $1 9_files/nuage.pp /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/neutron-server.service /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/ml2.pp /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/filter.pp /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/grub /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/sriov.pp /etc/puppet/modules/nuage/manifests/9_files
+  virt-copy-in -a $1 9_files/topology-collector-4.7.0.tar.gz /etc/puppet/modules/nuage/manifests/9_files
+
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/nuage.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/neutron-server.service /usr/lib/systemd/system/neutron-server.service' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/ml2.pp /etc/puppet/modules/neutron/manifests/plugins/ml2.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/filter.pp /etc/puppet/modules/nova/manifests/scheduler/filter.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/grub /etc/default/grub' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/sriov.pp /etc/puppet/modules/neutron/manifests/agents/ml2/sriov.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/topology-collector-4.7.0.tar.gz /root/topology-collector-4.7.0.tar.gz' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+
 fi
 
 }
@@ -160,6 +179,23 @@ EOT
 virt-customize --run vrs_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 rm -f vrs_packages
+
+}
+
+function install_extra_packages {
+
+cat <<EOT >> extra_packages
+yum install -y wget
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -Uvh epel-release-latest-7*.rpm
+yum install $NUAGE_EXTRA_PACKAGES -y
+yum remove epel-release -y
+rm -rf epel-release-latest-7.noarch.rpm
+EOT
+
+virt-customize --run extra_packages -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+
+rm -f extra_packages
 
 }
 
@@ -267,9 +303,13 @@ if [ "$CONTINUE_SCRIPT" = true ]; then
 
     install_vrs $ImageName
 
-    echo "Cleaning up"
-
     delete_repo_file $ImageName
+
+    echo "Installing Extra Packages"
+
+    install_extra_packages $ImageName
+
+    echo "Cleaning up"
 
     rhel_remove_subscription $ImageName
 
@@ -280,4 +320,3 @@ if [ "$CONTINUE_SCRIPT" = true ]; then
     echo "Done"
 
 fi
-

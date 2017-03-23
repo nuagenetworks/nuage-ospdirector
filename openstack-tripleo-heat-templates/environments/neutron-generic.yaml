@@ -1,0 +1,19 @@
+resource_registry:
+  OS::TripleO::ControllerDeployment: /usr/share/openstack-tripleo-heat-templates/puppet/controller.yaml
+
+parameter_defaults:
+  NeutronCorePlugin: 'neutron.plugins.ml2.plugin.Ml2Plugin'
+  NeutronServicePlugins: 'NuagePortAttributes,NuageNetTopology'
+  NeutronNetworkType: 'vxlan,vlan,flat'
+  NeutronPluginExtensions: "nuage_subnet,nuage_port"
+  NeutronTypeDrivers: "vlan,vxlan,flat"
+  NeutronMechanismDrivers: "nuage,nuage_hwvtep,sriovnicswitch"
+  NeutronTunnelIdRanges: "1:1000"
+  NeutronNetworkVLANRanges: "physnet1:1:1000,physnet2:1:1000"
+  NeutronVniRanges: "1001:2000"
+  NeutronEnableDHCPAgent: 'false'
+  NeutronEnableL3Agent: 'false'
+  NeutronEnableMetadataAgent: 'false'
+  NeutronEnableOVSAgent: 'false'
+  NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+  InstanceNameTemplate: 'inst-%08x'

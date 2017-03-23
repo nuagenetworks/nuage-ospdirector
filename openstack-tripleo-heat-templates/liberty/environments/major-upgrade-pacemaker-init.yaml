@@ -1,0 +1,20 @@
+parameter_defaults:
+  UpgradeLevelNovaCompute: kilo
+  UpgradeInitCommand: |
+    set -e
+    if subscription-manager status >/dev/null 2<&1; then
+      subscription-manager repos --disable=rhel-7-server-openstack-7.0-rpms --disable=rhel-7-server-openstack-7.0-director-rpms
+      subscription-manager repos --enable=rhel-7-server-openstack-8-rpms --enable=rhel-7-server-openstack-8-director-rpms
+    elif rhn-channel -l >/dev/null 2>&1; then
+      rm -f /etc/sysconfig/rhn/systemid  2>/dev/null
+      rhnreg_ks --activationkey='_RHEL_REG_ACTIVATION_KEY_' --serverUrl='_RHEL_REG_SAT_URL_/XMLRPC' --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT  --force
+    fi
+
+resource_registry:
+  OS::TripleO::Tasks::UpdateWorkflow: ../extraconfig/tasks/major_upgrade_pacemaker_init.yaml
+  OS::TripleO::Tasks::PackageUpdate:  ../extraconfig/tasks/yum_update_noop.yaml
+  OS::TripleO::ControllerPostDeployment: OS::Heat::None
+  OS::TripleO::ComputePostDeployment: OS::Heat::None
+  OS::TripleO::ObjectStoragePostDeployment: OS::Heat::None
+  OS::TripleO::BlockStoragePostDeployment: OS::Heat::None
+  OS::TripleO::CephStoragePostDeployment: OS::Heat::None

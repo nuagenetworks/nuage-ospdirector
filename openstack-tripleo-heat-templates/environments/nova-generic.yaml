@@ -1,0 +1,12 @@
+resource_registry:
+  OS:TripleO:Compute: /usr/share/openstack-tripleo-heat-templates/puppet/compute.yaml
+
+parameter_defaults:
+  NeutronCorePlugin: 'neutron.plugins.ml2.plugin.Ml2Plugin'
+  NeutronMechanismDrivers: 'nuage,nuage_hwvtep,sriovnicswitch'
+  NovaOVSBridge: 'alubr0'
+  NovaSecurityGroupAPI: 'neutron'
+  NovaComputeLibvirtType: 'kvm'
+  NovaIPv6: True
+  NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+  NuageNovaApiEndpoint: 'internalURL'

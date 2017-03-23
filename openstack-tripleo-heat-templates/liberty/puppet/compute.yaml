@@ -1,0 +1,780 @@
+heat_template_version: 2015-10-15
+
+description: >
+  OpenStack hypervisor node configured via Puppet.
+
+parameters:
+  AdminPassword:
+    description: The password for the keystone admin account, used for monitoring, querying neutron etc.
+    type: string
+    hidden: true
+  CeilometerComputeAgent:
+    description: Indicates whether the Compute agent is present and expects nova-compute to be configured accordingly
+    type: string
+    default: ''
+    constraints:
+    - allowed_values: ['', Present]
+  CeilometerMeteringSecret:
+    description: Secret shared by the ceilometer services.
+    type: string
+    hidden: true
+  CeilometerPassword:
+    description: The password for the ceilometer service account.
+    type: string
+    hidden: true
+  CinderEnableNfsBackend:
+    default: false
+    description: Whether to enable or not the NFS backend for Cinder
+    type: boolean
+  CinderEnableRbdBackend:
+    default: false
+    description: Whether to enable or not the Rbd backend for Cinder
+    type: boolean
+  Debug:
+    default: ''
+    description: Set to True to enable debugging on all services.
+    type: string
+  ExtraConfig:
+    default: {}
+    description: |
+      Additional hiera configuration to inject into the cluster. Note
+      that NovaComputeExtraConfig takes precedence over ExtraConfig.
+    type: json
+  Flavor:
+    description: Flavor for the nova compute node
+    type: string
+    constraints:
+      - custom_constraint: nova.flavor
+  GlanceHost:
+    type: string
+    default: ''  # Has to be here because of the ignored empty value bug
+  Image:
+    type: string
+    default: overcloud-compute
+    constraints:
+      - custom_constraint: glance.image
+  ImageUpdatePolicy:
+    default: 'REBUILD_PRESERVE_EPHEMERAL'
+    description: What policy to use when reconstructing instances. REBUILD for rebuilds, REBUILD_PRESERVE_EPHEMERAL to preserve /mnt.
+    type: string
+  KeyName:
+    description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    type: string
+    default: default
+    constraints:
+      - custom_constraint: nova.keypair
+  KeystoneAdminApiVirtualIP:
+    type: string
+    default: ''
+  KeystonePublicApiVirtualIP:
+     type: string
+     default: ''
+  NeutronBridgeMappings:
+    description: >
+      The OVS logical->physical bridge mappings to use. See the Neutron
+      documentation for details. Defaults to mapping br-ex - the external
+      bridge on hosts - to a physical name 'datacentre' which can be used
+      to create provider networks (and we use this for the default floating
+      network) - if changing this either use different post-install network
+      scripts or be sure to keep 'datacentre' as a mapping network name.
+    type: comma_delimited_list
+    default: "datacentre:br-ex"
+  NeutronEnableTunnelling:
+    type: string
+    default: "True"
+  NeutronEnableL2Pop:
+    type: string
+    description: >
+        Enable/disable the L2 population feature in the Neutron agents.
+    default: "False"
+  NeutronFlatNetworks:
+    type: comma_delimited_list
+    default: 'datacentre'
+    description: >
+      If set, flat networks to configure in neutron plugins.
+  NeutronHost:
+    type: string
+    default: ''  # Has to be here because of the ignored empty value bug
+  NeutronNetworkType:
+    type: comma_delimited_list
+    description: The tenant network type for Neutron.
+    default: 'vxlan'
+  NeutronNetworkVLANRanges:
+    default: 'datacentre:1:1000'
+    description: >
+      The Neutron ML2 and OpenVSwitch vlan mapping range to support. See the
+      Neutron documentation for permitted values. Defaults to permitting any
+      VLAN on the 'datacentre' physical network (See NeutronBridgeMappings).
+    type: comma_delimited_list
+  NeutronPassword:
+    description: The password for the neutron service account, used by neutron agents.
+    type: string
+    hidden: true
+  NeutronPhysicalBridge:
+    default: 'br-ex'
+    description: An OVS bridge to create for accessing external networks.
+    type: string
+  NeutronPublicInterface:
+    default: nic1
+    description: A port to add to the NeutronPhysicalBridge.
+    type: string
+  NeutronTenantMtu:
+    description: >
+      The default MTU for tenant networks. For VXLAN/GRE tunneling, this should
+      be at least 50 bytes smaller than the MTU on the physical network. This
+      value will be used to set the MTU on the virtual Ethernet device.
+      This number is related to the value of NeutronDnsmasqOptions, since that
+      will determine the MTU that is assigned to the VM host through DHCP.
+    default: 1400
+    type: number
+  NeutronTunnelTypes:
+    type: comma_delimited_list
+    description: |
+        The tunnel types for the Neutron tenant network.
+    default: 'vxlan'
+  NeutronTunnelIdRanges:
+    description: |
+        Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges
+        of GRE tunnel IDs that are available for tenant network allocation
+    default: ["1:4094", ]
+    type: comma_delimited_list
+  NeutronVniRanges:
+    description: |
+        Comma-separated list of <vni_min>:<vni_max> tuples enumerating ranges
+        of VXLAN VNI IDs that are available for tenant network allocation
+    default: ["1:4094", ]
+    type: comma_delimited_list
+  NeutronPublicInterfaceRawDevice:
+    default: ''
+    type: string
+  NeutronDVR:
+    default: 'False'
+    type: string
+  NeutronMetadataProxySharedSecret:
+    description: Shared secret to prevent spoofing
+    type: string
+    hidden: true
+  NeutronCorePlugin:
+    default: 'ml2'
+    description: |
+        The core plugin for Neutron. The value should be the entrypoint to be loaded
+        from neutron.core_plugins namespace.
+    type: string
+  NeutronServicePlugins:
+    default: "router,qos"
+    description: |
+        Comma-separated list of service plugin entrypoints to be loaded from the
+        neutron.service_plugins namespace.
+    type: comma_delimited_list
+  NeutronTypeDrivers:
+    default: "vxlan,vlan,flat,gre"
+    description: |
+        Comma-separated list of network type driver entrypoints to be loaded.
+    type: comma_delimited_list
+  NeutronMechanismDrivers:
+    default: 'openvswitch'
+    description: |
+        The mechanism drivers for the Neutron tenant network.
+    type: comma_delimited_list
+  NeutronAgentExtensions:
+    default: "qos"
+    description: |
+        Comma-separated list of extensions enabled for the Neutron agents.
+    type: comma_delimited_list
+  # Not relevant for Computes, should be removed
+  NeutronAllowL3AgentFailover:
+    default: 'True'
+    description: Allow automatic l3-agent failover
+    type: string
+  # Not relevant for Computes, should be removed
+  NeutronL3HA:
+    default: 'False'
+    description: Whether to enable l3-agent HA
+    type: string
+  NeutronAgentMode:
+    default: 'dvr_snat'
+    description: Agent mode for the neutron-l3-agent on the controller hosts
+    type: string
+  NodeIndex:
+    type: number
+    default: 0
+  NovaApiHost:
+    type: string
+    default: ''  # Has to be here because of the ignored empty value bug
+  NovaComputeDriver:
+    type: string
+    default: libvirt.LibvirtDriver
+  NovaComputeExtraConfig:
+    default: {}
+    description: |
+      NovaCompute specific configuration to inject into the cluster. Same
+      structure as ExtraConfig.
+    type: json
+  NovaComputeIPs:
+    default: {}
+    type: json
+  NovaComputeLibvirtType:
+    type: string
+    default: kvm
+  NovaComputeLibvirtVifDriver:
+    default: ''
+    description: Libvirt VIF driver configuration for the network
+    type: string
+  NovaEnableRbdBackend:
+    default: false
+    description: Whether to enable or not the Rbd backend for Nova
+    type: boolean
+  NovaIPv6:
+    default: false
+    description: Enable IPv6 features in Nova
+    type: boolean
+  NovaPassword:
+    description: The password for the nova service account, used by nova-api.
+    type: string
+    hidden: true
+  NovaPublicIP:
+    type: string
+    default: ''  # Has to be here because of the ignored empty value bug
+  NovaOVSBridge:
+    default: 'br-int'
+    description: Name of integration bridge used by Open vSwitch
+    type: string
+  NovaSecurityGroupAPI:
+    default: 'neutron'
+    description: The full class name of the security API class
+    type: string
+  NtpServer:
+    default: ''
+    description: Comma-separated list of ntp servers
+    type: comma_delimited_list
+  RabbitHost:
+    type: string
+    default: ''  # Has to be here because of the ignored empty value bug
+  RabbitPassword:
+    default: guest
+    description: The password for RabbitMQ
+    type: string
+    hidden: true
+  RabbitUserName:
+    default: guest
+    description: The username for RabbitMQ
+    type: string
+  RabbitClientUseSSL:
+    default: false
+    description: >
+        Rabbit client subscriber parameter to specify
+        an SSL connection to the RabbitMQ host.
+    type: string
+  RabbitClientPort:
+    default: 5672
+    description: Set rabbit subscriber port, change this if using SSL
+    type: number
+  SnmpdReadonlyUserName:
+    default: ro_snmp_user
+    description: The user name for SNMPd with readonly rights running on all Overcloud nodes
+    type: string
+  SnmpdReadonlyUserPassword:
+    description: The user password for SNMPd with readonly rights running on all Overcloud nodes
+    type: string
+    hidden: true
+  UpgradeLevelNovaCompute:
+    type: string
+    description: Nova Compute upgrade level
+    default: ''
+  EnablePackageInstall:
+    default: 'false'
+    description: Set to true to enable package installation via Puppet
+    type: boolean
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  TimeZone:
+    default: 'UTC'
+    description: The timezone to be set on compute nodes.
+    type: string
+  UpdateIdentifier:
+    default: ''
+    type: string
+    description: >
+      Setting to a previously unused value during stack-update will trigger
+      package update on all nodes
+  Hostname:
+    type: string
+    default: '' # Defaults to Heat created hostname
+  HostnameMap:
+    type: json
+    default: {}
+    description: Optional mapping to override hostnames
+  NetworkDeploymentActions:
+    type: comma_delimited_list
+    description: >
+      Heat action when to apply network configuration changes
+    default: ['CREATE']
+  ServerMetadata:
+    default: {}
+    description: >
+      Extra properties or metadata passed to Nova for the created nodes in
+      the overcloud. It's accessible via the Nova metadata API.
+    type: json
+  SchedulerHints:
+    type: json
+    description: Optional scheduler hints to pass to nova
+    default: {}
+
+  SoftwareConfigTransport:
+    default: POLL_SERVER_CFN
+    description: |
+      How the server should receive the metadata required for software configuration.
+    type: string
+    constraints:
+    - allowed_values: [POLL_SERVER_CFN, POLL_SERVER_HEAT, POLL_TEMP_URL, ZAQAR_MESSAGE]
+  CloudDomain:
+    default: ''
+    type: string
+    description: >
+      The DNS domain used for the hosts. This should match the dhcp_domain
+      configured in the Undercloud neutron. Defaults to localdomain.
+
+resources:
+
+  NovaCompute:
+    type: OS::Nova::Server
+    properties:
+      image:
+        {get_param: Image}
+      image_update_policy:
+        get_param: ImageUpdatePolicy
+      flavor: {get_param: Flavor}
+      key_name: {get_param: KeyName}
+      networks:
+        - network: ctlplane
+      user_data_format: SOFTWARE_CONFIG
+      user_data: {get_resource: UserData}
+      name:
+        str_replace:
+            template: {get_param: Hostname}
+            params: {get_param: HostnameMap}
+      software_config_transport: {get_param: SoftwareConfigTransport}
+      metadata: {get_param: ServerMetadata}
+      scheduler_hints: {get_param: SchedulerHints}
+
+  # Combine the NodeAdminUserData and NodeUserData mime archives
+  UserData:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+      - config: {get_resource: NodeAdminUserData}
+        type: multipart
+      - config: {get_resource: NodeUserData}
+        type: multipart
+
+  # Creates the "heat-admin" user if configured via the environment
+  # Should return a OS::Heat::MultipartMime reference via OS::stack_id
+  NodeAdminUserData:
+    type: OS::TripleO::NodeAdminUserData
+
+  # For optional operator additional userdata
+  # Should return a OS::Heat::MultipartMime reference via OS::stack_id
+  NodeUserData:
+    type: OS::TripleO::NodeUserData
+
+  ExternalPort:
+    type: OS::TripleO::Compute::Ports::ExternalPort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  InternalApiPort:
+    type: OS::TripleO::Compute::Ports::InternalApiPort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  StoragePort:
+    type: OS::TripleO::Compute::Ports::StoragePort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  StorageMgmtPort:
+    type: OS::TripleO::Compute::Ports::StorageMgmtPort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  TenantPort:
+    type: OS::TripleO::Compute::Ports::TenantPort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  ManagementPort:
+    type: OS::TripleO::Compute::Ports::ManagementPort
+    properties:
+      ControlPlaneIP: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      IPPool: {get_param: NovaComputeIPs}
+      NodeIndex: {get_param: NodeIndex}
+
+  NetIpMap:
+    type: OS::TripleO::Network::Ports::NetIpMap
+    properties:
+      ControlPlaneIp: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      ExternalIp: {get_attr: [ExternalPort, ip_address]}
+      ExternalIpUri: {get_attr: [ExternalPort, ip_address_uri]}
+      InternalApiIp: {get_attr: [InternalApiPort, ip_address]}
+      InternalApiIpUri: {get_attr: [InternalApiPort, ip_address_uri]}
+      StorageIp: {get_attr: [StoragePort, ip_address]}
+      StorageIpUri: {get_attr: [StoragePort, ip_address_uri]}
+      StorageMgmtIp: {get_attr: [StorageMgmtPort, ip_address]}
+      StorageMgmtIpUri: {get_attr: [StorageMgmtPort, ip_address_uri]}
+      TenantIp: {get_attr: [TenantPort, ip_address]}
+      TenantIpUri: {get_attr: [TenantPort, ip_address_uri]}
+      ManagementIp: {get_attr: [ManagementPort, ip_address]}
+      ManagementIpUri: {get_attr: [ManagementPort, ip_address_uri]}
+
+  NetworkConfig:
+    type: OS::TripleO::Compute::Net::SoftwareConfig
+    properties:
+      ControlPlaneIp: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+      ExternalIpSubnet: {get_attr: [ExternalPort, ip_subnet]}
+      InternalApiIpSubnet: {get_attr: [InternalApiPort, ip_subnet]}
+      StorageIpSubnet: {get_attr: [StoragePort, ip_subnet]}
+      StorageMgmtIpSubnet: {get_attr: [StorageMgmtPort, ip_subnet]}
+      TenantIpSubnet: {get_attr: [TenantPort, ip_subnet]}
+      ManagementIpSubnet: {get_attr: [ManagementPort, ip_subnet]}
+
+  NetworkDeployment:
+    type: OS::TripleO::SoftwareDeployment
+    properties:
+      name: NetworkDeployment
+      config: {get_resource: NetworkConfig}
+      server: {get_resource: NovaCompute}
+      actions: {get_param: NetworkDeploymentActions}
+      input_values:
+        bridge_name: {get_param: NeutronPhysicalBridge}
+        interface_name: {get_param: NeutronPublicInterface}
+
+  NovaComputeConfig:
+    type: OS::Heat::StructuredConfig
+    properties:
+      group: os-apply-config
+      config:
+        hiera:
+          hierarchy:
+            - '"%{::uuid}"'
+            - heat_config_%{::deploy_config_name}
+            - compute_extraconfig
+            - extraconfig
+            - compute
+            - ceph_cluster # provided by CephClusterConfig
+            - ceph
+            - all_nodes # provided by allNodesConfig
+            - '"%{::osfamily}"'
+            - common
+            - neutron_bigswitch_data # Optionally provided by ComputeExtraConfigPre
+            - cisco_n1kv_data  # Optionally provided by ComputeExtraConfigPre
+            - nova_nuage_data  # Optionally provided by ComputeExtraConfigPre
+            - midonet_data # Optionally provided by AllNodesExtraConfig
+            - neutron_opencontrail_data  # Optionally provided by ComputeExtraConfigPre
+          datafiles:
+            compute_extraconfig:
+              mapped_data: {get_param: NovaComputeExtraConfig}
+            extraconfig:
+              mapped_data: {get_param: ExtraConfig}
+            common:
+              raw_data: {get_file: hieradata/common.yaml}
+            ceph:
+              raw_data: {get_file: hieradata/ceph.yaml}
+            compute:
+              raw_data: {get_file: hieradata/compute.yaml}
+              mapped_data:
+                cinder_enable_nfs_backend: {get_input: cinder_enable_nfs_backend}
+                nova::use_ipv6: {get_input: nova_ipv6}
+                nova::debug: {get_input: debug}
+                nova::rabbit_userid: {get_input: rabbit_username}
+                nova::rabbit_password: {get_input: rabbit_password}
+                nova::rabbit_use_ssl: {get_input: rabbit_client_use_ssl}
+                nova::rabbit_port: {get_input: rabbit_client_port}
+                nova::upgrade_level_compute: {get_input: upgrade_level_nova_compute}
+                nova_compute_driver: {get_input: nova_compute_driver}
+                nova::compute::libvirt::libvirt_virt_type: {get_input: nova_compute_libvirt_type}
+                nova::compute::neutron::libvirt_vif_driver: {get_input: nova_compute_libvirt_vif_driver}
+                nova_api_host: {get_input: nova_api_host}
+                nova::compute::vncproxy_host: {get_input: nova_public_ip}
+                nova::compute::rbd::ephemeral_storage: {get_input: nova_enable_rbd_backend}
+                rbd_persistent_storage: {get_input: cinder_enable_rbd_backend}
+                nova_password: {get_input: nova_password}
+                nova::compute::network_device_mtu: {get_input: neutron_tenant_mtu}
+                nova::compute::vncserver_proxyclient_address: {get_input: nova_vnc_proxyclient_address}
+                nova::vncproxy::common::vncproxy_protocol: {get_input: nova_vncproxy_protocol}
+                nova::vncproxy::common::vncproxy_host: {get_input: nova_vncproxy_host}
+                nova::vncproxy::common::vncproxy_port: {get_input: nova_vncproxy_port}
+                nova::network::neutron::neutron_ovs_bridge: {get_input: nova_ovs_bridge}
+                nova::network::neutron::security_group_api: {get_input: nova_security_group_api}
+                ceilometer::debug: {get_input: debug}
+                ceilometer::rabbit_userid: {get_input: rabbit_username}
+                ceilometer::rabbit_password: {get_input: rabbit_password}
+                ceilometer::rabbit_use_ssl: {get_input: rabbit_client_use_ssl}
+                ceilometer::rabbit_port: {get_input: rabbit_client_port}
+                ceilometer::metering_secret: {get_input: ceilometer_metering_secret}
+                ceilometer::agent::auth::auth_password: {get_input: ceilometer_password}
+                ceilometer::agent::auth::auth_url: {get_input: ceilometer_agent_auth_url}
+                ceilometer_compute_agent: {get_input: ceilometer_compute_agent}
+                snmpd_readonly_user_name: {get_input: snmpd_readonly_user_name}
+                snmpd_readonly_user_password: {get_input: snmpd_readonly_user_password}
+                nova::glance_api_servers: {get_input: glance_api_servers}
+                neutron::debug: {get_input: debug}
+                neutron::rabbit_password: {get_input: rabbit_password}
+                neutron::rabbit_user: {get_input: rabbit_username}
+                neutron::rabbit_use_ssl: {get_input: rabbit_client_use_ssl}
+                neutron::rabbit_port: {get_input: rabbit_client_port}
+                neutron::network_device_mtu: {get_input: neutron_tenant_mtu}
+                neutron::plugins::ml2::flat_networks: {get_input: neutron_flat_networks}
+                neutron_host: {get_input: neutron_host}
+                neutron::agents::ml2::ovs::local_ip: {get_input: neutron_local_ip}
+
+                neutron::plugins::ml2::tenant_network_types: {get_input: neutron_tenant_network_types}
+                neutron::agents::ml2::ovs::tunnel_types: {get_input: neutron_tunnel_types}
+                neutron::agents::ml2::ovs::extensions: {get_input: neutron_agent_extensions}
+                neutron::plugins::ml2::network_vlan_ranges: {get_input: neutron_network_vlan_ranges}
+                neutron::plugins::ml2::tunnel_id_ranges: {get_input: neutron_tunnel_id_ranges}
+                neutron::plugins::ml2::vni_ranges: {get_input: neutron_vni_ranges}
+                neutron::agents::ml2::ovs::bridge_mappings: {get_input: neutron_bridge_mappings}
+                neutron::agents::ml2::ovs::enable_tunneling: {get_input: neutron_enable_tunneling}
+                neutron::agents::ml2::ovs::l2_population: {get_input: neutron_enable_l2pop}
+                neutron_physical_bridge: {get_input: neutron_physical_bridge}
+                neutron_public_interface: {get_input: neutron_public_interface}
+                nova::network::neutron::neutron_admin_password: {get_input: neutron_password}
+                nova::network::neutron::neutron_url: {get_input: neutron_internal_url}
+                nova::network::neutron::neutron_admin_auth_url: {get_input: neutron_admin_auth_url}
+                neutron_router_distributed: {get_input: neutron_router_distributed}
+                neutron_agent_mode: {get_input: neutron_agent_mode}
+                neutron_metadata_proxy_shared_secret: {get_input: neutron_metadata_proxy_shared_secret}
+                neutron::core_plugin: {get_input: neutron_core_plugin}
+                neutron::service_plugins: {get_input: neutron_service_plugins}
+                neutron::plugins::ml2::type_drivers: {get_input: neutron_type_drivers}
+                neutron::plugins::ml2::mechanism_drivers: {get_input: neutron_mechanism_drivers}
+                neutron_public_interface_raw_device: {get_input: neutron_public_interface_raw_device}
+                keystone_public_api_virtual_ip: {get_input: keystone_vip}
+                admin_password: {get_input: admin_password}
+                ntp::servers: {get_input: ntp_servers}
+                timezone::timezone: {get_input: timezone}
+                tripleo::packages::enable_install: {get_input: enable_package_install}
+                tripleo::packages::enable_upgrade: {get_input: enable_package_upgrade}
+
+  NovaComputeDeployment:
+    type: OS::TripleO::SoftwareDeployment
+    depends_on: NetworkDeployment
+    properties:
+      name: NovaComputeDeployment
+      config: {get_resource: NovaComputeConfig}
+      server: {get_resource: NovaCompute}
+      input_values:
+        cinder_enable_nfs_backend: {get_param: CinderEnableNfsBackend}
+        debug: {get_param: Debug}
+        nova_compute_driver: {get_param: NovaComputeDriver}
+        nova_compute_libvirt_type: {get_param: NovaComputeLibvirtType}
+        nova_compute_libvirt_vif_driver: {get_param: NovaComputeLibvirtVifDriver}
+        nova_public_ip: {get_param: NovaPublicIP}
+        nova_api_host: {get_param: NovaApiHost}
+        nova_password: {get_param: NovaPassword}
+        nova_enable_rbd_backend: {get_param: NovaEnableRbdBackend}
+        nova_ipv6: {get_param: NovaIPv6}
+        cinder_enable_rbd_backend: {get_param: CinderEnableRbdBackend}
+        nova_vnc_proxyclient_address: {get_attr: [NetIpMap, net_ip_map, {get_param: [ServiceNetMap, NovaVncProxyNetwork]}]}
+        nova_vncproxy_protocol: {get_param: [EndpointMap, NovaVNCProxyPublic, protocol]}
+        # Remove brackets that may come if the IP address is IPv6.
+        # For DNS names and IPv4, this will just get the NovaVNCProxyPublic value
+        nova_vncproxy_host:
+          str_replace:
+            template: {get_param: [EndpointMap, NovaVNCProxyPublic, host]}
+            params:
+              '[': ''
+              ']': ''
+        nova_vncproxy_port: {get_param: [EndpointMap, NovaVNCProxyPublic, port]}
+        nova_ovs_bridge: {get_param: NovaOVSBridge}
+        nova_security_group_api: {get_param: NovaSecurityGroupAPI}
+        upgrade_level_nova_compute: {get_param: UpgradeLevelNovaCompute}
+        ceilometer_metering_secret: {get_param: CeilometerMeteringSecret}
+        ceilometer_password: {get_param: CeilometerPassword}
+        ceilometer_compute_agent: {get_param: CeilometerComputeAgent}
+        ceilometer_agent_auth_url: {get_param: [EndpointMap, KeystoneInternal, uri]}
+        snmpd_readonly_user_name: {get_param: SnmpdReadonlyUserName}
+        snmpd_readonly_user_password: {get_param: SnmpdReadonlyUserPassword}
+        glance_api_servers: {get_param: [EndpointMap, GlanceInternal, uri]}
+        neutron_flat_networks:
+          str_replace:
+            template: NETWORKS
+            params:
+              NETWORKS: {get_param: NeutronFlatNetworks}
+        neutron_host: {get_param: NeutronHost}
+        neutron_local_ip: {get_attr: [NetIpMap, net_ip_map, {get_param: [ServiceNetMap, NeutronTenantNetwork]}]}
+        neutron_tunnel_id_ranges:
+          str_replace:
+            template: RANGES
+            params:
+              RANGES: {get_param: NeutronTunnelIdRanges}
+        neutron_vni_ranges:
+          str_replace:
+            template: RANGES
+            params:
+              RANGES: {get_param: NeutronVniRanges}
+        neutron_tenant_network_types:
+          str_replace:
+            template: TYPES
+            params:
+              TYPES: {get_param: NeutronNetworkType}
+        neutron_tunnel_types:
+          str_replace:
+            template: TYPES
+            params:
+              TYPES: {get_param: NeutronTunnelTypes}
+        neutron_network_vlan_ranges:
+          str_replace:
+            template: RANGES
+            params:
+              RANGES: {get_param: NeutronNetworkVLANRanges}
+        neutron_bridge_mappings:
+          str_replace:
+            template: MAPPINGS
+            params:
+              MAPPINGS: {get_param: NeutronBridgeMappings}
+        neutron_tenant_mtu: {get_param: NeutronTenantMtu}
+        neutron_enable_tunneling: {get_param: NeutronEnableTunnelling}
+        neutron_enable_l2pop: {get_param: NeutronEnableL2Pop}
+        neutron_physical_bridge: {get_param: NeutronPhysicalBridge}
+        neutron_public_interface: {get_param: NeutronPublicInterface}
+        neutron_password: {get_param: NeutronPassword}
+        neutron_agent_mode: {get_param: NeutronAgentMode}
+        neutron_router_distributed: {get_param: NeutronDVR}
+        neutron_metadata_proxy_shared_secret: {get_param: NeutronMetadataProxySharedSecret}
+        neutron_core_plugin: {get_param: NeutronCorePlugin}
+        neutron_service_plugins:
+          str_replace:
+            template: PLUGINS
+            params:
+              PLUGINS: {get_param: NeutronServicePlugins}
+        neutron_type_drivers:
+          str_replace:
+            template: DRIVERS
+            params:
+              DRIVERS: {get_param: NeutronTypeDrivers}
+        neutron_mechanism_drivers:
+          str_replace:
+            template: MECHANISMS
+            params:
+              MECHANISMS: {get_param: NeutronMechanismDrivers}
+        neutron_agent_extensions:
+          str_replace:
+            template: AGENT_EXTENSIONS
+            params:
+              AGENT_EXTENSIONS: {get_param: NeutronAgentExtensions}
+        neutron_public_interface_raw_device: {get_param: NeutronPublicInterfaceRawDevice}
+        neutron_internal_url: {get_param: [EndpointMap, NeutronInternal, uri]}
+        neutron_admin_auth_url: {get_param: [EndpointMap, KeystoneAdmin, uri]}
+        keystone_vip: {get_param: KeystonePublicApiVirtualIP}
+        admin_password: {get_param: AdminPassword}
+        rabbit_username: {get_param: RabbitUserName}
+        rabbit_password: {get_param: RabbitPassword}
+        rabbit_client_use_ssl: {get_param: RabbitClientUseSSL}
+        rabbit_client_port: {get_param: RabbitClientPort}
+        ntp_servers: {get_param: NtpServer}
+        timezone: {get_param: TimeZone}
+        enable_package_install: {get_param: EnablePackageInstall}
+        enable_package_upgrade: {get_attr: [UpdateDeployment, update_managed_packages]}
+
+  # Resource for site-specific injection of root certificate
+  NodeTLSCAData:
+    depends_on: NovaComputeDeployment
+    type: OS::TripleO::NodeTLSCAData
+    properties:
+      server: {get_resource: NovaCompute}
+
+  # Hook for site-specific additional pre-deployment config, e.g extra hieradata
+  ComputeExtraConfigPre:
+    depends_on: NovaComputeDeployment
+    type: OS::TripleO::ComputeExtraConfigPre
+    properties:
+        server: {get_resource: NovaCompute}
+
+  # Hook for site-specific additional pre-deployment config,
+  # applying to all nodes, e.g node registration/unregistration
+  NodeExtraConfig:
+    depends_on: [ComputeExtraConfigPre, NodeTLSCAData]
+    type: OS::TripleO::NodeExtraConfig
+    properties:
+        server: {get_resource: NovaCompute}
+
+  UpdateConfig:
+    type: OS::TripleO::Tasks::PackageUpdate
+
+  UpdateDeployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      name: UpdateDeployment
+      config: {get_resource: UpdateConfig}
+      server: {get_resource: NovaCompute}
+      input_values:
+        update_identifier:
+          get_param: UpdateIdentifier
+
+outputs:
+  ip_address:
+    description: IP address of the server in the ctlplane network
+    value: {get_attr: [NovaCompute, networks, ctlplane, 0]}
+  external_ip_address:
+    description: IP address of the server in the external network
+    value: {get_attr: [ExternalPort, ip_address]}
+  internal_api_ip_address:
+    description: IP address of the server in the internal_api network
+    value: {get_attr: [InternalApiPort, ip_address]}
+  storage_ip_address:
+    description: IP address of the server in the storage network
+    value: {get_attr: [StoragePort, ip_address]}
+  storage_mgmt_ip_address:
+    description: IP address of the server in the storage_mgmt network
+    value: {get_attr: [StorageMgmtPort, ip_address]}
+  tenant_ip_address:
+    description: IP address of the server in the tenant network
+    value: {get_attr: [TenantPort, ip_address]}
+  management_ip_address:
+    description: IP address of the server in the management network
+    value: {get_attr: [ManagementPort, ip_address]}
+  hostname:
+    description: Hostname of the server
+    value: {get_attr: [NovaCompute, name]}
+  hosts_entry:
+    description: >
+      Server's IP address and hostname in the /etc/hosts format
+    value:
+      str_replace:
+        template: "IP HOST.DOMAIN HOST"
+        params:
+          IP: {get_attr: [NetIpMap, net_ip_map, {get_param: [ServiceNetMap, ComputeHostnameResolveNetwork]}]}
+          DOMAIN: {get_param: CloudDomain}
+          HOST: {get_attr: [NovaCompute, name]}
+  nova_server_resource:
+    description: Heat resource handle for the Nova compute server
+    value:
+      {get_resource: NovaCompute}
+  config_identifier:
+    description: identifier which changes if the node configuration may need re-applying
+    value:
+      list_join:
+      - ','
+      - - {get_attr: [NovaComputeDeployment, deploy_stdout]}
+        - {get_attr: [NodeTLSCAData, deploy_stdout]}
+        - {get_attr: [ComputeExtraConfigPre, deploy_stdout]}
+        - {get_param: UpdateIdentifier}
