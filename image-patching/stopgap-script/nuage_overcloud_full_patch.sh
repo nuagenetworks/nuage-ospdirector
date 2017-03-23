@@ -98,7 +98,13 @@ if [ $2 -eq 8 ]; then
 fi
 
 if [ $2 -eq 9 ]; then
-  :
+
+  virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/9_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+
+  virt-copy-in -a $1 9_files/nuage.pp /etc/puppet/modules/nuage/manifests/9_files
+
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/nuage.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+
 fi
 
 }
@@ -280,4 +286,3 @@ if [ "$CONTINUE_SCRIPT" = true ]; then
     echo "Done"
 
 fi
-
