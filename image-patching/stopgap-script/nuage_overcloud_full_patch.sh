@@ -23,8 +23,8 @@
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon"
-NUAGE_DEPENDENCIES="libvirt python-twisted-core perl-JSON qemu-kvm vconfig python-novaclient"
+NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient"
 NUAGE_VRS_PACKAGE="nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE="2048"
 
@@ -45,7 +45,7 @@ echo " --RhelPassword=Password for the RHEL Subscription"
 echo " --RhelPool=Pool to subscribe to for base packages"
 echo " --RepoName=Name for the local repo hosting the Nuage RPMs"
 echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"
-echo " --Version=OSP-Director version (7, 8 or 9)?"
+echo " --Version=OSP-Director version (7, 8, 9 or 10)?"
 echo " -h or --help: Show this message"
 }
 
@@ -105,6 +105,10 @@ if [ $2 -eq 9 ]; then
 
   virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/9_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/nuage.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
+fi
+
+if [ $2 -eq 10 ]; then
+  :
 fi
 
 }
