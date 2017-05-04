@@ -135,7 +135,11 @@ rm -f rhel_unsubscribe
 #####
 
 function uninstall_packages {
-virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+# For Newton and above, use standard python-openvswitch
+if [ $2 -le 9 ]; then
+  virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
+fi
+
 virt-customize --run-command 'yum remove openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel --edit '/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/'
 
 }
@@ -263,7 +267,7 @@ if [ "$CONTINUE_SCRIPT" = true ]; then
 
     echo "Uninstalling packages"
 
-    uninstall_packages $ImageName
+    uninstall_packages $ImageName $Version
 
     echo "Creating Repo File"
 
