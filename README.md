@@ -4,12 +4,10 @@ This repository provides information, architecture and deployment steps for inte
 
 The repository includes:
 
-1. tripleo: Heat-template changes required for OSP Director and Nuage integration
+1. generate-cms-id: CMS ID generation information by connecting to Nuage VSD
 
-2. puppet-neutron: Puppet-Neutron changes for Nuage integration
+2. image-patching: Information about patching the overcloud-full.qcow2 image
 
-3. puppet-nova: Puppet-Nova changes for Nuage integration
+3. tripleo-heat-templates-diff: Changes required in openstack-tripleo-heat-templates that are not available in OSP Director yet
 
-4. image-patching: overcloud-full.qcow2 image patching resources
-
-5. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki)
+4. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-10-integration-with-ML2-for-Verizon)
