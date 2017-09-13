@@ -1,0 +1,105 @@
+diff -r -u openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml templates_current/overcloud-resource-registry-puppet.j2.yaml
+--- openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2017-09-11 21:24:03.310000000 -0700
++++ templates_current/overcloud-resource-registry-puppet.j2.yaml	2017-05-24 19:33:26.037000000 -0700
+@@ -141,6 +141,7 @@
+   OS::TripleO::Services::NeutronCorePluginML2OVN: puppet/services/neutron-plugin-ml2-ovn.yaml
+   OS::TripleO::Services::NeutronCorePluginPlumgrid: puppet/services/neutron-plugin-plumgrid.yaml
+   OS::TripleO::Services::NeutronCorePluginNuage: puppet/services/neutron-plugin-nuage.yaml
++  OS::TripleO::Services::NeutronCorePluginML2Nuage: puppet/services/neutron-plugin-ml2-nuage.yaml
+   OS::TripleO::Services::NeutronCorePluginOpencontrail: puppet/services/neutron-plugin-opencontrail.yaml
+   OS::TripleO::Services::NeutronCorePluginMidonet: puppet/services/neutron-midonet.yaml
+   OS::TripleO::Services::NeutronOvsAgent: puppet/services/neutron-ovs-agent.yaml
+diff -r -u openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml templates_current/puppet/services/neutron-base.yaml
+--- openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml	2017-09-11 21:25:10.776000000 -0700
++++ templates_current/puppet/services/neutron-base.yaml	2017-05-31 21:19:20.763000000 -0700
+@@ -60,6 +60,12 @@
+         currently in effect to compensate for some additional overhead when
+         deploying with some network configurations (e.g. network isolation over
+         single network interfaces)
++  NeutronDBSyncExtraParams:
++    default: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini'
++    description: |
++        String of extra command line parameters to append to the neutron-db-manage
++        upgrade head command.
++    type: string
+   ServiceNetMap:
+     default: {}
+     description: Mapping of service_name -> network name. Typically set
+@@ -100,3 +106,4 @@
+         neutron::db::database_db_max_retries: -1
+         neutron::db::database_max_retries: -1
+         neutron::global_physnet_mtu: {get_param: NeutronGlobalPhysnetMtu}
++        neutron::db::sync::extra_params: {get_param: NeutronDBSyncExtraParams}
+diff -r -u openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml templates_current/puppet/services/neutron-compute-plugin-nuage.yaml
+--- openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml	2017-09-11 21:19:45.258000000 -0700
++++ templates_current/puppet/services/neutron-compute-plugin-nuage.yaml	2017-06-09 17:35:24.650000000 -0700
+@@ -22,6 +22,10 @@
+     description: The password for the nova service account, used by nova-api.
+     type: string
+     hidden: true
++  NuageMetadataPort:
++    description: TCP Port to listen for metadata server requests
++    type: string
++    default: '9697'
+ 
+ outputs:
+   role_data:
+@@ -32,5 +36,11 @@
+         tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
+         tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
+         tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
++        tripleo.neutron_compute_plugin_nuage.firewall_rules:
++          '118 neutron vxlan networks':
++            proto: 'udp'
++            dport: 4789
++          '100 metadata agent':
++            dport: {get_param: NuageMetadataPort}
+       step_config: |
+         include ::tripleo::profile::base::neutron::agents::nuage
+Only in templates_current/puppet/services: neutron-plugin-ml2-nuage.yaml
+diff -r -u openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml templates_current/puppet/services/neutron-plugin-ml2.yaml
+--- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml	2017-09-11 21:27:04.411000000 -0700
++++ templates_current/puppet/services/neutron-plugin-ml2.yaml	2017-05-31 22:06:13.212000000 -0700
+@@ -66,6 +66,10 @@
+         By default Intel & Mellanox SR-IOV capable NICs are supported.
+     type: comma_delimited_list
+     default: ['15b3:1004','8086:10ca']
++  NeutronFirewallDriver:
++    description: Firewall driver for realizing neutron security group function
++    type: string
++    default: 'neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver'
+ 
+ resources:
+ 
+@@ -125,6 +129,7 @@
+                 params:
+                   TYPES: {get_param: NeutronNetworkType}
+             neutron::plugins::ml2::supported_pci_vendor_devs: {get_param: NeutronSupportedPCIVendorDevs}
++            neutron::plugins::ml2::firewall_driver: {get_param: NeutronFirewallDriver}
+ 
+       step_config: |
+         include ::tripleo::profile::base::neutron::plugins::ml2
+diff -r -u openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml templates_current/puppet/services/neutron-plugin-nuage.yaml
+--- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml	2017-09-11 21:22:12.516000000 -0700
++++ templates_current/puppet/services/neutron-plugin-nuage.yaml	2017-05-24 20:53:11.675000000 -0700
+@@ -19,10 +19,6 @@
+                  via parameter_defaults in the resource registry.
+     type: json
+   # Config specific parameters, to be provided via parameter_defaults
+-  NeutronNuageOSControllerIp: 
+-    description: IP address of the OpenStack Controller
+-    type: string
+-
+   NeutronNuageNetPartitionName:
+     description: Specifies the title that you will see on the VSD
+     type: string
+@@ -76,8 +72,7 @@
+       config_settings:
+         map_merge:
+           - get_attr: [NeutronBase, role_data, config_settings]
+-          - neutron::plugins::nuage::nuage_oscontroller_ip: {get_param: NeutronNuageOSControllerIp}
+-            neutron::plugins::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
++          - neutron::plugins::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
+             neutron::plugins::nuage::nuage_vsd_ip: {get_param: NeutronNuageVSDIp}
+             neutron::plugins::nuage::nuage_vsd_username: {get_param: NeutronNuageVSDUsername}
+             neutron::plugins::nuage::nuage_vsd_password: {get_param: NeutronNuageVSDPassword}
