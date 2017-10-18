@@ -61,11 +61,18 @@ class neutron::plugins::ml2::nuage (
   }
 
   if $::osfamily == 'Debian' {
-    file_line { '/etc/default/neutron-server:NEUTRON_PLUGIN_CONFIG':
+    file_line { 'neutron-server-DAEMON_ARGS':
       path  => '/etc/default/neutron-server',
-      match => '^NEUTRON_PLUGIN_CONFIG=(.*)$',
-      line  => "NEUTRON_PLUGIN_CONFIG=${::neutron::params::nuage_config_file}",
-      tag   => 'neutron-file-line',
+      line  => 'DAEMON_ARGS="$DAEMON_ARGS --config-file /etc/neutron/plugins/nuage/plugin.ini"',
+    }
+  }
+
+  if $::osfamily == 'Redhat' {
+    file { '/etc/neutron/conf.d/neutron-server/nuage_plugin.conf':
+      ensure  => link,
+      require => File['/etc/neutron/plugins/nuage/plugin.ini'],
+      target  => $::neutron::params::nuage_config_file,
+      tag     => 'neutron-config-file',
     }
   }
 
@@ -94,7 +101,7 @@ class neutron::plugins::ml2::nuage (
     'RESTPROXY/cms_id':                     value => $nuage_cms_id;
   }
 
-  if $::neutron::core_plugin == 'ml2' and !('nuage' in $::neutron::plugins::ml2::mechanism_drivers) {
+  if $::neutron::core_plugin != 'ml2' or !('nuage' in $::neutron::plugins::ml2::mechanism_drivers) {
     fail('Nuage should be the mechanism driver in neutron.conf')
   }
 }

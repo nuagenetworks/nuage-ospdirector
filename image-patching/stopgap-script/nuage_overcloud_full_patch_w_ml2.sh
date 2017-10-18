@@ -23,8 +23,8 @@
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuagenetlib nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions"
-NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient"
+NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions nuage-topology-collector"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad sshpass ansible"
 NUAGE_VRS_PACKAGE="nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE="2048"
 
@@ -56,12 +56,12 @@ echo " -h or --help: Show this message"
 function rhel_subscription {
 
 cat <<EOT >> rhel_subscription
-# subscription-manager config --server.proxy_hostname=proxy.lbs.alcatel-lucent.com --server.proxy_port=8000
+subscription-manager config --server.proxy_hostname=proxy.lbs.alcatel-lucent.com --server.proxy_port=8000
 subscription-manager register --username=$1 --password='$2'
 subscription-manager subscribe --pool=$3
 subscription-manager repos --enable=rhel-7-server-optional-rpms
 subscription-manager repos --enable=rhel-7-server-rpms
-subscription-manager repos --enable=rhel-7-server-openstack-10-rpms
+#subscription-manager repos --enable=rhel-7-server-openstack-10-rpms
 EOT
 virt-customize --run rhel_subscription -a $4 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
 
@@ -123,15 +123,22 @@ fi
 if [ $2 -eq 10 ]; then
   virt-customize --run-command 'mkdir -p /etc/puppet/modules/nuage/manifests/10_files' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
 
+  virt-copy-in -a $1 10_files/config.pp /etc/puppet/modules/nuage/manifests/10_files
   virt-copy-in -a $1 10_files/nuage.pp /etc/puppet/modules/nuage/manifests/10_files
-  virt-copy-in -a $1 10_files/neutron-server.service /etc/puppet/modules/nuage/manifests/10_files
   virt-copy-in -a $1 10_files/ml2.pp /etc/puppet/modules/nuage/manifests/10_files
   virt-copy-in -a $1 10_files/tripleo_profile_nuage.pp /etc/puppet/modules/nuage/manifests/10_files
+  virt-copy-in -a $1 10_files/tripleo_profile_sriov.pp /etc/puppet/modules/nuage/manifests/10_files
+  virt-copy-in -a $1 10_files/init.pp /etc/puppet/modules/nuage/manifests/10_files
+  virt-copy-in -a $1 10_files/local_settings.py.erb /etc/puppet/modules/nuage/manifests/10_files
 
+  virt-customize --run-command 'mkdir -p /etc/puppet/modules/nova/manifests/patch' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/config.pp /etc/puppet/modules/nova/manifests/patch/config.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
   virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/ml2/nuage.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
-  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/neutron-server.service /usr/lib/systemd/system/neutron-server.service' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
   virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/ml2.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
   virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/tripleo_profile_nuage.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2/nuage.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/tripleo_profile_sriov.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/sriov.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/init.pp /etc/puppet/modules/horizon/manifests/init.pp' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
+  virt-customize --run-command 'cp /etc/puppet/modules/nuage/manifests/10_files/local_settings.py.erb /etc/puppet/modules/horizon/templates/local_settings.py.erb' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
 
 fi
 
@@ -159,6 +166,7 @@ rm -f rhel_unsubscribe
 #####
 
 function uninstall_packages {
+
 # For Newton and above, use standard python-openvswitch
 if [ $2 -le 9 ]; then
   virt-customize --run-command 'yum remove python-openvswitch -y' -a $1 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
