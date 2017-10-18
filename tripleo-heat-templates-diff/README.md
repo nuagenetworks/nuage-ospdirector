@@ -7,7 +7,7 @@ overcloud-full-10.0-20170504.2.el7ost.tar
 
 Steps:
 
-1. Download diff_OSPD10_5.2.0-15 from [here](https://github.com/nuagenetworks/nuage-ospdirector/blob/ML2-SRIOV-VZ/tripleo-heat-templates-diff/diff_OSPD10) to the undercloud machine under /usr/share
+1. Download diff_OSPD10_5.2.0-15 from [here](https://github.com/nuagenetworks/nuage-ospdirector/blob/ML2-SRIOV/tripleo-heat-templates-diff/diff_OSPD10_5.2.0-15) to the undercloud machine under /usr/share
 
 2. From /usr/share, run the following command to patch the changes:
 
