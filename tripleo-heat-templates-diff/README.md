@@ -4,11 +4,13 @@ Patch diff to /usr/share/openstack-tripleo-heat-templates
 Version supported:   
 
 OSPD 10:
+
 openstack-tripleo-heat-templates.noarch 5.2.0-15.el7ost   
 overcloud-full-10.0-20170504.2.el7ost.tar
 
 OSPD 11:
-openstack-tripleo-heat-templates.noarch 6.2.0-3.el7ost
+
+openstack-tripleo-heat-templates.noarch 6.2.0-3.el7ost   
 overcloud-full-11.0-20170630.1.el7ost.tar
 
 Steps:
