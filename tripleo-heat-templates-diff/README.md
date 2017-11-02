@@ -21,4 +21,36 @@ Steps:
    patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml   
    patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml   
 
-4. Copy the file neutron-plugin-ml2-nuage.yaml from [here](https://github.com/nuagenetworks/nuage-ospdirector/blob/ML2-SRIOV-VZ/tripleo-heat-templates-diff/neutron-plugin-ml2-nuage.yaml) to /usr/share/openstack-tripleo-heat-templates/puppet/services/
+
+Version supported:   
+openstack-tripleo-heat-templates-5.3.0-4.el7ost.noarch and openstack-tripleo-heat-templates-5.3.0-6.el7ost.noarch    
+overcloud-full-10.0-20170504.2.el7ost.tar
+
+Steps:
+
+1. Download diff_OSPD10 from [here](https://github.com/nuagenetworks/nuage-ospdirector/blob/ML2-SRIOV-VZ/tripleo-heat-templates-diff/diff_OSPD10) to the undercloud machine under /usr/share
+
+2. From /usr/share, run the following command to patch the changes:
+
+   "patch -p0 < diff\_OSPD10"
+
+3. Some changes from the diff_patch are already included. Skip over them. Verify that rest of the changes are applied. This should be the output of the command above:
+
+   patching file openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml
+   Hunk #1 succeeded at 144 (offset 3 lines).
+   patching file openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml
+   patching file openstack-tripleo-heat-templates/puppet/services/horizon.yaml
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml
+   Reversed (or previously applied) patch detected!  Assume -R? [n] n
+   Apply anyway? [n] n
+   Skipping patch.
+   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml.rej
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml
+   Reversed (or previously applied) patch detected!  Assume -R? [n] n
+   Apply anyway? [n] n
+   Skipping patch.
+   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml.rej
+
