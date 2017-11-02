@@ -36,21 +36,21 @@ Steps:
 
 3. Some changes from the diff_patch are already included. Skip over them. Verify that rest of the changes are applied. This should be the output of the command above:
 
-   patching file openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml
-   Hunk #1 succeeded at 144 (offset 3 lines).
-   patching file openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml
-   patching file openstack-tripleo-heat-templates/puppet/services/horizon.yaml
-   patching file openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
-   patching file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml
-   Reversed (or previously applied) patch detected!  Assume -R? [n] n
-   Apply anyway? [n] n
-   Skipping patch.
-   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml.rej
-   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
-   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml
-   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml
-   Reversed (or previously applied) patch detected!  Assume -R? [n] n
-   Apply anyway? [n] n
-   Skipping patch.
-   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml.rej
+   patching file openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml   
+   Hunk #1 succeeded at 144 (offset 3 lines).   
+   patching file openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml   
+   patching file openstack-tripleo-heat-templates/puppet/services/horizon.yaml   
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml   
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml   
+   Reversed (or previously applied) patch detected!  Assume -R? [n] n   
+   Apply anyway? [n] n   
+   Skipping patch.   
+   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml.rej   
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml   
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml   
+   patching file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml   
+   Reversed (or previously applied) patch detected!  Assume -R? [n] n   
+   Apply anyway? [n] n   
+   Skipping patch.   
+   2 out of 2 hunks ignored -- saving rejects to file openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml.rej   
 
