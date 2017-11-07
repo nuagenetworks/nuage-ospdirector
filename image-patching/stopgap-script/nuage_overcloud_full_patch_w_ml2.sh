@@ -23,8 +23,8 @@
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions nuage-topology-collector"
-NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad sshpass ansible"
+NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE="nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE="2048"
 
@@ -56,12 +56,10 @@ echo " -h or --help: Show this message"
 function rhel_subscription {
 
 cat <<EOT >> rhel_subscription
-subscription-manager config --server.proxy_hostname=proxy.lbs.alcatel-lucent.com --server.proxy_port=8000
 subscription-manager register --username=$1 --password='$2'
 subscription-manager subscribe --pool=$3
 subscription-manager repos --enable=rhel-7-server-optional-rpms
 subscription-manager repos --enable=rhel-7-server-rpms
-#subscription-manager repos --enable=rhel-7-server-openstack-10-rpms
 EOT
 virt-customize --run rhel_subscription -a $4 --memsize $VIRT_CUSTOMIZE_MEMSIZE --selinux-relabel
 
