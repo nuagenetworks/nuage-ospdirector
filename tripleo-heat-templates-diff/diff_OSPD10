@@ -77,7 +77,7 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
          deploying with some network configurations (e.g. network isolation over
          single network interfaces)
 +  NeutronDBSyncExtraParams:
-+    default: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini'
++    default: ''
 +    description: |
 +        String of extra command line parameters to append to the neutron-db-manage
 +        upgrade head command.
@@ -233,7 +233,8 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml
 +  NeutronFirewallDriver:
 +    description: Firewall driver for realizing neutron security group function
 +    type: string
-+    default: 'neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver'
++    default: 'openvswitch'
+
  resources:
  
    NeutronBase:
