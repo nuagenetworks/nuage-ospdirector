@@ -10,4 +10,4 @@ The repository includes:
 
 3. tripleo-heat-templates-diff: Changes required in openstack-tripleo-heat-templates that are not available in OSP Director yet
 
-4. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-10-integration-with-ML2-for-Verizon)
+4. Wiki document: The details of integration, architecture and deployment steps for various OSPD deployments can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki)
