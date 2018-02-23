@@ -13,6 +13,11 @@ OSPD 11:
 openstack-tripleo-heat-templates.noarch 6.2.0-3.el7ost   
 overcloud-full-11.0-20170630.1.el7ost.tar
 
+OSPD 12:
+
+openstack-tripleo-heat-templates.noarch 7.0.3-22.el7ost
+overcloud-full-12.0-20180126.1.el7ost.tar
+
 Steps:
 
 1. Download the appropriate diff file from [here](https://github.com/nuagenetworks/nuage-ospdirector/blob/ML2-SRIOV/tripleo-heat-templates-diff/) to the undercloud machine under /usr/share

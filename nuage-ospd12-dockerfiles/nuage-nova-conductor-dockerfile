@@ -1,0 +1,19 @@
+FROM registry.access.redhat.com/rhosp12/openstack-nova-conductor:12.0-20180124.1
+LABEL description="Nuage Nova Extension Plugin"
+LABEL version-release="12.0-20180124.1"
+LABEL summary="Nuage Nova Extension Plugin"
+LABEL io.k8s.display-name="Nuage Nova Extension Plugin"
+LABEL com.redhat.component="openstack-nuage-nova-conductor-docker"
+LABEL name="rhosp12/openstack-nuage-nova-conductor"
+LABEL version="12.0"
+LABEL release="20180124.1"
+LABEL architecture="x86_64"
+
+USER root
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum install -y nuage-nova-extensions && yum clean all
+RUN rm -rf /etc/yum.repos.d/nuage.repo
+
+USER nova
+

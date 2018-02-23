@@ -1,0 +1,100 @@
+diff -r -u -N openstack-tripleo-heat-templates-orig/docker/services/horizon.yaml openstack-tripleo-heat-templates/docker/services/horizon.yaml
+--- openstack-tripleo-heat-templates-orig/docker/services/horizon.yaml	2018-01-18 08:06:37.000000000 -0500
++++ openstack-tripleo-heat-templates/docker/services/horizon.yaml	2018-02-19 16:47:08.721863016 -0500
+@@ -67,11 +67,6 @@
+       config_settings:
+         map_merge:
+           - get_attr: [HorizonBase, role_data, config_settings]
+-          - horizon::vhost_extra_params:
+-              add_listen: true
+-              priority: 10
+-              access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
+-              options: ['FollowSymLinks','MultiViews']
+           - horizon::secure_cookies: false
+       logging_source: {get_attr: [HorizonBase, role_data, logging_source]}
+       logging_groups: {get_attr: [HorizonBase, role_data, logging_groups]}
+diff -r -u -N openstack-tripleo-heat-templates-orig/puppet/services/heat-engine.yaml openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml
+--- openstack-tripleo-heat-templates-orig/puppet/services/heat-engine.yaml	2017-11-03 16:20:29.000000000 -0400
++++ openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-02-13 23:43:15.420294008 -0500
+@@ -68,7 +68,10 @@
+     type: number
+     default: 1000
+     description: Maximum resources allowed per top-level stack. -1 stands for unlimited.
+-
++  HeatEnginePluginDirs:
++    type: comma_delimited_list
++    default: []
++    description: An array of directories to search for plug-ins.
+ 
+ resources:
+   HeatBase:
+@@ -94,6 +97,7 @@
+         map_merge:
+           - get_attr: [HeatBase, role_data, config_settings]
+           - heat::engine::num_engine_workers: {get_param: HeatWorkers}
++            heat::engine::plugin_dirs: {get_param: HeatEnginePluginDirs}
+             heat::engine::configure_delegated_roles: false
+             heat::engine::trusts_delegated_roles: []
+             heat::engine::max_nested_stack_depth: 6
+diff -r -u -N openstack-tripleo-heat-templates-orig/puppet/services/horizon.yaml openstack-tripleo-heat-templates/puppet/services/horizon.yaml
+--- openstack-tripleo-heat-templates-orig/puppet/services/horizon.yaml	2017-11-03 16:20:29.000000000 -0400
++++ openstack-tripleo-heat-templates/puppet/services/horizon.yaml	2018-02-19 16:46:14.442547807 -0500
+@@ -2,7 +2,6 @@
+ 
+ description: >
+   Horizon service configured with Puppet
+-
+ parameters:
+   ServiceData:
+     default: {}
+@@ -75,6 +74,19 @@
+     type: string
+     description: Specifies the default CA cert to use if TLS is used for
+                  services in the internal network.
++  HorizonVhostExtraParams:
++    default:
++      add_listen: true
++      priority: 10
++      access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
++      options: ['FollowSymLinks','MultiViews']
++    description: Extra parameters for Horizon vhost configuration
++    type: json
++  HorizonCustomizationModule:
++    default: ''
++    description: Horizon has a global overrides mechanism available to perform customizations
++    type: string
++  
+ 
+ conditions:
+ 
+@@ -100,10 +112,7 @@
+           horizon::disallow_iframe_embed: true
+           horizon::cache_backend: django.core.cache.backends.memcached.MemcachedCache
+           horizon::django_session_engine: 'django.contrib.sessions.backends.cache'
+-          horizon::vhost_extra_params:
+-            priority: 10
+-            access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
+-            options: ['FollowSymLinks','MultiViews']
++          horizon::vhost_extra_params: {get_param: HorizonVhostExtraParams}
+           horizon::bind_address: {get_param: [ServiceNetMap, HorizonNetwork]}
+           horizon::keystone_url: {get_param: [EndpointMap, KeystoneInternal, uri_no_suffix]}
+           horizon::password_validator: {get_param: [HorizonPasswordValidator]}
+@@ -125,6 +134,7 @@
+                 $NETWORK: {get_param: [ServiceNetMap, HorizonNetwork]}
+           horizon::listen_ssl: {get_param: EnableInternalTLS}
+           horizon::horizon_ca: {get_param: InternalTLSCAFile}
++          horizon::customization_module: {get_param: HorizonCustomizationModule}
+         -
+           if:
+           - debug_unset
+diff -r -u -N openstack-tripleo-heat-templates-orig/puppet/services/neutron-plugin-ml2-nuage.yaml openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
+--- openstack-tripleo-heat-templates-orig/puppet/services/neutron-plugin-ml2-nuage.yaml	2017-11-03 16:20:12.000000000 -0400
++++ openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-02-19 16:46:38.195248142 -0500
+@@ -105,6 +105,7 @@
+             neutron::plugins::ml2::nuage::nuage_base_uri_version: {get_param: NeutronNuageBaseURIVersion}
+             neutron::plugins::ml2::nuage::nuage_cms_id: {get_param: NeutronNuageCMSId}
+             nova::api::use_forwarded_for: {get_param: UseForwardedFor}
++            tripleo::profile::base::nova::api::nova_patch_enabled: {get_param: NovaPatchConfigMonkeyPatch}
+             nova::patch::config::monkey_patch: {get_param: NovaPatchConfigMonkeyPatch}
+             nova::patch::config::monkey_patch_modules: {get_param: NovaPatchConfigMonkeyPatchModules}
+       step_config: |
