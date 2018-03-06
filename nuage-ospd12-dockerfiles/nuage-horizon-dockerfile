@@ -10,5 +10,5 @@ LABEL release="20180124.1"
 LABEL architecture="x86_64"
 
 COPY nuage.repo /etc/yum.repos.d/nuage.repo
-RUN yum -y install nuage-openstack-horizon && yum clean all
+RUN yum -y install nuage-openstack-horizon nuage-openstack-neutronclient && yum clean all
 RUN rm -f /etc/yum.repos.d/nuage.repo 
