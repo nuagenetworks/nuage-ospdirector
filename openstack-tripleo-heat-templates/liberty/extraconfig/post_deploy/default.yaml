@@ -1,5 +1,0 @@
-heat_template_version: 2014-10-16
-description: 'Extra Post Deployment Config'
-parameters:
-  servers:
-    type: json

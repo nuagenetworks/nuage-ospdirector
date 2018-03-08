@@ -199,6 +199,7 @@ def add_files(image, version, workingDir):
         virt_copy('%s %s/10_files/tripleo_profile_sriov.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
         virt_copy('%s %s/10_files/init.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
         virt_copy('%s %s/10_files/local_settings.py.erb /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
+        virt_copy('%s %s/10_files/engine.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
         virt_customize('"mkdir -p /etc/puppet/modules/nova/manifests/patch" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
         virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/config.pp /etc/puppet/modules/nova/manifests/patch/config.pp" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
         virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/ml2/nuage.pp" -a %s --memsize %s --selinux-relabel' %(image, VIRT_CUSTOMIZE_MEMSIZE))
@@ -210,6 +211,9 @@ def add_files(image, version, workingDir):
             image, VIRT_CUSTOMIZE_MEMSIZE))
         virt_customize(
             '"cp /etc/puppet/modules/nuage/manifests/10_files/local_settings.py.erb /etc/puppet/modules/horizon/templates/local_settings.py.erb" -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
+        virt_customize(
+            '"cp /etc/puppet/modules/nuage/manifests/10_files/engine.pp /etc/puppet/modules/heat/manifests/engine.pp" -a %s --memsize %s --selinux-relabel' % (
             image, VIRT_CUSTOMIZE_MEMSIZE))
 
     if version == 11:

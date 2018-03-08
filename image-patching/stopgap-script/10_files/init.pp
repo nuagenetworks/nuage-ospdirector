@@ -319,9 +319,22 @@
 #        'acme_saml2' => ['acme', 'saml2'],
 #      }
 #
+#  [*enable_secure_proxy_ssl_header*]
+#    (optional) Enables the SECURE_PROXY_SSL_HEADER option which makes django
+#    take the X-Forwarded-Proto header into account. Note that this is only
+#    recommended if you're running horizon behind a proxy.
+#    Defaults to false
+#
 #  [*customization_module*]
-#    (optional) Customize horizon UI
+#    (optional) Horizon has a global override mechanism available to perform
+#    customizations. This adds a key - customization_module - to HORIZON_CONFIG
+#    dictionary in local_settings.py. The value should be a string with the
+#    path to your module containing modifications in dotted python path
+#    notation.
 #    Defaults to undef
+#
+#    Example:
+#      customization_module => "my_project.overrides"
 #
 # === DEPRECATED group/name
 #
@@ -422,6 +435,8 @@ class horizon(
   $websso_initial_choice               = undef,
   $websso_choices                      = undef,
   $websso_idp_mapping                  = undef,
+  $enable_secure_proxy_ssl_header      = false,
+  $customization_module                = undef,
   # DEPRECATED PARAMETERS
   $custom_theme_path                   = undef,
   $fqdn                                = undef,
@@ -429,7 +444,6 @@ class horizon(
   $tuskar_ui_ironic_discoverd_url      = undef,
   $tuskar_ui_undercloud_admin_password = undef,
   $tuskar_ui_deployment_mode           = undef,
-  $customization_module                = undef,
 ) inherits ::horizon::params {
 
   $hypervisor_defaults = {

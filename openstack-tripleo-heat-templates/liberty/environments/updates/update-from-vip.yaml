@@ -1,8 +1,0 @@
-resource_registry:
-  # Port assignments for the VIPs
-  OS::TripleO::Network::Ports::ExternalVipPort: ../../network/ports/vip.yaml
-  OS::TripleO::Network::Ports::InternalApiVipPort: ../../network/ports/vip.yaml
-  OS::TripleO::Network::Ports::StorageVipPort: ../../network/ports/vip.yaml
-  OS::TripleO::Network::Ports::StorageMgmtVipPort: ../../network/ports/vip.yaml
-  OS::TripleO::Network::Ports::TenantVipPort: ../../network/ports/vip.yaml
-  OS::TripleO::Network::Ports::CtlplaneVipPort: ../../network/ports/ctlplane_vip.yaml

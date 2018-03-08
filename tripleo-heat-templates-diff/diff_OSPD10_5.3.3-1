@@ -1,0 +1,235 @@
+diff -u -r -N openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml patched/overcloud-resource-registry-puppet.j2.yaml
+--- openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2018-02-06 18:27:53.000000000 -0500
++++ patched/overcloud-resource-registry-puppet.j2.yaml	2018-02-22 02:48:42.016386910 -0500
+@@ -137,6 +137,7 @@
+   # can be the same as NeutronCorePlugin but some vendors install different
+   # things where VMs run
+   OS::TripleO::Services::ComputeNeutronCorePlugin: puppet/services/neutron-plugin-ml2.yaml
++  OS::TripleO::Services::ComputeNeutronCorePluginNuage: puppet/services/neutron-compute-plugin-nuage.yaml
+   # Neutron Core Plugin Vendors (these typically override NeutronCorePlugin)
+   OS::TripleO::Services::NeutronCorePluginML2OVN: puppet/services/neutron-plugin-ml2-ovn.yaml
+   OS::TripleO::Services::NeutronCorePluginPlumgrid: puppet/services/neutron-plugin-plumgrid.yaml
+diff -u -r -N openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml patched/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml
+--- openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml	2018-02-06 18:27:53.000000000 -0500
++++ patched/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml	1969-12-31 19:00:00.000000000 -0500
+@@ -1,93 +0,0 @@
+-heat_template_version: 2015-04-30
+-
+-description: Configure hieradata for Nuage configuration on the Compute
+-
+-parameters:
+-  server:
+-    description: ID of the compute node to apply this config to
+-    type: string
+-
+-  NuageActiveController:
+-    description: IP address of the Active Virtualized Services Controller (VSC)
+-    type: string
+-  NuageStandbyController:
+-    description: IP address of the Standby Virtualized Services Controller (VSC)
+-    type: string
+-  NuageMetadataPort:
+-    description: TCP Port to listen for metadata server requests
+-    type: string
+-    default: '9697'
+-  NuageNovaMetadataPort:
+-    description: TCP Port used by Nova metadata server
+-    type: string
+-    default: '8775'
+-  NuageMetadataProxySharedSecret:
+-    description: Shared secret to sign the instance-id request
+-    type: string
+-  NuageNovaClientVersion:
+-    description: Client Version Nova
+-    type: string
+-    default: '2'
+-  NuageNovaOsUsername:
+-    description: Nova username in keystone_authtoken
+-    type: string
+-    default: 'nova'
+-  NuageMetadataAgentStartWithOvs:
+-    description: Set to True if nuage-metadata-agent needs to be started with nuage-openvswitch-switch
+-    type: string
+-    default: 'True'
+-  NuageNovaApiEndpoint:
+-    description: One of publicURL, internalURL, adminURL in "keystone endpoint-list"
+-    type: string
+-    default: 'publicURL'
+-  NuageNovaRegionName:
+-    description: Region name in "keystone endpoint-list"
+-    type: string
+-    default: 'regionOne'
+-
+-# Declaration of resources for the template.
+-resources:
+-  NovaNuageConfig:
+-    type: OS::Heat::StructuredConfig
+-    properties:
+-      group: os-apply-config
+-      config:
+-        hiera:
+-          datafiles:
+-            nova_nuage_data:
+-              mapped_data:
+-               nuage::vrs::active_controller: {get_input: ActiveController}
+-               nuage::vrs::standby_controller: {get_input: StandbyController}
+-               nuage::metadataagent::metadata_port: {get_input: MetadataPort}
+-               nuage::metadataagent::nova_metadata_port: {get_input: NovaMetadataPort}
+-               nuage::metadataagent::metadata_secret: {get_input: SharedSecret}
+-               nuage::metadataagent::nova_client_version: {get_input: NovaClientVersion}
+-               nuage::metadataagent::nova_os_username: {get_input: NovaOsUsername}
+-               nuage::metadataagent::metadata_agent_start_with_ovs: {get_input: MetadataAgentStartWithOvs}
+-               nuage::metadataagent::nova_api_endpoint_type: {get_input: NovaApiEndpointType}
+-               nuage::metadataagent::nova_region_name: {get_input: NovaRegionName}
+-
+-  NovaNuageDeployment:
+-    type: OS::Heat::StructuredDeployment
+-    properties:
+-      name: NovaNuageDeployment
+-      config: {get_resource: NovaNuageConfig}
+-      server: {get_param: server}
+-      input_values:
+-        ActiveController: {get_param: NuageActiveController}
+-        StandbyController: {get_param: NuageStandbyController}
+-        MetadataPort: {get_param: NuageMetadataPort}
+-        NovaMetadataPort: {get_param: NuageNovaMetadataPort}
+-        SharedSecret: {get_param: NuageMetadataProxySharedSecret}
+-        NovaClientVersion: {get_param: NuageNovaClientVersion}
+-        NovaOsUsername: {get_param: NuageNovaOsUsername}
+-        MetadataAgentStartWithOvs: {get_param: NuageMetadataAgentStartWithOvs}
+-        NovaApiEndpointType: {get_param: NuageNovaApiEndpoint}
+-        NovaRegionName: {get_param: NuageNovaRegionName}
+-
+-# Specify output parameters that will be available
+-# after the template is instantiated.
+-outputs:
+-  deploy_stdout:
+-    description: Deployment reference, used to trigger puppet apply on changes
+-    value: {get_attr: [NovaNuageDeployment, deploy_stdout]}
+diff -u -r -N openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml patched/puppet/services/heat-engine.yaml
+--- openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-02-06 18:27:53.000000000 -0500
++++ patched/puppet/services/heat-engine.yaml	2018-02-22 02:44:27.668401639 -0500
+@@ -48,6 +48,10 @@
+     default:
+       tag: openstack.heat.engine
+       path: /var/log/heat/heat-engine.log
++  HeatEnginePluginDirs:
++    type: comma_delimited_list
++    default: []
++    description: An array of directories to search for plug-ins.
+ 
+ resources:
+   HeatBase:
+@@ -93,6 +97,7 @@
+                   passwords:
+                     - {get_param: HeatAuthEncryptionKey}
+                     - {get_param: [DefaultPasswords, heat_auth_encryption_key]}
++            heat::engine::plugin_dirs: {get_param: HeatEnginePluginDirs}
+       step_config: |
+         include ::tripleo::profile::base::heat::engine
+ 
+diff -u -r -N openstack-tripleo-heat-templates/puppet/services/horizon.yaml patched/puppet/services/horizon.yaml
+--- openstack-tripleo-heat-templates/puppet/services/horizon.yaml	2018-02-06 18:27:53.000000000 -0500
++++ patched/puppet/services/horizon.yaml	2018-02-22 02:44:27.668401639 -0500
+@@ -43,6 +43,17 @@
+   MonitoringSubscriptionHorizon:
+     default: 'overcloud-horizon'
+     type: string
++  HorizonVhostExtraParams:
++    default:
++      add_listen: false
++      priority: 10
++      access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
++    description: Extra params for Horizon Vhost configuration
++    type: json
++  HorizonCustomizationModule:
++    default: ''
++    description: Horizon has a global overrides mechanism available to perform customizations
++    type: string
+ 
+ outputs:
+   role_data:
+@@ -65,10 +76,7 @@
+               - 443
+         horizon::cache_backend: django.core.cache.backends.memcached.MemcachedCache
+         horizon::django_session_engine: 'django.contrib.sessions.backends.cache'
+-        horizon::vhost_extra_params:
+-          add_listen: false
+-          priority: 10
+-          access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
++        horizon::vhost_extra_params: {get_param: HorizonVhostExtraParams}
+         horizon::bind_address: {get_param: [ServiceNetMap, HorizonNetwork]}
+         horizon::django_debug: {get_param: Debug}
+         horizon::keystone_url: {get_param: [EndpointMap, KeystoneInternal, uri]}
+@@ -80,5 +88,6 @@
+                 - {get_param: HorizonSecret}
+                 - {get_param: [DefaultPasswords, horizon_secret]}
+         memcached_ipv6: {get_param: MemcachedIPv6}
++        horizon::customization_module: {get_param: HorizonCustomizationModule}
+       step_config: |
+         include ::tripleo::profile::base::horizon
+diff -u -r -N openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml patched/puppet/services/neutron-compute-plugin-nuage.yaml
+--- openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-06 18:27:53.000000000 -0500
++++ patched/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-22 02:44:27.668401639 -0500
+@@ -26,6 +26,43 @@
+     description: TCP Port to listen for metadata server requests
+     type: string
+     default: '9697'
++  NuageActiveController:
++    description: IP address of the Active Virtualized Services Controller (VSC)
++    type: string
++  NuageStandbyController:
++    description: IP address of the Standby Virtualized Services Controller (VSC)
++    type: string
++  NuageNovaMetadataPort:
++    description: TCP Port used by Nova metadata server
++    type: string
++    default: '8775'
++  NuageMetadataProxySharedSecret:
++    description: Shared secret to sign the instance-id request
++    type: string
++  NuageNovaClientVersion:
++    description: Client Version Nova
++    type: string
++    default: '2'
++  NuageNovaOsUsername:
++    description: Nova username in keystone_authtoken
++    type: string
++    default: 'nova'
++  NuageMetadataAgentStartWithOvs:
++    description: Set to true if nuage-metadata-agent needs to be started with nuage-openvswitch-switch
++    type: boolean
++    default: true
++  NuageNovaApiEndpoint:
++    description: One of publicURL, internalURL, adminURL in "keystone endpoint-list"
++    type: string
++    default: 'publicURL'
++  NuageNovaRegionName:
++    description: Region name in "keystone endpoint-list"
++    type: string
++    default: 'regionOne'
++  NuageBridgeMTU:
++    description: Support for non-default MTU configured on each Compute node
++    type: string
++    default: ''
+ 
+ outputs:
+   role_data:
+@@ -33,6 +70,17 @@
+     value:
+       service_name: neutron_compute_plugin_nuage
+       config_settings:
++        nuage::vrs::active_controller: {get_param: NuageActiveController}
++        nuage::vrs::standby_controller: {get_param: NuageStandbyController}
++        nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
++        nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
++        nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
++        nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
++        nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
++        nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
++        nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
++        nuage::metadataagent::nova_api_endpoint_type: {get_param: NuageNovaApiEndpoint}
++        nuage::metadataagent::nova_region_name: {get_param: NuageNovaRegionName}
+         tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
+         tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
+         tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}

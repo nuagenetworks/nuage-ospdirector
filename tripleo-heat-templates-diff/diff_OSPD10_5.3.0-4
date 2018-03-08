@@ -1,7 +1,7 @@
 diff -r -u -N openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml patched/overcloud-resource-registry-puppet.j2.yaml
---- openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/overcloud-resource-registry-puppet.j2.yaml	2018-02-08 06:41:16.000000000 -0500
-@@ -137,10 +137,12 @@
+--- openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/overcloud-resource-registry-puppet.j2.yaml	2018-02-22 01:58:43.863560529 -0500
+@@ -140,10 +140,12 @@
    # can be the same as NeutronCorePlugin but some vendors install different
    # things where VMs run
    OS::TripleO::Services::ComputeNeutronCorePlugin: puppet/services/neutron-plugin-ml2.yaml
@@ -15,7 +15,7 @@ diff -r -u -N openstack-tripleo-heat-templates/overcloud-resource-registry-puppe
    OS::TripleO::Services::NeutronCorePluginMidonet: puppet/services/neutron-midonet.yaml
    OS::TripleO::Services::NeutronOvsAgent: puppet/services/neutron-ovs-agent.yaml
 diff -r -u -N openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml patched/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml
---- openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml	2018-02-06 16:37:56.000000000 -0500
+--- openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml	2018-02-06 18:25:44.000000000 -0500
 +++ patched/puppet/extraconfig/pre_deploy/compute/nova-nuage.yaml	1969-12-31 19:00:00.000000000 -0500
 @@ -1,93 +0,0 @@
 -heat_template_version: 2015-04-30
@@ -112,8 +112,8 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/extraconfig/pre_deploy/com
 -    description: Deployment reference, used to trigger puppet apply on changes
 -    value: {get_attr: [NovaNuageDeployment, deploy_stdout]}
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml patched/puppet/services/heat-engine.yaml
---- openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/heat-engine.yaml	2018-02-08 06:57:23.000000000 -0500
+--- openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/puppet/services/heat-engine.yaml	2018-02-22 01:58:43.864560529 -0500
 @@ -48,6 +48,10 @@
      default:
        tag: openstack.heat.engine
@@ -125,7 +125,7 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml 
  
  resources:
    HeatBase:
-@@ -91,6 +95,7 @@
+@@ -93,6 +97,7 @@
                    passwords:
                      - {get_param: HeatAuthEncryptionKey}
                      - {get_param: [DefaultPasswords, heat_auth_encryption_key]}
@@ -134,8 +134,8 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml 
          include ::tripleo::profile::base::heat::engine
  
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/horizon.yaml patched/puppet/services/horizon.yaml
---- openstack-tripleo-heat-templates/puppet/services/horizon.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/horizon.yaml	2018-02-07 02:53:16.000000000 -0500
+--- openstack-tripleo-heat-templates/puppet/services/horizon.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/puppet/services/horizon.yaml	2018-02-22 01:58:43.864560529 -0500
 @@ -43,6 +43,17 @@
    MonitoringSubscriptionHorizon:
      default: 'overcloud-horizon'
@@ -174,8 +174,8 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/horizon.yaml patc
        step_config: |
          include ::tripleo::profile::base::horizon
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml patched/puppet/services/neutron-base.yaml
---- openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/neutron-base.yaml	2018-02-07 02:53:16.000000000 -0500
+--- openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/puppet/services/neutron-base.yaml	2018-02-22 01:58:43.864560529 -0500
 @@ -60,6 +60,12 @@
          currently in effect to compensate for some additional overhead when
          deploying with some network configurations (e.g. network isolation over
@@ -195,16 +195,12 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
          neutron::global_physnet_mtu: {get_param: NeutronGlobalPhysnetMtu}
 +        neutron::db::sync::extra_params: {get_param: NeutronDBSyncExtraParams}
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml patched/puppet/services/neutron-compute-plugin-nuage.yaml
---- openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-08 06:55:09.000000000 -0500
-@@ -22,6 +22,47 @@
-     description: The password for the nova service account, used by nova-api.
+--- openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/puppet/services/neutron-compute-plugin-nuage.yaml	2018-02-22 02:28:06.212458474 -0500
+@@ -26,6 +26,43 @@
+     description: TCP Port to listen for metadata server requests
      type: string
-     hidden: true
-+  NuageMetadataPort:
-+    description: TCP Port to listen for metadata server requests
-+    type: string
-+    default: '9697'
+     default: '9697'
 +  NuageActiveController:
 +    description: IP address of the Active Virtualized Services Controller (VSC)
 +    type: string
@@ -245,7 +241,7 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-compute-p
  
  outputs:
    role_data:
-@@ -29,8 +70,25 @@
+@@ -33,6 +70,17 @@
      value:
        service_name: neutron_compute_plugin_nuage
        config_settings:
@@ -263,17 +259,9 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-compute-p
          tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
          tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
          tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
-+        tripleo.neutron_compute_plugin_nuage.firewall_rules:
-+          '118 neutron vxlan networks':
-+            proto: 'udp'
-+            dport: 4789
-+          '100 metadata agent':
-+            dport: {get_param: NuageMetadataPort}
-       step_config: |
-         include ::tripleo::profile::base::neutron::agents::nuage
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml patched/puppet/services/neutron-plugin-ml2-nuage.yaml
 --- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	1969-12-31 19:00:00.000000000 -0500
-+++ patched/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-02-07 02:53:16.000000000 -0500
++++ patched/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-02-22 01:58:43.865560529 -0500
 @@ -0,0 +1,96 @@
 +heat_template_version: 2016-04-08
 +
@@ -372,8 +360,8 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml
 +      step_config: |
 +        include tripleo::profile::base::neutron::plugins::ml2
 diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml patched/puppet/services/neutron-plugin-ml2.yaml
---- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/neutron-plugin-ml2.yaml	2018-02-07 02:53:16.000000000 -0500
+--- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml	2018-02-06 18:25:44.000000000 -0500
++++ patched/puppet/services/neutron-plugin-ml2.yaml	2018-02-22 01:58:43.865560529 -0500
 @@ -66,6 +66,11 @@
          By default Intel & Mellanox SR-IOV capable NICs are supported.
      type: comma_delimited_list
@@ -394,27 +382,3 @@ diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml
  
        step_config: |
          include ::tripleo::profile::base::neutron::plugins::ml2
-diff -r -u -N openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml patched/puppet/services/neutron-plugin-nuage.yaml
---- openstack-tripleo-heat-templates/puppet/services/neutron-plugin-nuage.yaml	2018-02-06 16:37:56.000000000 -0500
-+++ patched/puppet/services/neutron-plugin-nuage.yaml	2018-02-07 02:55:02.000000000 -0500
-@@ -19,10 +19,6 @@
-                  via parameter_defaults in the resource registry.
-     type: json
-   # Config specific parameters, to be provided via parameter_defaults
--  NeutronNuageOSControllerIp:
--    description: IP address of the OpenStack Controller
--    type: string
--
-   NeutronNuageNetPartitionName:
-     description: Specifies the title that you will see on the VSD
-     type: string
-@@ -76,8 +72,7 @@
-       config_settings:
-         map_merge:
-           - get_attr: [NeutronBase, role_data, config_settings]
--          - neutron::plugins::nuage::nuage_oscontroller_ip: {get_param: NeutronNuageOSControllerIp}
--            neutron::plugins::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
-+          - neutron::plugins::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
-             neutron::plugins::nuage::nuage_vsd_ip: {get_param: NeutronNuageVSDIp}
-             neutron::plugins::nuage::nuage_vsd_username: {get_param: NeutronNuageVSDUsername}
-             neutron::plugins::nuage::nuage_vsd_password: {get_param: NeutronNuageVSDPassword}
