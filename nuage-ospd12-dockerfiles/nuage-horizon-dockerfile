@@ -9,6 +9,8 @@ LABEL version="12.0"
 LABEL release="20180124.1"
 LABEL architecture="x86_64"
 
+RUN yum-config-manager --disable \*
+RUN rm -rf disable
 COPY nuage.repo /etc/yum.repos.d/nuage.repo
 RUN yum -y install nuage-openstack-horizon nuage-openstack-neutronclient && yum clean all
 RUN rm -f /etc/yum.repos.d/nuage.repo 
