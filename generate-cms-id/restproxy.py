@@ -4,10 +4,10 @@
 import base64
 import httplib
 import json
-import socket
-import time
 import logging
+import socket
 import ssl
+import time
 
 LOG = logging.getLogger(__name__)
 MAX_RETRIES = 5
@@ -94,8 +94,17 @@ class RESTProxyServer(object):
         LOG.debug('Request body: %s', body)
 
         if self.serverssl:
-            conn = httplib.HTTPSConnection(
-                self.server, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
+            if hasattr(ssl, '_create_unverified_context'):
+                # pylint: disable=no-member
+                # pylint: disable=unexpected-keyword-arg
+                conn = httplib.HTTPSConnection(
+                    self.server, self.port, timeout=self.timeout,
+                    context=ssl._create_unverified_context())
+                # pylint: enable=no-member
+                # pylint: enable=unexpected-keyword-arg
+            else:
+                conn = httplib.HTTPSConnection(
+                    self.server, self.port, timeout=self.timeout)
             if conn is None:
                 LOG.error('RESTProxy: Could not establish HTTPS '
                           'connection')
