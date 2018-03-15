@@ -13,15 +13,9 @@
 #    under the License.
 import argparse
 import logging
-import os
 import sys
 from uuid import getnode
 
-def dummy(msg):
-    return msg
-
-import __builtin__
-__builtin__.__dict__['_'] = dummy
 
 def get_mac():
     mac = getnode()
@@ -37,6 +31,7 @@ logger.addHandler(logging.StreamHandler())
 
 REST_SUCCESS_CODES = range(200, 207)
 
+
 def init_arg_parser():
 
     parser = argparse.ArgumentParser()
@@ -51,7 +46,7 @@ def init_arg_parser():
     parser.add_argument('--serverssl', action='store', required=True,
                         help='VSD Server SSL')
     parser.add_argument('--base_uri', action='store', required=True,
-                        help='Nuage Base URI')    
+                        help='Nuage Base URI')
     parser.add_argument('--name', action='store',
                         default=DEFAULT_CMS_NAME,
                         help='The name of the CMS to create on VSD')
