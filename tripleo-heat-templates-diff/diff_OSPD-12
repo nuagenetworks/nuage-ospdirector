@@ -87,14 +87,3 @@ diff -r -u -N openstack-tripleo-heat-templates-orig/puppet/services/horizon.yaml
          -
            if:
            - debug_unset
-diff -r -u -N openstack-tripleo-heat-templates-orig/puppet/services/neutron-plugin-ml2-nuage.yaml openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
---- openstack-tripleo-heat-templates-orig/puppet/services/neutron-plugin-ml2-nuage.yaml	2017-11-03 16:20:12.000000000 -0400
-+++ openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-02-19 16:46:38.195248142 -0500
-@@ -105,6 +105,7 @@
-             neutron::plugins::ml2::nuage::nuage_base_uri_version: {get_param: NeutronNuageBaseURIVersion}
-             neutron::plugins::ml2::nuage::nuage_cms_id: {get_param: NeutronNuageCMSId}
-             nova::api::use_forwarded_for: {get_param: UseForwardedFor}
-+            tripleo::profile::base::nova::api::nova_patch_enabled: {get_param: NovaPatchConfigMonkeyPatch}
-             nova::patch::config::monkey_patch: {get_param: NovaPatchConfigMonkeyPatch}
-             nova::patch::config::monkey_patch_modules: {get_param: NovaPatchConfigMonkeyPatchModules}
-       step_config: |
