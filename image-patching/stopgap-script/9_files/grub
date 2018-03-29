@@ -1,0 +1,6 @@
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="console"
+GRUB_CMDLINE_LINUX="rd.lvm.lv=rhel_ovs2-mvdcperf03/root crashkernel=auto  rd.lvm.lv=rhel_ovs2-mvdcperf03/swap vconsole.font=latarcyrheb-sun16 vconsole.keymap=us rhgb quiet intel_iommu=on iommu=pt"
