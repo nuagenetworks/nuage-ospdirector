@@ -28,14 +28,14 @@ diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/heat-eng
 
  resources:
    HeatBase:
-@@ -94,6 +97,7 @@
-         map_merge:
-           - get_attr: [HeatBase, role_data, config_settings]
-           - heat::engine::num_engine_workers: {get_param: HeatWorkers}
+@@ -134,6 +137,7 @@
+                   passwords:
+                     - {get_param: HeatAuthEncryptionKey}
+                     - {get_param: [DefaultPasswords, heat_auth_encryption_key]}
 +            heat::engine::plugin_dirs: {get_param: HeatEnginePluginDirs}
-             heat::engine::configure_delegated_roles: false
-             heat::engine::trusts_delegated_roles: []
-             heat::engine::max_nested_stack_depth: 6
+       step_config: |
+         include ::tripleo::profile::base::heat::engine
+
 diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/horizon.yaml openstack-tripleo-heat-templates/puppet/services/horizon.yaml
 --- openstack-tripleo-heat-templates-original/puppet/services/horizon.yaml      2018-03-29 21:15:14.382807895 -0400
 +++ openstack-tripleo-heat-templates/puppet/services/horizon.yaml       2018-03-29 21:22:00.985815964 -0400
