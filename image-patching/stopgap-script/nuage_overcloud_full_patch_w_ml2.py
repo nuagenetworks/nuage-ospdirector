@@ -28,7 +28,7 @@ from logging import handlers
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions"
+NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules nuage-openstack-heat nuage-openstack-horizon selinux-policy-nuage nuage-nova-extensions nuage-bgp"
 NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
