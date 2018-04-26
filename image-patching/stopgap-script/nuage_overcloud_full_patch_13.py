@@ -28,7 +28,7 @@ from logging import handlers
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-openstack-neutron nuage-openstack-neutronclient nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage"
+NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage"
 NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 OTHER_PACKAGES="os-net-config"
@@ -117,7 +117,6 @@ def rhel_subscription(username, password, pool, image, proxy_hostname = None, pr
                                                   'subscription-manager subscribe --pool=%s \n' \
                                                   'subscription-manager repos --enable=rhel-7-server-optional-rpms \n' \
                                                   'subscription-manager repos --enable=rhel-7-server-rpms \n' \
-                                                  'subscription-manager repos --enable=rhel-7-server-openstack-12-rpms \n' \
                                                   'EOT' % (username, password, pool)
     cmds_run([subscription_command])
     virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
@@ -291,41 +290,6 @@ def uninstall_packages(image, version):
 
 
 #####
-# Function to install Nuage AVRS packages that are required
-#####
-
-def copy_avrs_scripts(image, avrs_baseurl, proxy_hostname = None, proxy_port = None):
-    #virt_copy('%s %s/avrs_scripts/avrs_automation.sh /root/avrs_automation.sh' % (image, workingDir))
-    #virt_copy('%s %s/avrs_scripts/configure-fast-path.py /root/configure-fast-path.py' % (image, workingDir))
-    if proxy_hostname != None and proxy_port != None:
-        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n' \
-                    'export http_proxy=http://%s:%s \n' \
-                    'export https_proxy=http://%s:%s \n'% (proxy_hostname, proxy_port, proxy_hostname, proxy_port)
-    else:
-        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n'
-
-
-    #avrs_cmds = avrs_cmds + 'yum install -y wget \n' \
-    #                        'mkdir ./6wind \n' \
-    #                        'wget -r -np -nH -R "index.html*" %s -O ./6wind || true \n' \
-    #                        'EOT' % (avrs_baseurl)
-    avrs_cmds = avrs_cmds + 'mkdir ./6wind \n' \
-                            'yumdownloader --destdir=./6wind -x \*i686 --archlist=x86_64 elfutils* \n' \
-                            'yumdownloader --destdir=./6wind python-pyelftools* \n' \
-                            'yumdownloader --destdir=./6wind dkms* \n' \
-                            'yumdownloader --destdir=./6wind 6windgate* \n' \
-                            'yumdownloader --destdir=./6wind nuage-openvswitch \n' \
-                            'yumdownloader --destdir=./6wind nuage-metadata-agent \n' \
-                            'yumdownloader --destdir=./6wind virtual-accelerator* \n' \
-                            'yumdownloader --destdir=./6wind 6wind-openstack-extensions \n' \
-                            'EOT'
-
-    cmds_run([avrs_cmds])
-    virt_customize_run('nuage_avrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f nuage_avrs_packages'])
-
-
-#####
 # Function to install Nuage packages that are required
 #####
 
@@ -374,6 +338,22 @@ def create_repo_file(reponame, repoUrl, image):
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
     virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+
+
+#####
+# Function to create the repo file
+#####
+
+def create_dcirepo_file(image):
+    cmds_run(['cat <<EOT > create_dci_repo \n'
+              'touch /etc/yum.repos.d/dci.repo \n'
+              'echo "[DCI]" >> /etc/yum.repos.d/dci.repo \n'
+              'echo "name=dci" >> /etc/yum.repos.d/dci.repo \n'
+              'echo "baseurl=http://135.227.144.63:8080/dci_repo/RH7-RHOS-13.0/" >> /etc/yum.repos.d/dci.repo \n'
+              'echo "enabled = 1" >> /etc/yum.repos.d/dci.repo \n'
+              'echo "gpgcheck = 0" >> /etc/yum.repos.d/dci.repo \n'
+              'EOT' ])
+    virt_customize_run('create_dci_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -441,6 +421,9 @@ def main(args):
         else:
             create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
+        cmds_run(['echo "Creating DCI Repo File"'])
+        create_dcirepo_file(argsDict['ImageName'][0])
+
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
 
@@ -457,29 +440,8 @@ def main(args):
             delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
 
-        if 'AVRSBaseUrl' in argsDict:
-            if 'RepoName' in argsDict:
-                create_repo_file(argsDict['RepoName'][0], argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-            else:
-                create_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-
-            cmds_run(['echo "Downloading AVRS Packages"'])
-            if 'ProxyHostname' in argsDict and 'ProxyPort' in argsDict:
-                copy_avrs_scripts(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0], argsDict['ProxyHostname'][0], argsDict['ProxyPort'][0])
-            else:
-                copy_avrs_scripts(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0])
-
-            cmds_run(['echo "Cleaning up"'])
-            if 'RepoName' in argsDict:
-                delete_repo_file(argsDict['RepoName'][0], argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-            else:
-                delete_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])
-
-        cmds_run(['echo "Adding files post-patching"'])
-        add_files(argsDict['ImageName'][0], argsDict['Version'][0], workingDir)
 
         cmds_run(['echo "Done"'])
 

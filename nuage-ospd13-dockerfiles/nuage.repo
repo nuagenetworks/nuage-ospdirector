@@ -1,6 +1,0 @@
-[Nuage]
-name = nuage
-baseurl = <base url>
-enabled = 1
-gpgcheck = 0
-
