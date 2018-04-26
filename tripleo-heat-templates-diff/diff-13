@@ -1,0 +1,66 @@
+diff -r -u -N openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml
+--- openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml	2018-03-14 05:06:16.000000000 -0400
++++ openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml	2018-04-16 19:04:33.000000000 -0400
+@@ -32,6 +32,10 @@
+     default: {}
+     description: Parameters specific to the role
+     type: json
++  NeutronPluginMl2PuppetTags:
++    default: 'neutron_plugin_ml2'
++    description: Puppet resource tag names that are used to generate config files with puppet
++    type: string
+ 
+ resources:
+ 
+@@ -61,7 +65,7 @@
+       # BEGIN DOCKER SETTINGS
+       puppet_config:
+         config_volume: 'neutron'
+-        puppet_tags: neutron_plugin_ml2
++        puppet_tags: {get_param: NeutronPluginMl2PuppetTags}
+         step_config:
+           get_attr: [NeutronBase, role_data, step_config]
+         config_image: {get_param: DockerNeutronConfigImage}
+diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml
+--- openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml	2018-02-12 15:46:44.000000000 -0500
++++ openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-04-17 01:47:16.000000000 -0400
+@@ -68,6 +68,10 @@
+     type: number
+     default: 1000
+     description: Maximum resources allowed per top-level stack. -1 stands for unlimited.
++  HeatEnginePluginDirs:
++    type: comma_delimited_list
++    default: []
++    description: An array of directories to search for plug-ins.
+ 
+ conditions:
+      heat_workers_unset: {equals : [{get_param: HeatWorkers}, 0]}
+@@ -132,6 +136,7 @@
+                   passwords:
+                     - {get_param: HeatAuthEncryptionKey}
+                     - {get_param: [DefaultPasswords, heat_auth_encryption_key]}
++            heat::engine::plugin_dirs: {get_param: HeatEnginePluginDirs}
+           -
+             if:
+             - heat_workers_unset
+diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
+--- openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-03-14 05:06:16.000000000 -0400
++++ openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-04-17 10:00:50.000000000 -0400
+@@ -79,7 +79,7 @@
+ 
+ resources:
+ 
+-  NeutronML2Base:
++  NeutronMl2Base:
+     type: ./neutron-plugin-ml2.yaml
+     properties:
+       ServiceData: {get_param: ServiceData}
+@@ -96,7 +96,7 @@
+       service_name: neutron_plugin_ml2_nuage
+       config_settings:
+         map_merge:
+-          - get_attr: [NeutronML2Base, role_data, config_settings]
++          - get_attr: [NeutronMl2Base, role_data, config_settings]
+           - neutron::plugins::ml2::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
+             neutron::plugins::ml2::nuage::nuage_vsd_ip: {get_param: NeutronNuageVSDIp}
+             neutron::plugins::ml2::nuage::nuage_vsd_username: {get_param: NeutronNuageVSDUsername}
