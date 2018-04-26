@@ -14,16 +14,16 @@ from logging import handlers
 # RhelPool    : RHEL Pool to subscribe
 # RepoName    : Name of the local repository
 # RepoBaseUrl : Base URL of the local repository
+# DCIRepoBaseUrl: Base URL of the local DCI repository
 # Version     : Version of OSP Director 13
 #
 # The following sequence is executed by the script
 # 1. Subscribe to RHEL and the pool
 # 2. Uninstall OVS
-# 3. Create the local repo file for Nuage packages
-# 4. Install neutron-client, netlib, metadata agent
+# 3. Create the local repo file for Nuage and DCI packages
+# 4. Install netlib, metadata agent
 # 5. Install VRS
 # 6. Unsubscribe from RHEL
-# 7. Add the files post-patching
 #
 #
 
