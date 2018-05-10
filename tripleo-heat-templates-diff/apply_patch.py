@@ -5,7 +5,7 @@
 # Since different openstack-tripleo-heat-templates can require different
 # diff patches to be applied, this functionality takes care of hiding
 # those details while applying the right patch. Currently all versions
-# upto version openstack-tripleo-heat-templates-8.0.2-0.20180327213843.f25e2d8 are handled.
+# upto version openstack-tripleo-heat-templates-8.0.2-4 are handled.
 # Later versions are not supported at this time.
 #
 # Usage: ./apply_patch.py
@@ -16,8 +16,8 @@ import sys
 import subprocess
 from rpmUtils.miscutils import stringToVersion
 
-VERSION_1_CHECK = "openstack-tripleo-heat-templates-8.0.2-0.20180327213843.f25e2d8.el7ost.noarch"
-PRE_VERSION_1_DIFF = "diff_OSPD13_8.0.2-0.20180327213843"
+VERSION_1_CHECK = "openstack-tripleo-heat-templates-8.0.2-4.el7ost.noarch"
+PRE_VERSION_1_DIFF = "diff_OSPD13_8.0.2-4"
 
 
 if len(sys.argv) != 1:
