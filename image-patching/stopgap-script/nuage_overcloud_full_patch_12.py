@@ -257,14 +257,9 @@ def add_files(image, version, workingDir):
             '"mkdir -p /etc/puppet/modules/nuage/manifests/12_files" -a %s --memsize %s --selinux-relabel' % (
             image, VIRT_CUSTOMIZE_MEMSIZE))
         virt_copy('%s %s/12_files/engine.pp /etc/puppet/modules/nuage/manifests/12_files' % (image, workingDir))
-        virt_copy('%s %s/12_files/nova-api.pp /etc/puppet/modules/nuage/manifests/12_files' % (image, workingDir))
         virt_customize(
             '"cp /etc/puppet/modules/nuage/manifests/12_files/engine.pp /etc/puppet/modules/heat/manifests/engine.pp" -a %s --memsize %s --selinux-relabel' % (
             image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/12_files/nova-api.pp /etc/puppet/modules/tripleo/manifests/profile/base/nova/api.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
 
 #####
 # Function to remove the RHEL subscription
