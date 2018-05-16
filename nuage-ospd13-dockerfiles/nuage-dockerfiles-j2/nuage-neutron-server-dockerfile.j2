@@ -1,12 +1,12 @@
-FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-neutron-server:{{ nuage_docker_config['Release'] }}
+FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-neutron-server:{{ nuage_docker_config['Tag'] }}
 LABEL description="Nuage Neutron Plugin"
-LABEL version-release={{ nuage_docker_config['Release'] }}
+LABEL version-release={{ nuage_docker_config['Tag'] }}
 LABEL summary="Nuage Neutron Plugin"
 LABEL io.k8s.display-name="Nuage Neutron Plugin"
 LABEL com.redhat.component="openstack-nuage-neutron-docker"
 LABEL name="rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-neutron-nuage"
 LABEL version={{ nuage_docker_config['OSPD_Version'] }}
-LABEL release={{ nuage_docker_config['Release'] }}
+LABEL release={{ nuage_docker_config['Tag'] }}
 LABEL architecture="x86_64"
 
 {% if nuage_docker_config['EnableProxy'] -%}
