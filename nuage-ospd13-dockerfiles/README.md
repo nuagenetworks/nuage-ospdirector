@@ -5,7 +5,7 @@ Steps:
 
 Registry: 10.31.137.88:4000/registry.distributed-ci.io   
 OSPD_Version: 13   
-Release: 2018-04-10.2   
+Tag: 2018-04-10.2   
 EnableProxy: false   
 RepoBaseUrl: http://135.227.146.166/5.2R2U1/queens   
 DockerImages: 'nuage-heat-api-cfn nuage-heat-api nuage-heat-engine nuage-horizon nuage-neutron-api'    
