@@ -1,12 +1,12 @@
-FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-horizon:{{ nuage_docker_config['Release'] }}
+FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-horizon:{{ nuage_docker_config['Tag'] }}
 LABEL description="Nuage Horizon Plugin"
-LABEL version-release={{ nuage_docker_config['Release'] }}
+LABEL version-release={{ nuage_docker_config['Tag'] }}
 LABEL summary="Nuage Horizon Plugin"
 LABEL io.k8s.display-name="Nuage Horizon Plugin"
 LABEL com.redhat.component="openstack-nuage-horizon-docker"
 LABEL name="rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-horizon-nuage"
 LABEL version={{ nuage_docker_config['OSPD_Version'] }}
-LABEL release={{ nuage_docker_config['Release'] }}
+LABEL release={{ nuage_docker_config['Tag'] }}
 LABEL architecture="x86_64"
 
 {% if nuage_docker_config['EnableProxy'] -%}
