@@ -1,12 +1,12 @@
-FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-heat-engine:{{ nuage_docker_config['Release'] }}
+FROM {{ nuage_docker_config['Registry'] }}/rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-heat-engine:{{ nuage_docker_config['Tag'] }}
 LABEL description="Nuage Heat-Engine Plugin"
-LABEL version-release={{ nuage_docker_config['Release'] }}
+LABEL version-release={{ nuage_docker_config['Tag'] }}
 LABEL summary="Nuage Heat-Engine Plugin"
 LABEL io.k8s.display-name="Nuage Heat-Engine Plugin"
 LABEL com.redhat.component="openstack-nuage-heat-engine-docker"
 LABEL name="rhosp{{ nuage_docker_config['OSPD_Version'] }}/openstack-heat-engine-nuage"
 LABEL version={{ nuage_docker_config['OSPD_Version'] }}
-LABEL release={{ nuage_docker_config['Release'] }}
+LABEL release={{ nuage_docker_config['Tag'] }}
 LABEL architecture="x86_64"
 
 {% if nuage_docker_config['EnableProxy'] -%}
