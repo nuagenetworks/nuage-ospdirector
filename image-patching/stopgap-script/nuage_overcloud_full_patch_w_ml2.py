@@ -14,24 +14,24 @@ from logging import handlers
 # RhelPool    : RHEL Pool to subscribe
 # RepoName    : Name of the local repository
 # RepoBaseUrl : Base URL of the local repository
-# DCIRepoBaseUrl: Base URL of the local DCI repository
 # Version     : Version of OSP Director 13
 #
 # The following sequence is executed by the script
 # 1. Subscribe to RHEL and the pool
 # 2. Uninstall OVS
-# 3. Create the local repo file for Nuage and DCI packages
-# 4. Install netlib, metadata agent
+# 3. Create the local repo file for Nuage packages
+# 4. Install neutron-client, netlib, metadata agent
 # 5. Install VRS
 # 6. Unsubscribe from RHEL
+# 7. Add the files post-patching
 #
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage"
+NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage nuage-bgp"
 NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
-NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 OTHER_PACKAGES="os-net-config"
+NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
 logger = logging.getLogger('')
@@ -119,7 +119,7 @@ def rhel_subscription(username, password, pool, image, proxy_hostname = None, pr
                                                   'subscription-manager repos --enable=rhel-7-server-rpms \n' \
                                                   'EOT' % (username, password, pool)
     cmds_run([subscription_command])
-    virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
     cmds_run(['rm -f rhel_subscription'])
 
@@ -132,7 +132,7 @@ def rhel_remove_subscription(image):
     cmds_run(['cat <<EOT > rhel_unsubscribe \n'
               'subscription-manager unregister \n'
               'EOT'])
-    virt_customize_run('rhel_unsubscribe -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('rhel_unsubscribe -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f rhel_unsubscribe'])
 
 
@@ -144,8 +144,8 @@ def uninstall_packages(image, version):
     # For Newton and above, use standard python-openvswitch
     if version <= 9:
         virt_customize(
-            '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+            '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"rpm -e --nodeps openvswitch" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -157,7 +157,7 @@ def install_packages(image):
               'yum install %s -y \n'
               'yum install %s -y \n'
               'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES)])
-    virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f nuage_packages'])
 
 
@@ -169,8 +169,9 @@ def install_vrs(image):
     cmds_run(['cat <<EOT > vrs_packages \n'
               'yum install %s -y \n'
               'EOT' % (NUAGE_VRS_PACKAGE)])
-    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f vrs_packages'])
+
 
 #####
 # Function to install Other packages
@@ -180,8 +181,9 @@ def install_other(image):
     cmds_run(['cat <<EOT > other_packages \n'
               'yum install %s -y \n'
               'EOT' % (OTHER_PACKAGES)])
-    virt_customize_run('other_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('other_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f other_packages'])
+
 
 #####
 # Function to create the repo file
@@ -196,22 +198,22 @@ def create_repo_file(reponame, repoUrl, image):
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
-    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
 # Function to create the repo file
 #####
 
-def create_dcirepo_file(image, repoUrl):
+def create_dcirepo_file(image):
     cmds_run(['cat <<EOT > create_dci_repo \n'
               'touch /etc/yum.repos.d/dci.repo \n'
               'echo "[DCI]" >> /etc/yum.repos.d/dci.repo \n'
               'echo "name=dci" >> /etc/yum.repos.d/dci.repo \n'
-              'echo "baseurl=%s" >> /etc/yum.repos.d/dci.repo \n'
+              'echo "baseurl=http://135.227.144.63:8080/dci_repo/RH7-RHOS-13.0/" >> /etc/yum.repos.d/dci.repo \n'
               'echo "enabled = 1" >> /etc/yum.repos.d/dci.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/dci.repo \n'
-              'EOT' % repoUrl])
+              'EOT' ])
     virt_customize_run('create_dci_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
@@ -227,7 +229,7 @@ def delete_repo_file(reponame, repoUrl, image):
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
-    virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
+    virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image))
     cmds_run(['rm -f create_repo'])
 
 
@@ -280,24 +282,16 @@ def main(args):
         else:
             create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
-        cmds_run(['echo "Creating DCI Repo File"'])
-        create_dcirepo_file(argsDict['ImageName'][0],  argsDict['DCIRepoBaseUrl'][0])
-
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
 
         cmds_run(['echo "Installing VRS"'])
         install_vrs(argsDict['ImageName'][0])
-        
-        cmds_run(['echo "Installing Other"'])
-        install_other(argsDict['ImageName'][0])
 
-        cmds_run(['echo "Cleaning up"'])
         if 'RepoName' in argsDict:
             delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
         else:
             delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
-
 
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])
