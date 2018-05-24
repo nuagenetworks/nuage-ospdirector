@@ -1,0 +1,25 @@
+FROM registry.access.redhat.com/rhosp13-beta/openstack-heat-api-cfn:<tag>
+
+LABEL description="Nuage Heat-Engine Plugin"
+LABEL version-release=latest
+LABEL summary="Nuage Heat-Engine Plugin"
+LABEL io.k8s.display-name="Nuage Heat-Engine Plugin"
+LABEL com.redhat.component="openstack-nuage-heat-api-cfn-docker"
+LABEL name="192.168.24.1:8787/openstack-heat-api-cfn"
+LABEL version=13
+LABEL release=latest
+LABEL architecture="x86_64"
+
+
+
+USER root
+
+RUN yum-config-manager --disable \* > disable
+RUN rm -f disable
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum -y install nuage-openstack-neutronclient && yum clean all
+ 
+RUN rm -f /etc/yum.repos.d/nuage.repo
+ 
+USER heat

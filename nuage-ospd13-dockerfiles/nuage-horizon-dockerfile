@@ -1,0 +1,21 @@
+FROM registry.access.redhat.com/rhosp13-beta/openstack-horizon:<tag>
+
+LABEL description="Nuage Horizon Plugin"
+LABEL version-release=latest
+LABEL summary="Nuage Horizon Plugin"
+LABEL io.k8s.display-name="Nuage Horizon Plugin"
+LABEL com.redhat.component="openstack-nuage-horizon-docker"
+LABEL name="192.168.24.1:8787/openstack-horizon"
+LABEL version=13
+LABEL release=latest
+LABEL architecture="x86_64"
+
+
+
+RUN yum-config-manager --disable \* > disable
+RUN rm -f disable
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum -y install nuage-openstack-horizon nuage-openstack-neutronclient && yum clean all
+
+RUN rm -f /etc/yum.repos.d/nuage.repo
