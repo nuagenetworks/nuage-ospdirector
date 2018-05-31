@@ -46,7 +46,7 @@ if version_1_rc <= 0:
     args = args + " < " + PRE_VERSION_1_DIFF
 
 elif version_1_rc > 0 and version_2_rc <= 0:
-    args = args + " < " + PRE_VERSION_2_DIFF
+    args = args + " < " + VERSION_2_DIFF
 
 elif version_2_rc > 0:
     print "Not supported for %s" % version
