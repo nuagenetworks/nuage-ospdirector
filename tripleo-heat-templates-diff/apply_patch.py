@@ -18,6 +18,7 @@ from rpmUtils.miscutils import stringToVersion
 
 VERSION_1_CHECK = "openstack-tripleo-heat-templates-8.0.2-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-8.0.2-14.el7ost.noarch"
+
 PRE_VERSION_1_DIFF = "diff_OSPD13_8.0.2-4"
 VERSION_2_DIFF = "diff_OSPD13_8.0.2-14"
 
@@ -39,6 +40,7 @@ args = "patch -p0 -N -d /usr/share"
 
 # Compare versions
 version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
+version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
 
 if version_1_rc <= 0:
     args = args + " < " + PRE_VERSION_1_DIFF
