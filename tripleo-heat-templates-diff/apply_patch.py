@@ -34,9 +34,11 @@ from rpmUtils.miscutils import stringToVersion
 VERSION_1_CHECK = "openstack-tripleo-heat-templates-5.3.0-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-5.3.3-1.el7ost.noarch"
 VERSION_3_CHECK = "openstack-tripleo-heat-templates-5.3.8-1.el7ost.noarch"
+VERSION_4_CHECK = "openstack-tripleo-heat-templates-5.3.10-1.el7ost.noarch"
 PRE_VERSION_1_DIFF = "diff_OSPD10_5.2.0-15"
 PRE_VERSION_2_DIFF = "diff_OSPD10_5.3.0-4"
-POST_VERSION_2_DIFF = "diff_OSPD10_5.3.3-1"
+PRE_VERSION_3_DIFF = "diff_OSPD10_5.3.3-1"
+POST_VERSION_3_DIFF = "diff_OSPD10_5.3.10-1"
 
 if len(sys.argv) != 1:
     print "Usage: %s" % sys.argv[0]
@@ -51,6 +53,7 @@ version = subprocess.check_output(['rpm', '-qa', 'openstack-tripleo-heat-templat
 (e1, v1, r1) = stringToVersion(VERSION_1_CHECK)
 (e2, v2, r2) = stringToVersion(VERSION_2_CHECK)
 (e3, v3, r3) = stringToVersion(VERSION_3_CHECK)
+(e4, v4, r4) = stringToVersion(VERSION_4_CHECK)
 
 args = "patch -p0 -N -d /usr/share"
 
@@ -58,6 +61,7 @@ args = "patch -p0 -N -d /usr/share"
 version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
 version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
 version_3_rc = version_compare((e0, v0, r0), (e3, v3, r3))
+version_4_rc = version_compare((e0, v0, r0), (e4, v4, r4))
 if version_1_rc < 0:
     args = args + " < " + PRE_VERSION_1_DIFF
 
@@ -65,9 +69,12 @@ elif version_1_rc >= 0 and version_2_rc < 0:
     args = args + " < " + PRE_VERSION_2_DIFF
 
 elif version_2_rc >= 0 and version_3_rc <= 0:
-    args = args + " < " + POST_VERSION_2_DIFF
+    args = args + " < " + PRE_VERSION_3_DIFF
 
-elif version_3_rc > 0:
+elif version_3_rc > 0 and version_4_rc <= 0:
+    args = args + " < " + POST_VERSION_3_DIFF
+
+elif version_4_rc > 0:
     print "Not supported for %s" % version
     sys.exit(1)
 
