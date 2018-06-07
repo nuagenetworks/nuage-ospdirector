@@ -14,7 +14,7 @@ from logging import handlers
 # RhelPool    : RHEL Pool to subscribe
 # RepoName    : Name of the local repository
 # RepoBaseUrl : Base URL of the local repository
-# Version     : Version of OSP Director (7 or 8)
+# Version     : Version of OSP Director 12
 #
 # The following sequence is executed by the script
 # 1. Subscribe to RHEL and the pool
@@ -131,127 +131,6 @@ def rhel_subscription(username, password, pool, image, proxy_hostname = None, pr
 
 def add_files(image, version, workingDir):
     version = int(version)
-    if version == 7:
-        virt_customize('"mkdir -p /etc/puppet/modules/nuage/manifests/7_files" -a %s --memsize %s --selinux-relabel' % (
-        image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy(
-            '%s %s/7_files/neutron_plugin_nuage.rb /etc/puppet/modules/nuage/manifests/7_files' % (image, workingDir))
-        virt_copy('%s %s/7_files/impl_ifcfg.py /etc/puppet/modules/nuage/manifests/7_files' % (image, workingDir))
-        virt_copy('%s %s/7_files/ini_setting.rb /etc/puppet/modules/nuage/manifests/7_files' % (image, workingDir))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/7_files/neutron_plugin_nuage.rb /etc/puppet/modules/neutron/lib/puppet/type/neutron_plugin_nuage.rb" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/7_files/ini_setting.rb /etc/puppet/modules/neutron/lib/puppet/provider/neutron_plugin_nuage/ini_setting.rb" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/7_files/impl_ifcfg.py /usr/lib/python2.7/site-packages/os_net_config/impl_ifcfg.py" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
-    if version == 8:
-        virt_customize(
-            '"mkdir -p /etc/puppet/modules/nuage/manifests/8_files" - a %s - -memsize %s - -selinux - relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy(
-            '%s %s/8_files/neutron_plugin_nuage.rb /etc/puppet/modules/nuage/manifests/8_files' % (image, workingDir))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/8_files/neutron_plugin_nuage.rb /etc/puppet/modules/neutron/lib/puppet/type/neutron_plugin_nuage.rb" - a %s - -memsize %s - -selinux - relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
-    if version == 9:
-        virt_customize('"mkdir -p /etc/puppet/modules/nuage/manifests/9_files" -a %s --memsize %s --selinux-relabel' % (
-        image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy('%s %s/9_files/nuage.pp /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy(
-            '%s %s/9_files/neutron-server.service /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy('%s %s/9_files/ml2.pp /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy('%s %s/9_files/filter.pp /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy('%s %s/9_files/grub /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy('%s %s/9_files/sriov.pp /etc/puppet/modules/nuage/manifests/9_files' % (image, workingDir))
-        virt_copy('%s %s/9_files/topology-collector-4.7.0.tar.gz /etc/puppet/modules/nuage/manifests/9_files' % (
-        image, workingDir))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/nuage.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/neutron-server.service /usr/lib/systemd/system/neutron-server.service" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/ml2.pp /etc/puppet/modules/neutron/manifests/plugins/ml2.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/filter.pp /etc/puppet/modules/nova/manifests/scheduler/filter.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/grub /etc/default/grub" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/sriov.pp /etc/puppet/modules/neutron/manifests/agents/ml2/sriov.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/9_files/topology-collector-4.7.0.tar.gz /root/topology-collector-4.7.0.tar.gz" -a %s --memsize %s --selinux-relabe' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
-    if version == 10:
-        virt_customize('"mkdir -p /etc/puppet/modules/nuage/manifests/10_files" -a %s --memsize %s --selinux-relabel' %( image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy('%s %s/10_files/config.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
-        virt_copy('%s %s/10_files/nuage.pp /etc/puppet/modules/nuage/manifests/10_files'  % (image, workingDir))
-        virt_copy('%s %s/10_files/ml2.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
-        virt_copy('%s %s/10_files/tripleo_profile_nuage.pp /etc/puppet/modules/nuage/manifests/10_files'  % (image, workingDir))
-        virt_copy('%s %s/10_files/tripleo_profile_sriov.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
-        virt_copy('%s %s/10_files/init.pp /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
-        virt_copy('%s %s/10_files/local_settings.py.erb /etc/puppet/modules/nuage/manifests/10_files' % (image, workingDir))
-        virt_customize('"mkdir -p /etc/puppet/modules/nova/manifests/patch" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/config.pp /etc/puppet/modules/nova/manifests/patch/config.pp" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/ml2/nuage.pp" -a %s --memsize %s --selinux-relabel' %(image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/ml2.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2.pp" -a %s --memsize %s --selinux-relabel' %(image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/tripleo_profile_nuage.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2/nuage.pp" -a %s --memsize %s --selinux-relabel' %(image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize('"cp /etc/puppet/modules/nuage/manifests/10_files/tripleo_profile_sriov.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/sriov.pp" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/10_files/init.pp /etc/puppet/modules/horizon/manifests/init.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/10_files/local_settings.py.erb /etc/puppet/modules/horizon/templates/local_settings.py.erb" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
-    if version == 11:
-        virt_customize(
-            '"mkdir -p /etc/puppet/modules/nuage/manifests/11_files" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy('%s %s/11_files/config.pp /etc/puppet/modules/nuage/manifests/11_files' % (image, workingDir))
-        virt_copy('%s %s/11_files/nuage.pp /etc/puppet/modules/nuage/manifests/11_files' % (image, workingDir))
-        virt_copy('%s %s/11_files/ml2.pp /etc/puppet/modules/nuage/manifests/11_files' % (image, workingDir))
-        virt_copy('%s %s/11_files/tripleo_profile_nuage.pp /etc/puppet/modules/nuage/manifests/11_files' % (
-        image, workingDir))
-        virt_copy('%s %s/11_files/tripleo_profile_sriov.pp /etc/puppet/modules/nuage/manifests/11_files' % (
-        image, workingDir))
-        virt_copy('%s %s/11_files/init.pp /etc/puppet/modules/nuage/manifests/11_files' % (image, workingDir))
-        virt_copy(
-            '%s %s/11_files/local_settings.py.erb /etc/puppet/modules/nuage/manifests/11_files' % (image, workingDir))
-        virt_customize('"mkdir -p /etc/puppet/modules/nova/manifests/patch" -a %s --memsize %s --selinux-relabel' % (
-        image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/config.pp /etc/puppet/modules/nova/manifests/patch/config.pp" -a %s --memsize %s --selinux-relabel' % (
-                image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/nuage.pp /etc/puppet/modules/neutron/manifests/plugins/ml2/nuage.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/ml2.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/tripleo_profile_nuage.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/plugins/ml2/nuage.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/tripleo_profile_sriov.pp /etc/puppet/modules/tripleo/manifests/profile/base/neutron/sriov.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/init.pp /etc/puppet/modules/horizon/manifests/init.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/11_files/local_settings.py.erb /etc/puppet/modules/horizon/templates/local_settings.py.erb" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-
     if version == 12:
         virt_customize(
             '"mkdir -p /etc/puppet/modules/nuage/manifests/12_files" -a %s --memsize %s --selinux-relabel' % (
