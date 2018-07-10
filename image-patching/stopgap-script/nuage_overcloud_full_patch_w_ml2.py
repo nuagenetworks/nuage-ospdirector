@@ -202,22 +202,6 @@ def create_repo_file(reponame, repoUrl, image):
 
 
 #####
-# Function to create the repo file
-#####
-
-def create_dcirepo_file(image):
-    cmds_run(['cat <<EOT > create_dci_repo \n'
-              'touch /etc/yum.repos.d/dci.repo \n'
-              'echo "[DCI]" >> /etc/yum.repos.d/dci.repo \n'
-              'echo "name=dci" >> /etc/yum.repos.d/dci.repo \n'
-              'echo "baseurl=http://135.227.144.63:8080/dci_repo/RH7-RHOS-13.0/" >> /etc/yum.repos.d/dci.repo \n'
-              'echo "enabled = 1" >> /etc/yum.repos.d/dci.repo \n'
-              'echo "gpgcheck = 0" >> /etc/yum.repos.d/dci.repo \n'
-              'EOT' ])
-    virt_customize_run('create_dci_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-
-
-#####
 # Function to clean up the repo file
 #####
 def delete_repo_file(reponame, repoUrl, image):
