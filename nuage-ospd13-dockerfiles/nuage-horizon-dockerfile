@@ -1,11 +1,11 @@
-FROM registry.access.redhat.com/rhosp13-beta/openstack-horizon:<tag>
+FROM registry.access.redhat.com/rhosp13/openstack-horizon:<tag>
 
 LABEL description="Nuage Horizon Plugin"
 LABEL version-release=latest
 LABEL summary="Nuage Horizon Plugin"
 LABEL io.k8s.display-name="Nuage Horizon Plugin"
 LABEL com.redhat.component="openstack-nuage-horizon-docker"
-LABEL name="192.0.2.1:8787/openstack-horizon"
+LABEL name="<undercloud-ip>:8787/rhosp13/openstack-nuage-horizon"
 LABEL version=13
 LABEL release=latest
 LABEL architecture="x86_64"

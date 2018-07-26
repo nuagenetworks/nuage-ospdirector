@@ -1,11 +1,11 @@
-FROM registry.access.redhat.com/rhosp13-beta/openstack-neutron-server:<tag>
+FROM registry.access.redhat.com/rhosp13/openstack-neutron-server:<tag>
 
 LABEL description="Nuage Neutron Plugin"
 LABEL version-release=latest
 LABEL summary="Nuage Neutron Plugin"
 LABEL io.k8s.display-name="Nuage Neutron Plugin"
 LABEL com.redhat.component="openstack-nuage-neutron-docker"
-LABEL name="192.0.2.1:8787/openstack-neutron-server"
+LABEL name="<undercloud-ip>:8787/rhosp13/openstack-nuage-neutron-server"
 LABEL version=13
 LABEL release=latest
 LABEL architecture="x86_64"
