@@ -145,7 +145,7 @@ def uninstall_packages(image, version):
     if version <= 9:
         virt_customize(
             '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"rpm -e --nodeps openvswitch" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -171,18 +171,6 @@ def install_vrs(image):
               'EOT' % (NUAGE_VRS_PACKAGE)])
     virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f vrs_packages'])
-
-
-#####
-# Function to install Other packages
-#####
-
-def install_other(image):
-    cmds_run(['cat <<EOT > other_packages \n'
-              'yum install %s -y \n'
-              'EOT' % (OTHER_PACKAGES)])
-    virt_customize_run('other_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f other_packages'])
 
 
 #####
@@ -277,11 +265,14 @@ def main(args):
         else:
             delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
+
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])
+
 
         cmds_run(['echo "Done"'])
 
 
 if __name__ == "__main__":
     main(sys.argv)
+
