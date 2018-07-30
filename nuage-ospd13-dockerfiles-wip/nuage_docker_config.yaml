@@ -1,6 +1,0 @@
-Registry: 
-OSPD_Version: 13
-Tag: 
-EnableProxy: false
-RepoBaseUrl: 
-DockerImages: 'nuage-heat-api-cfn nuage-heat-api nuage-heat-engine nuage-horizon nuage-neutron-server'
