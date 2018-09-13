@@ -21,3 +21,27 @@ diff -r -u -N openstack-tripleo-heat-templates-original/docker/services/neutron-
          step_config:
            get_attr: [NeutronBase, role_data, step_config]
          config_image: {get_param: DockerNeutronConfigImage}
+diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
+--- openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml 2018-09-13 15:55:42.971897576 -0400
++++ openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml  2018-07-31 11:44:19.000000000 -0400
+@@ -116,6 +116,12 @@
+   EnableInternalTLS:
+     type: boolean
+     default: false
++  EnableVLANTransparency:
++    default: false
++    description: >
++        If True, then allow plugins that support it to create VLAN
++        transparent networks.
++    type: boolean
+
+ conditions:
+   dhcp_agents_zero: {equals : [{get_param: NeutronDhcpAgentsPerNetwork}, 0]}
+@@ -152,6 +158,7 @@
+             neutron::db::sync::db_sync_timeout: {get_param: DatabaseSyncTimeout}
+             neutron::global_physnet_mtu: {get_param: NeutronGlobalPhysnetMtu}
+             neutron::db::sync::extra_params: {get_param: NeutronDBSyncExtraParams}
++            neutron::vlan_transparent: {get_param: EnableVLANTransparency}
+           - if:
+             - dhcp_agents_zero
+             - {}
