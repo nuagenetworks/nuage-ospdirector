@@ -10,4 +10,4 @@ The repository includes:
 
 3. generate-cms-id: CMS ID generation resources
 
-4. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-9-integration-with-ML2-and-SRIOV)
+4. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-13-Integration)
