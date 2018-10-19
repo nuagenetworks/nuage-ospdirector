@@ -1,5 +1,5 @@
 ##############################################################################
-# Copyright 2015 Alcatel-Lucent USA Inc.
+# Copyright Nokia 2018
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 # Since different openstack-tripleo-heat-templates can require different
 # diff patches to be applied, this functionality takes care of hiding
 # those details while applying the right patch. Currently all versions
-# upto version openstack-tripleo-heat-templates-5.3.8-1 are handled.
+# upto version openstack-tripleo-heat-templates-5.3.10-17 handled.
 # Later versions are not supported at this time.
 #
 # Usage: ./apply_patch.py
@@ -34,11 +34,11 @@ from rpmUtils.miscutils import stringToVersion
 VERSION_1_CHECK = "openstack-tripleo-heat-templates-5.3.0-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-5.3.3-1.el7ost.noarch"
 VERSION_3_CHECK = "openstack-tripleo-heat-templates-5.3.8-1.el7ost.noarch"
-VERSION_4_CHECK = "openstack-tripleo-heat-templates-5.3.10-1.el7ost.noarch"
+VERSION_4_CHECK = "openstack-tripleo-heat-templates-5.3.10-17.el7ost.noarch"
 PRE_VERSION_1_DIFF = "diff_OSPD10_5.2.0-15"
 PRE_VERSION_2_DIFF = "diff_OSPD10_5.3.0-4"
 PRE_VERSION_3_DIFF = "diff_OSPD10_5.3.3-1"
-POST_VERSION_3_DIFF = "diff_OSPD10_5.3.10-1"
+POST_VERSION_3_DIFF = "diff_OSPD10_5.3.10-17"
 
 if len(sys.argv) != 1:
     print "Usage: %s" % sys.argv[0]

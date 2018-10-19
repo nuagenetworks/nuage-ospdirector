@@ -16,4 +16,4 @@ Multiple versions are supported by the script:
 openstack-tripleo-heat-templates.noarch 5.2.0-15.el7ost, 5.2.0-20.el7ost, 5.2.0-21.el7ost and 5.2.0-25.el7ost   
 openstack-tripleo-heat-templates-5.3.0-4.el7ost.noarch and openstack-tripleo-heat-templates-5.3.0-6.el7ost.noarch   
 openstack-tripleo-heat-templates-5.3.3-1.el7ost.noarch and openstack-tripleo-heat-templates-5.3.8-1.el7ost.noarch   
-openstack-tripleo-heat-templates-5.3.10-1.el7ost.noarch
+openstack-tripleo-heat-templates-5.3.10-1.el7ost.noarch and openstack-tripleo-heat-templates-5.3.10-17.el7ost.noarch
