@@ -1,4 +1,19 @@
-#!/usr/bin/python
+##############################################################################
+# Copyright Nokia 2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+# !/usr/bin/python
 
 # Functionality to compare the installed openstack-tripleo-heat-templates
 # version with the available diff versions and patch the appropriate diff.
@@ -11,6 +26,7 @@
 # Usage: ./apply_patch.py
 #
 
+import os
 import rpm
 import sys
 import subprocess
@@ -21,34 +37,57 @@ VERSION_2_CHECK = "openstack-tripleo-heat-templates-7.0.9-8.el7ost.noarch"
 PRE_VERSION_1_DIFF = "diff_OSPD12_7.0.3-22"
 FOR_VERSION_2_DIFF = "diff_OSPD12_7.0.9-8"
 
-if len(sys.argv) != 1:
-    print "Usage: %s" % sys.argv[0]
-    sys.exit(1)
 
 def version_compare((e1, v1, r1), (e2, v2, r2)):
     return rpm.labelCompare((e1, v1, r1), (e2, v2, r2))
 
-version = subprocess.check_output(['rpm', '-qa', 'openstack-tripleo-heat-templates'])
 
-(e0, v0, r0) = stringToVersion(version)
-(e1, v1, r1) = stringToVersion(VERSION_1_CHECK)
-(e2, v2, r2) = stringToVersion(VERSION_2_CHECK)
+def file_exists(filename):
+    if not os.path.exists(filename):
+        print "File: %s is not present in the current directory. " \
+              "Please check!!" % filename
+        sys.exit(1)
+    return filename
 
-args = "patch -p0 -N -d /usr/share"
 
-# Compare versions
-version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
-version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
-if version_1_rc <= 0:
-    args = args + " < " + PRE_VERSION_1_DIFF
+def main():
 
-elif version_2_rc == 0:
-    args = args + " < " + FOR_VERSION_2_DIFF
+    if len(sys.argv) != 1:
+        print "Usage: %s" % sys.argv[0]
+        sys.exit(1)
 
-elif version_2_rc > 0:
-    print "Not supported for %s" % version
-    sys.exit(1)
+    version = subprocess.check_output(
+        ['rpm', '-qa', 'openstack-tripleo-heat-templates']
+    )
+    (e0, v0, r0) = stringToVersion(version)
+    (e1, v1, r1) = stringToVersion(VERSION_1_CHECK)
+    (e2, v2, r2) = stringToVersion(VERSION_2_CHECK)
 
-# Apply appropriate diff
-print "Applying: %s" % args
-subprocess.call(args, shell=True)
+    args = "patch -p0 -N -d /usr/share"
+
+    # Compare versions
+    version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
+    version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
+    if version_1_rc <= 0:
+        args = args + " < " + file_exists(PRE_VERSION_1_DIFF)
+
+    elif version_2_rc == 0:
+        args = args + " < " + file_exists(FOR_VERSION_2_DIFF)
+
+    elif version_2_rc > 0:
+        print "Not supported for %s" % version
+        sys.exit(1)
+
+    # Apply appropriate diff
+    print "Applying: %s" % args
+    try:
+        subprocess.call(args, shell=True)
+    except Exception as e:
+        print "Failed while applying patching with error %s " % e
+        sys.exit(1)
+
+    return
+
+
+if __name__ == '__main__':
+    main()
