@@ -20,10 +20,10 @@
 # Since different openstack-tripleo-heat-templates can require different
 # diff patches to be applied, this functionality takes care of hiding
 # those details while applying the right patch. Currently all versions
-# upto version openstack-tripleo-heat-templates-8.0.4-20 are handled.
+# upto version openstack-tripleo-heat-templates-8.0.7-4 are handled.
 # Later versions are not supported at this time.
 #
-# Usage: ./apply_patch.py
+# Usage: python apply_patch.py
 #
 
 import os
@@ -34,10 +34,10 @@ from rpmUtils.miscutils import stringToVersion
 
 VERSION_1_CHECK = "openstack-tripleo-heat-templates-8.0.2-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-8.0.2-43.el7ost.noarch"
-VERSION_3_CHECK = "openstack-tripleo-heat-templates-8.0.4-20.el7ost.noarch"
+VERSION_3_CHECK = "openstack-tripleo-heat-templates-8.0.7-4.el7ost.noarch"
 PRE_VERSION_1_DIFF = "diff_OSPD13_8.0.2-4"
 VERSION_2_DIFF = "diff_OSPD13_8.0.2-43"
-VERSION_3_DIFF = "diff_OSPD13_8.0.4-20"
+VERSION_3_DIFF = "diff_OSPD13_8.0.7-4"
 
 
 def version_compare((e1, v1, r1), (e2, v2, r2)):
@@ -85,6 +85,7 @@ def main():
 
     elif version_3_rc > 0:
         print "Not supported for %s" % version
+        sys.exit(1)
 
     # Apply appropriate diff
     print "Applying: %s" % args
@@ -99,3 +100,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
