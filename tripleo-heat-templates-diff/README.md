@@ -4,7 +4,7 @@ Download the three diff files and apply_patch.py script from here to the undercl
 
 Run the following command to patch the changes:
 
-"python apply apply_patch.py"
+"python apply_patch.py"
 
 Verify that all the changes are applied. Ensure that there are no "Hunk #1 FAILED" errors. There might be "hunk ignored" warnings (based on running version) which can be ignored.
 
