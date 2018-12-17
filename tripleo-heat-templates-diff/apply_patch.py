@@ -23,7 +23,7 @@
 # upto version openstack-tripleo-heat-templates-8.0.7-4 are handled.
 # Later versions are not supported at this time.
 #
-# Usage: python apply_patch.py
+# Usage: sudo python apply_patch.py
 #
 
 import os
