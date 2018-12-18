@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 ##############################################################################
 # Copyright Nokia 2018
 #
@@ -13,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ##############################################################################
-# !/usr/bin/python
 
 # Functionality to compare the installed openstack-tripleo-heat-templates
 # version with the available diff versions and patch the appropriate diff.
@@ -23,7 +24,7 @@
 # upto version openstack-tripleo-heat-templates-8.0.7-4 are handled.
 # Later versions are not supported at this time.
 #
-# Usage: sudo python apply_patch.py
+# Usage: sudo ./apply_patch.py or sudo python apply_patch.py
 #
 
 import os
@@ -62,40 +63,47 @@ def main():
         ['rpm', '-qa', 'openstack-tripleo-heat-templates']
     )
 
-    (e0, v0, r0) = stringToVersion(version)
-    (e1, v1, r1) = stringToVersion(VERSION_1_CHECK)
-    (e2, v2, r2) = stringToVersion(VERSION_2_CHECK)
-    (e3, v3, r3) = stringToVersion(VERSION_3_CHECK)
-
-    args = "patch -p0 -N -d /usr/share"
-
-    # Compare versions
-    version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
-    version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
-    version_3_rc = version_compare((e0, v0, r0), (e3, v3, r3))
-
-    if version_1_rc <= 0:
-        args = args + " < " + file_exists(PRE_VERSION_1_DIFF)
-
-    elif version_1_rc > 0 and version_2_rc <= 0:
-        args = args + " < " + file_exists(VERSION_2_DIFF)
-
-    elif version_2_rc > 0 and version_3_rc <= 0:
-        args = args + " < " + file_exists(VERSION_3_DIFF)
-
-    elif version_3_rc > 0:
-        print "Not supported for %s" % version
+    if not version:
+        print "ERROR: Make sure openstack-tripleo-heat-templates" \
+              " package is installed before running this script"
         sys.exit(1)
 
-    # Apply appropriate diff
-    print "Applying: %s" % args
-    try:
-        subprocess.call(args, shell=True)
-    except Exception as e:
-        print "Failed while applying patching with error %s " % e
-        sys.exit(1)
+    else:
 
-    return
+        (e0, v0, r0) = stringToVersion(version)
+        (e1, v1, r1) = stringToVersion(VERSION_1_CHECK)
+        (e2, v2, r2) = stringToVersion(VERSION_2_CHECK)
+        (e3, v3, r3) = stringToVersion(VERSION_3_CHECK)
+
+        args = "patch -p0 -N -d /usr/share"
+
+        # Compare versions
+        version_1_rc = version_compare((e0, v0, r0), (e1, v1, r1))
+        version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
+        version_3_rc = version_compare((e0, v0, r0), (e3, v3, r3))
+
+        if version_1_rc <= 0:
+            args = args + " < " + file_exists(PRE_VERSION_1_DIFF)
+
+        elif version_1_rc > 0 and version_2_rc <= 0:
+            args = args + " < " + file_exists(VERSION_2_DIFF)
+
+        elif version_2_rc > 0 and version_3_rc <= 0:
+            args = args + " < " + file_exists(VERSION_3_DIFF)
+
+        elif version_3_rc > 0:
+            print "Not supported for %s" % version
+            sys.exit(1)
+
+        # Apply appropriate diff
+        print "Applying: %s" % args
+        try:
+            subprocess.call(args, shell=True)
+        except Exception as e:
+            print "Failed while applying patching with error %s " % e
+            sys.exit(1)
+
+        return
 
 
 if __name__ == '__main__':
