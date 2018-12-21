@@ -6,7 +6,7 @@ Clone this repo onto the undercloud machine
 git clone https://github.com/nuagenetworks/nuage-ospdirector.git
 cd nuage-ospdirector/
 git checkout OSPD13
-cd nuage-ospdirector/tripleo-heat-templates-diff/apply_patch.py
+cd tripleo-heat-templates-diff/
 ```
 
 Run either `sudo ./apply_patch.py` or `sudo python apply_patch.py` to patch the changes   
