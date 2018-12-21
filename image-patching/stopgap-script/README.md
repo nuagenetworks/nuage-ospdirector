@@ -40,7 +40,7 @@ Run the below commands:
 
 ```
 [stack@director ~]$ source ~/stackrc
-(undercloud) [stack@director images]$ openstack image list
+(undercloud) [stack@director ~]$ openstack image list
 ```
 
 1. If above command returns null, run the below command   
