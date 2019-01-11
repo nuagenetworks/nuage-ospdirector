@@ -60,4 +60,7 @@ Run the below commands:
 ```
 
 then run the below commad   
-` (undercloud) [stack@director images]$ openstack overcloud image upload --update-existing --image-path /home/stack/images/`
+```
+(undercloud) [stack@director images]$ openstack overcloud image upload --update-existing --image-path /home/stack/images/
+(undercloud) [stack@director images]$ openstack overcloud node configure [<node_uuid> [<node_uuid> ...]]
+```
