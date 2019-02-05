@@ -1,0 +1,22 @@
+diff -u -r -N openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml patched/puppet/services/heat-engine.yaml
+--- openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml   2018-06-05 12:00:32.000000000 -0400
++++ patched/puppet/services/heat-engine.yaml    2018-06-06 00:38:25.164455234 -0400
+@@ -48,6 +48,10 @@
+     default:
+       tag: openstack.heat.engine
+       path: /var/log/heat/heat-engine.log
++  HeatEnginePluginDirs:
++    type: comma_delimited_list
++    default: []
++    description: An array of directories to search for plug-ins.
+
+ resources:
+   HeatBase:
+@@ -93,6 +97,7 @@
+                   passwords:
+                     - {get_param: HeatAuthEncryptionKey}
+                     - {get_param: [DefaultPasswords, heat_auth_encryption_key]}
++            heat::engine::plugin_dirs: {get_param: HeatEnginePluginDirs}
+       step_config: |
+         include ::tripleo::profile::base::heat::engine
+

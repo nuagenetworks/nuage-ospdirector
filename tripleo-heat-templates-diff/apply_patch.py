@@ -35,11 +35,11 @@ from rpmUtils.miscutils import stringToVersion
 VERSION_1_CHECK = "openstack-tripleo-heat-templates-5.3.0-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-5.3.3-1.el7ost.noarch"
 VERSION_3_CHECK = "openstack-tripleo-heat-templates-5.3.8-1.el7ost.noarch"
-VERSION_4_CHECK = "openstack-tripleo-heat-templates-5.3.10-17.el7ost.noarch"
+VERSION_4_CHECK = "openstack-tripleo-heat-templates-5.3.10-23.el7ost.noarch"
 PRE_VERSION_1_DIFF = "diff_OSPD10_5.2.0-15"
 PRE_VERSION_2_DIFF = "diff_OSPD10_5.3.0-4"
 PRE_VERSION_3_DIFF = "diff_OSPD10_5.3.3-1"
-POST_VERSION_3_DIFF = "diff_OSPD10_5.3.10-17"
+POST_VERSION_3_DIFF = "diff_OSPD10_5.3.10-23"
 
 
 def version_compare((e1, v1, r1), (e2, v2, r2)):
