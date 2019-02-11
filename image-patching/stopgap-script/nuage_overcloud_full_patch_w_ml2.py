@@ -291,8 +291,11 @@ def uninstall_packages(image, version):
     if version <= 9:
         virt_customize(
             '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-
+    virt_customize('"rpm -e --nodeps openvswitch" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"rpm -e --nodeps openstack-neutron-openvswitch" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"rpm -e --nodeps openvswitch-ovn-central" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"rpm -e --nodeps openvswitch-ovn-common" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"rpm -e --nodeps openvswitch-ovn-host" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 #####
 # Function to install Nuage packages that are required
