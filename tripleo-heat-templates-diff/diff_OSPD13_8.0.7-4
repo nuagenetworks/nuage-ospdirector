@@ -1,6 +1,6 @@
 diff -ruN openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml 2019-01-15 00:28:34.585000000 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml  2019-01-15 00:26:21.575000000 -0500
+--- openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml 2018-10-09 17:27:43.028281250 -0400
++++ openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml  2018-10-09 17:27:59.191281250 -0400
 @@ -116,6 +116,12 @@
    EnableInternalTLS:
      type: boolean
