@@ -5,7 +5,7 @@ Clone this repo onto the machine that is accessible to the nuage-rpms repo and m
 ```
 yum install libguestfs-tools -y
 git clone https://github.com/nuagenetworks/nuage-ospdirector.git
-cd nuage-ospdirector/
+cd nuage-ospdirector
 git checkout OSPD13
 cd image-patching/stopgap-script/
 ```
@@ -18,14 +18,18 @@ Now run the below command by providing required values
 
 `python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
 
+For AVRS Integration, Please run below command
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
+
 This script takes in following input parameters:   
-RhelUserName: User name for the RHEL subscription   
-RhelPassword: Password for the RHEL subscription   
-RhelPool: RHEL Pool to subscribe to for base packages and instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point   
-RepoName: Name for the local repo hosting the Nuage RPMs   
-RepoBaseUrl: Base URL for the repo hosting the Nuage RPMs   
-ImageName: Name of the qcow2 image (overcloud-full.qcow2 for example)   
-Version: OSP-Director version (13)   
+  * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
+  * RhelPassword is the password for the RedHat Enterprise Linux subscription
+  * RepoName is the name of the local repository hosting the Nuage RPMs.
+  * RepoBaseUrl is the base URL for the repository hosting the Nuage RPMs (such as http://IP/reponame)
+  * AVRSBaseUrl is the base URL for the repository hosting the 6Wind and AVRS RPMs (such as http://IP/reponame)
+  * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
+  * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
+  * Version is the OpenStack Platform director version (for Queens, the version is 13).
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.   
 
