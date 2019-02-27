@@ -1,0 +1,46 @@
+diff -ruN openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml
+--- openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml     2019-01-31 14:39:48.255175754 -0500
++++ openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml      2019-01-31 14:44:25.647175754 -0500
+@@ -84,6 +84,8 @@
+             - - {get_attr: [IronicConductorBase, role_data, step_config]}
+               - {get_attr: [MySQLClient, role_data, step_config]}
+         config_image: {get_param: DockerIronicConfigImage}
++        volumes:
++          - /var/lib/ironic:/var/lib/ironic:z
+       kolla_config:
+         /var/lib/kolla/config_files/ironic_conductor.json:
+           command: /usr/bin/ironic-conductor
+diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml
+--- openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml     2019-01-31 14:39:48.334175754 -0500
++++ openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml      2019-01-31 14:42:16.246175754 -0500
+@@ -161,6 +161,10 @@
+   MonitoringSubscriptionIronicConductor:
+     default: 'overcloud-ironic-conductor'
+     type: string
++  IronicDhcpProvider:
++    description: Which DHCP provider to use
++    default: ''
++    type: string
+
+ resources:
+   IronicBase:
+@@ -176,6 +180,7 @@
+       IronicDebug: {get_param: IronicDebug}
+
+ conditions:
++  dhcp_provider_unset: {equals : [{get_param: IronicDhcpProvider}, '']}
+   service_debug:
+     or:
+       - equals: [{get_param: IronicDebug}, 'true']
+@@ -192,6 +197,11 @@
+       config_settings:
+         map_merge:
+           - get_attr: [IronicBase, role_data, config_settings]
++          -
++            if:
++            - dhcp_provider_unset
++            - {}
++            - ironic::conductor::dhcp_provider: {get_param: IronicDhcpProvider}
+           - ironic::conductor::api_url: {get_param: [EndpointMap, IronicInternal, uri_no_suffix]}
+             ironic::conductor::cleaning_disk_erase: {get_param: IronicCleaningDiskErase}
+             ironic::conductor::cleaning_network: {get_param: IronicCleaningNetwork}

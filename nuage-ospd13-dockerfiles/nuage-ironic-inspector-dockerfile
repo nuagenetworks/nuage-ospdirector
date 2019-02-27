@@ -1,0 +1,21 @@
+FROM registry.access.redhat.com/rhosp13/openstack-ironic-inspector:<tag>
+
+LABEL description="Nuage Ironic-Inspector Plugin"
+LABEL version-release=latest
+LABEL summary="Nuage Ironic-Inspector Plugin"
+LABEL io.k8s.display-name="Nuage Ironic-Inspector Plugin"
+LABEL com.redhat.component="openstack-nuage-ironic-inspector-docker"
+LABEL name="<undercloud-ip>:8787/openstack-ironic-inspector"
+LABEL version=13
+LABEL release=latest
+LABEL architecture="x86_64"
+
+
+USER root
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum -y install --disablerepo "*" --enablerepo Nuage nuage-ironic-inspector && yum clean all
+
+RUN rm -f /etc/yum.repos.d/nuage.repo
+
+USER ironic-inspector

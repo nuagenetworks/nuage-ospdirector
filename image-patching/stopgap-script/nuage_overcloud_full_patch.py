@@ -118,7 +118,7 @@ def rhel_subscription(username, password, pool, image, proxy_hostname = None, pr
                                                   'subscription-manager repos --enable=rhel-7-server-rpms \n' \
                                                   'EOT' % (username, password, pool)
     cmds_run([subscription_command])
-    virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
     cmds_run(['rm -f rhel_subscription'])
 
@@ -131,7 +131,7 @@ def rhel_remove_subscription(image):
     cmds_run(['cat <<EOT > rhel_unsubscribe \n'
               'subscription-manager unregister \n'
               'EOT'])
-    virt_customize_run('rhel_unsubscribe -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('rhel_unsubscribe -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f rhel_unsubscribe'])
 
 
@@ -143,8 +143,8 @@ def uninstall_packages(image, version):
     # For Newton and above, use standard python-openvswitch
     if version <= 9:
         virt_customize(
-            '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+            '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -158,9 +158,13 @@ def add_files(image, version, workingDir):
             '"mkdir -p /etc/puppet/modules/nuage/manifests/13_files" -a %s --memsize %s --selinux-relabel' % (
             image, VIRT_CUSTOMIZE_MEMSIZE))
         virt_copy('%s %s/13_files/neutron_init.pp /etc/puppet/modules/nuage/manifests/13_files' % (image, workingDir))
+        virt_copy('%s %s/13_files/conductor.pp /etc/puppet/modules/nuage/manifests/13_files' % (image, workingDir))
         virt_customize(
             '"cp /etc/puppet/modules/nuage/manifests/13_files/neutron_init.pp /etc/puppet/modules/neutron/manifests/init.pp" -a %s --memsize %s --selinux-relabel' % (
             image, VIRT_CUSTOMIZE_MEMSIZE))
+        virt_customize(
+            '"cp /etc/puppet/modules/nuage/manifests/13_files/conductor.pp /etc/puppet/modules/ironic/manifests/conductor.pp" -a %s --memsize %s --selinux-relabel' % (
+                image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -172,7 +176,7 @@ def install_packages(image):
               'yum install %s -y \n'
               'yum install %s -y \n'
               'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES)])
-    virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f nuage_packages'])
 
 
@@ -184,7 +188,7 @@ def install_vrs(image):
     cmds_run(['cat <<EOT > vrs_packages \n'
               'yum install %s -y \n'
               'EOT' % (NUAGE_VRS_PACKAGE)])
-    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f vrs_packages'])
 
 
@@ -201,7 +205,7 @@ def create_repo_file(reponame, repoUrl, image):
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
-    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -216,8 +220,38 @@ def delete_repo_file(reponame, repoUrl, image):
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
-    virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image))
+    virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
     cmds_run(['rm -f create_repo'])
+
+
+#####
+# Function to install Nuage AVRS packages that are required
+#####
+
+def copy_avrs_packages(image, avrs_baseurl, proxy_hostname = None, proxy_port = None):
+    if proxy_hostname != None and proxy_port != None:
+        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n' \
+                    'export http_proxy=http://%s:%s \n' \
+                    'export https_proxy=http://%s:%s \n'% (proxy_hostname, proxy_port, proxy_hostname, proxy_port)
+    else:
+        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n'
+
+    avrs_cmds = avrs_cmds + 'mkdir ./6wind \n' \
+                            'rm -rf /var/cache/yum/Nuage \n' \
+                            'yum clean all \n' \
+                            'touch /kernel-version \n' \
+                            'rpm -q kernel | awk \'{ print substr(\$1,8) }\' > /kernel-version \n' \
+                            'yum install -y createrepo \n' \
+                            'yum install --downloadonly --downloaddir=./6wind kernel-headers-\$(cat /kernel-version) kernel-devel-\$(cat /kernel-version) kernel-debug-devel-\$(cat /kernel-version) python-pyelftools* dkms* 6windgate* nuage-openvswitch nuage-metadata-agent virtual-accelerator* \n' \
+                            'yum install --downloadonly --downloaddir=./6wind selinux-policy-nuage-avrs* \n' \
+                            'yum install --downloadonly --downloaddir=./6wind 6wind-openstack-extensions \n' \
+                            'rm -rf /kernel-version \n' \
+                            'EOT'
+
+    cmds_run([avrs_cmds])
+    virt_customize_run('nuage_avrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f nuage_avrs_packages'])
+
 
 
 def main(args):
@@ -275,15 +309,27 @@ def main(args):
         cmds_run(['echo "Installing VRS"'])
         install_vrs(argsDict['ImageName'][0])
 
+        cmds_run(['echo "Cleaning up"'])
         if 'RepoName' in argsDict:
             delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
         else:
             delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
 
+        if 'AVRSBaseUrl' in argsDict:
+            create_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
+
+            cmds_run(['echo "Downloading AVRS Packages"'])
+            if 'ProxyHostname' in argsDict and 'ProxyPort' in argsDict:
+                copy_avrs_packages(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0], argsDict['ProxyHostname'][0], argsDict['ProxyPort'][0])
+            else:
+                copy_avrs_packages(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0])
+
+            cmds_run(['echo "Cleaning up"'])
+            delete_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
+
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])
-
 
         cmds_run(['echo "Adding files post-patching"'])
         add_files(argsDict['ImageName'][0], argsDict['Version'][0], workingDir)
@@ -293,4 +339,3 @@ def main(args):
 
 if __name__ == "__main__":
     main(sys.argv)
-

@@ -1,0 +1,5 @@
+[Nuage_6wind]
+name=nuage_6wind
+baseurl=<base-url>
+enabled=1
+gpgcheck=0
