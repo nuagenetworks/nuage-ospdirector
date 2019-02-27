@@ -3,7 +3,7 @@ Steps:
 Clone this repo onto the undercloud director   
 
 ```
-git clone https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector.git
+git clone https://github.com/nuagenetworks/nuage-ospdirector.git
 cd nuage-ospdirector
 git checkout OSPD13
 cd tripleo-heat-templates-diff/

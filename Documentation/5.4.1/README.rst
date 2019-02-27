@@ -12,14 +12,14 @@
 .. ..  Date       Version    Author
 .. ..  =========  =======    =========
 .. ..  05/24/18    5.3.2     Jennifer - Create new document for Queens ML2 based on the 5.3.1 Queens files.
-.. ..  08/02/18    5.3.2     Jennifer - Installation procedure for Queens is to use OSPD 13. Wiki is here: https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-13-Integration
+.. ..  08/02/18    5.3.2     Jennifer - Installation procedure for Queens is to use OSPD 13. Wiki is here: https://github.com/nuagenetworks/nuage-ospdirector/wiki/Nuage-OSP-Director-13-Integration
 .. ..  09/05/18 to
 .. ..  09/10/18    5.3.2 U2   Jennifer - Add the SR-IOV Installation procedure for Queens. Wiki is here: https://github.mv.usa.alcatel.com/speesapa/Nuage-Queens-OSPD/wiki/Sriov in PR 3078, PR 3087, and PR 3090
 .. ..  09/11/18    5.3.2 U2   Add link for the ospd sriov documentation to what needs to be done next after the deployment;  also mention that we expect the user to actually install and run the topology collector manually to setup the controller and reference sriov documentation on how to run it.
 .. ..  09/12/18    5.3.3     Jennifer - Add 5.3.2 U2 updates to the master branch.
 .. ..  10/23/18    5.3.3     Jennifer - DOC-2112
 .. ..  10/24/18    5.3.3     Jennifer - DOC-2105 - AVRS
-.. ..  01/22/19    5.4.1     DOC-2202 - Edit file in gitlab
+.. ..  01/22/19    5.4.1     DOC-2202 - Edit file in github
 
 
 ======================================================
@@ -127,14 +127,14 @@ The integration includes the following steps:
         - nuage-openstack-neutronclient
         - nuage-ironic-inspector (required for Ironic Inspector Integration)
         - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.0
+        - nuage-puppet-modules-5.1.0
         - selinux-policy-nuage
         - nuage-topology-collector
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-5.1.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -167,8 +167,8 @@ The integration includes the following steps:
 
 * Updating the Undercloud codebase
 
-    - Apply the changes in the diff files in https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff to the Undercloud codebase.
-    - The instructions to apply the patch script are in this README file: https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md .
+    - Apply the changes in the diff files in https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff to the Undercloud codebase.
+    - The instructions to apply the patch script are in this README file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md .
     - For AVRS integration, get the script and files to patch the Overcloud image with the AVRS RPMs.
 
 * Updating the TripleO Heat templates (also referred to as the puppet manifests)
@@ -195,10 +195,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.0), go to https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
+* For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
 
 
 Before the Deployment Process
@@ -224,7 +224,7 @@ OSC and VRS Packages
     * Nuage-openstack-neutronclient
     * Nuage-ironic-inspector (required for Ironic Inspector Integration)
     * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.0)
+    * nuage-puppet-modules (Latest version 5.1.0)
     * Nuage-topology-collector
     * Selinux-policy-nuage
 
@@ -246,9 +246,7 @@ OSC and VRS Packages
     * 6windgate-linux-fp-sync-vrf
     * 6windgate-product-base
     * 6windgate-tools-common-libs-daemonctl
-    * 6windgate-tools-common-libs-libavl
     * 6windgate-tools-common-libs-libconsole
-    * 6windgate-tools-common-libs-libssh
     * 6windgate-tools-common-libs-pyroute2
     * Python-pyelftools
     * Dkms
@@ -285,14 +283,14 @@ If you want to use a remote registry for the Overcloud container images, you nee
 Phase 2: Modify the Overcloud qcow image (for example, overcloud-full.qcow2) to include Nuage components.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
+The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
 
 
 Phase 3: Update the Undercloud codebase.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Follow the instructions in `README.md
-<https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
+<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
 
 
 **For an AVRS integration please follow below steps as well**:
@@ -315,13 +313,13 @@ Follow the instructions in `README.md
 
 
 2. Use the ``create_compute_avrs_role.sh`` to create a roles file called ``avrs-role.yaml``. Copy the script from `here
-<https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
+<https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
 
 ::
 
     ./create_compute_avrs_role.sh
 
-Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample avrs-role.yaml provided at https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-role.yaml .
+Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample avrs-role.yaml provided at https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-role.yaml .
 (Please Note, given ``avrs-role.yaml`` file can get updated with newer release )
 
 
@@ -330,7 +328,7 @@ Phase 4: Generate a CMS ID for the OpenStack installation.
 
 The Cloud Management System (CMS) ID needs to be generated to configure your OpenStack installation with the VSD installation.
 
-Go to https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id for the files and script to generate the CMS ID, and follow the instructions in README.md.
+Go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id for the files and script to generate the CMS ID, and follow the instructions in README.md.
 
 The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
 
@@ -714,9 +712,9 @@ Phase 8: Build the Docker images.
 
 1. On the Undercloud, create a directory named *Nuage-OSPD-Dockerfiles*.
 
-2. Copy all the Docker files and the nuage.repo file from https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles to the Nuage-OSPD-Dockerfiles directory.
+2. Copy all the Docker files and the nuage.repo file from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles to the Nuage-OSPD-Dockerfiles directory.
 
-3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from https://gitlab.us.alcatel-lucent.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles/ to the Nuage-OSPD-Dockerfiles directory.
+3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles/ to the Nuage-OSPD-Dockerfiles directory.
 
 4. Configure the Overcloud to use one of the registry methods: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/configuring-a-container-image-source.
 
