@@ -1,0 +1,20 @@
+resource_registry:
+  OS::TripleO::ComputeAvrs::NodeUserData: ../firstboot/avrs-first-boot.yaml
+  OS::TripleO::ComputeAvrsExtraConfigPost: ../extraconfig/post_deploy/avrs-post.yaml
+
+parameter_defaults:
+  NovaVcpuPinSet: "2-7,10-15"
+  # An array of filters used by Nova to filter a node.These filters will be applied in the order they are listed,
+  # so place your most restrictive filters first to make the filtering process more efficient.
+  NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+  # Kernel arguments for Compute node
+  ComputeKernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
+  # A list or range of physical CPU cores to be tuned.
+  # The given args will be appended to the tuned cpu-partitioning profile.
+  HostIsolatedCoreList: "1-7,9-15"
+  FastPathNics: "0000:06:00.1 0000:06:00.2"
+  FastPathMask: "1,9"
+  FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+  FastPathOptions: "\"--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000\""
+  FastPathDPVI: "0"
+  FastPathOffload: "off"
