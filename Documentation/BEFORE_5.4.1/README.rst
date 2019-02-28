@@ -194,7 +194,7 @@ Links to Nuage and OpenStack Resources
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
 
@@ -310,7 +310,7 @@ Follow the instructions in `README.md
 
 
 2. Use the ``create_compute_avrs_role.sh`` to create a roles file called ``avrs-role.yaml``. Copy the script from `here
-<https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
+<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
 
 ::
 
