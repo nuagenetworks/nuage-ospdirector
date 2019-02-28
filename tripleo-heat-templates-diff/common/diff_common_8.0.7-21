@@ -44,3 +44,18 @@ diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-condu
            - ironic::conductor::api_url: {get_param: [EndpointMap, IronicInternal, uri_no_suffix]}
              ironic::conductor::cleaning_disk_erase: {get_param: IronicCleaningDiskErase}
              ironic::conductor::cleaning_network: {get_param: IronicCleaningNetwork}
+diff -r -u -N openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml openstack-tripleo-heat-templates/docker/services/neutron-api.yaml
+--- openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml  22019-01-31 14:39:48.445175754 -0500
++++ openstack-tripleo-heat-templates/docker/services/neutron-api.yaml   2019-01-31 21:10:57.576175754 -0500
+@@ -244,6 +244,11 @@
+           when:
+             - step|int == 6
+             - is_bootstrap_node|bool
++        - name: Nuage package update
++          shell: yum -y update  nuage-*
++          when:
++            - step|int == 6
++            - is_bootstrap_node|bool
+         - name: Neutron package update workaround
+           yum: name=python-networking-odl state=latest
+           when:
