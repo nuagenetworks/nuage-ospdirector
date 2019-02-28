@@ -3,14 +3,14 @@
 <b> Note: Use the greatest diff version that is less than or equal to the current openstack-tripleo-heat-templates version. </b>
 
 
-* Make sure [avrs-first-boot.yaml](https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/avrs-first-boot.yaml) is present under /usr/share/openstack-tripleo-heat-templates/firstboot/ .
+* Make sure [avrs-first-boot.yaml](https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-first-boot.yaml) is present under /usr/share/openstack-tripleo-heat-templates/firstboot/ .
 
-* Make sure [avrs-post.yaml](https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/avrs-post.yaml) is present under /usr/share/openstack-tripleo-heat-templates/extraconfig/post_deploy/ .
+* Make sure [avrs-post.yaml](https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-post.yaml) is present under /usr/share/openstack-tripleo-heat-templates/extraconfig/post_deploy/ .
 
 * Based on the openstack-tripleo-heat-templates version, compare the appropriate `nova-compute-avrs-<openstack-tripleo-heat-templates version>.yaml` to /usr/share/openstack-tripleo-heat-templates/docker/services/ as nova-compute-avrs.yaml .
 Note: For openstack-tripleo-heat-templates version `8.0.4-20`, `8.0.7-4` and `8.0.7-21` refer to nova-compute-avrs-8.0.4-20.yaml
 
-* Create an environment file as [avrs-environment.yaml](https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/avrs/avrs-environment.yaml) under /usr/share/openstack-tripleo-heat-templates/environments/.
+* Create an environment file as [avrs-environment.yaml](https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-environment.yaml) under /usr/share/openstack-tripleo-heat-templates/environments/.
 
 * Mapping of environment file parameters to the **fast-path.env** parameters:
 
