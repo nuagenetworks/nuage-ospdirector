@@ -144,7 +144,7 @@ def uninstall_packages(image, version):
     if version <= 9:
         virt_customize(
             '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"yum remove openvswitch2.10 -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize('"yum remove openvswitch[0-9]* -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
