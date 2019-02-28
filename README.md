@@ -12,4 +12,4 @@ The repository includes:
 
 4. image-patching: overcloud-full.qcow2 image patching resources
 
-5. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki)
+5. document: The details of integration, architecture and deployment steps can be found under Documentation folder
