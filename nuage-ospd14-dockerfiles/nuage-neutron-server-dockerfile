@@ -1,0 +1,22 @@
+FROM registry.access.redhat.com/rhosp14/openstack-neutron-server:latest
+
+LABEL description="Nuage Neutron Plugin"
+LABEL version-release=latest
+LABEL summary="Nuage Neutron Plugin"
+LABEL io.k8s.display-name="Nuage Neutron Plugin"
+LABEL com.redhat.component="openstack-nuage-neutron-docker"
+LABEL name="<undercloud-ip>:8787/rhosp14/openstack-nuage-neutron-server"
+LABEL version=14
+LABEL release=latest
+LABEL architecture="x86_64"
+
+
+
+USER root
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum install --disablerepo "*" --enablerepo Nuage nuage-openstack-neutron nuage-openstack-neutronclient -y && yum clean all
+
+RUN rm -f /etc/yum.repos.d/nuage.repo
+
+USER neutron

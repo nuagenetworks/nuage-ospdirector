@@ -1,0 +1,22 @@
+FROM registry.access.redhat.com/rhosp14/openstack-heat-engine:latest
+
+LABEL description="Nuage Heat-Engine Plugin"
+LABEL version-release=latest
+LABEL summary="Nuage Heat-Engine Plugin"
+LABEL io.k8s.display-name="Nuage Heat-Engine Plugin"
+LABEL com.redhat.component="openstack-nuage-heat-engine-docker"
+LABEL name="<undercloud-ip>:8787/rhosp14/openstack-nuage-heat-engine"
+LABEL version=14
+LABEL release=latest
+LABEL architecture="x86_64"
+
+
+
+USER root
+
+COPY nuage.repo /etc/yum.repos.d/nuage.repo
+RUN yum -y install --disablerepo "*" --enablerepo Nuage nuage-openstack-heat nuage-openstack-neutronclient && yum clean all
+ 
+RUN rm -f /etc/yum.repos.d/nuage.repo
+ 
+USER heat
