@@ -15,7 +15,7 @@
 
 
 ======================================================
-Deploying Queens Using OpenStack Platform Director 14
+Deploying Rocky Using OpenStack Platform Director 14
 ======================================================
 
 This section contains the following topics:
