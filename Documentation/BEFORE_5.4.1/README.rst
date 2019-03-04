@@ -74,7 +74,7 @@ The cluster in your Layer 3 (L3) network should have the following components:
 
 .. _infrastructure_required:
 
-.. figure:: graphics/infrastructure_required.PNG
+.. figure:: ../../graphics/infrastructure_required.PNG
 
 These networks are used:
 
@@ -165,8 +165,8 @@ The integration includes the following steps:
 
 * Updating the Undercloud codebase
 
-    - Apply the changes in the diff files in https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff to the Undercloud codebase.
-    - The instructions to apply the patch script are in this README file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md .
+    - Apply the changes in the diff files in `tripleo-heat-templates-diff <../../tripleo-heat-templates-diff>`_ to the Undercloud codebase.
+    - The instructions to apply the patch script are in this README file: `README.md <../../tripleo-heat-templates-diff/README.md>`_ .
     - For AVRS integration, get the script and files to patch the Overcloud image with the AVRS RPMs.
 
 * Updating the TripleO Heat templates (also referred to as the puppet manifests)
@@ -193,10 +193,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to `image-patching <../../image-patching>`_.
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_.
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
+* For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_.
 
 
 Before the Deployment Process
@@ -280,14 +280,14 @@ If you want to use a remote registry for the Overcloud container images, you nee
 Phase 2: Modify the Overcloud qcow image (for example, overcloud-full.qcow2) to include Nuage components.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
+The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_ file.
 
 
 Phase 3: Update the Undercloud codebase.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Follow the instructions in `README.md
-<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
+<../../tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
 
 
 **For an AVRS integration please follow below steps as well**:
@@ -310,13 +310,13 @@ Follow the instructions in `README.md
 
 
 2. Use the ``create_compute_avrs_role.sh`` to create a roles file called ``avrs-role.yaml``. Copy the script from `here
-<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
+<../../avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
 
 ::
 
     ./create_compute_avrs_role.sh
 
-Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample avrs-role.yaml provided at https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-role.yaml .
+Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample `avrs-role.yaml <../../avrs/avrs-role.yaml>`_ .
 (Please Note, given ``avrs-role.yaml`` file can get updated with newer release )
 
 
@@ -325,7 +325,7 @@ Phase 4: Generate a CMS ID for the OpenStack installation.
 
 The Cloud Management System (CMS) ID needs to be generated to configure your OpenStack installation with the VSD installation.
 
-Go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id for the files and script to generate the CMS ID, and follow the instructions in README.md.
+Go to `generate-cms-id <../../generate-cms-id>`_ for the files and script to generate the CMS ID, and follow the instructions in README.md.
 
 The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
 
@@ -670,9 +670,9 @@ Phase 8: Build the Docker images.
 
 1. On the Undercloud, create a directory named *Nuage-OSPD-Dockerfiles*.
 
-2. Copy all the Docker files and the nuage.repo file from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles to the Nuage-OSPD-Dockerfiles directory.
+2. Copy all the Docker files and the nuage.repo file from  `nuage-ospd13-dockerfiles <../../nuage-ospd13-dockerfiles>`_ to the Nuage-OSPD-Dockerfiles directory.
 
-3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles/avrs to the Nuage-OSPD-Dockerfiles directory.
+3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from  `nuage-ospd13-dockerfiles <../../nuage-ospd13-dockerfiles>`_ to the Nuage-OSPD-Dockerfiles directory.
 
 4. Configure the Overcloud to use one of the registry methods: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/configuring-a-container-image-source.
 

@@ -20,6 +20,7 @@
 .. ..  10/23/18    5.3.3     Jennifer - DOC-2112
 .. ..  10/24/18    5.3.3     Jennifer - DOC-2105 - AVRS
 .. ..  01/22/19    5.4.1     DOC-2202 - Edit file in github
+.. ..  03/04/19    5.4.1     PROD-9386 - Adding Smart NIC Documentation
 
 
 ======================================================
@@ -75,7 +76,7 @@ The cluster in your Layer 3 (L3) network should have the following components:
 
 .. _infrastructure_required:
 
-.. figure:: graphics/infrastructure_required.PNG
+.. figure:: ../../graphics/infrastructure_required.PNG
 
 These networks are used:
 
@@ -167,8 +168,8 @@ The integration includes the following steps:
 
 * Updating the Undercloud codebase
 
-    - Apply the changes in the diff files in https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff to the Undercloud codebase.
-    - The instructions to apply the patch script are in this README file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md .
+    - Apply the changes in the diff files in `tripleo-heat-templates-diff <../../tripleo-heat-templates-diff>`_ to the Undercloud codebase.
+    - The instructions to apply the patch script are in this README file: `README.md <../../tripleo-heat-templates-diff/README.md>`_.
     - For AVRS integration, get the script and files to patch the Overcloud image with the AVRS RPMs.
 
 * Updating the TripleO Heat templates (also referred to as the puppet manifests)
@@ -195,10 +196,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to `image-patching <../../image-patching>`_.
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_.
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
+* For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_.
 
 
 Before the Deployment Process
@@ -283,14 +284,14 @@ If you want to use a remote registry for the Overcloud container images, you nee
 Phase 2: Modify the Overcloud qcow image (for example, overcloud-full.qcow2) to include Nuage components.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
+The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_ file.
 
 
 Phase 3: Update the Undercloud codebase.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Follow the instructions in `README.md
-<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
+<../../tripleo-heat-templates-diff/README.md>`_  to apply the patch to the codebase.
 
 
 **For an AVRS integration please follow below steps as well**:
@@ -313,13 +314,13 @@ Follow the instructions in `README.md
 
 
 2. Use the ``create_compute_avrs_role.sh`` to create a roles file called ``avrs-role.yaml``. Copy the script from `here
-<https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
+<../../avrs/create_compute_avrs_role.sh>`_  to ``/home/stack/templates/`` on Undercloud Node. Run using
 
 ::
 
     ./create_compute_avrs_role.sh
 
-Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample avrs-role.yaml provided at https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/avrs/avrs-role.yaml .
+Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with sample `avrs-role.yaml <../../avrs/avrs-role.yaml>`_.
 (Please Note, given ``avrs-role.yaml`` file can get updated with newer release )
 
 
@@ -328,7 +329,7 @@ Phase 4: Generate a CMS ID for the OpenStack installation.
 
 The Cloud Management System (CMS) ID needs to be generated to configure your OpenStack installation with the VSD installation.
 
-Go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id for the files and script to generate the CMS ID, and follow the instructions in README.md.
+Go to `generate-cms-id <../../generate-cms-id>`_ for the files and script to generate the CMS ID, and follow the instructions in README.md.
 
 The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
 
@@ -703,7 +704,49 @@ In OSPD 13 and later, /usr/share/openstack-tripleo-heat-templates/environments/n
         ...
 
 
-7. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
+7. **(Optional)** To enable Smart NIC Integration, perform the following instrctions:
+
+:Step 1: Create a new sriov-role.yaml file to deploy SR-IOV Compute nodes. The command used to create this file is:
+
+::
+
+    openstack overcloud roles generate Controller ComputeSriov -o /home/stack/templates/sriov-role.yaml
+
+
+Create a flavor and profile for computesriov:
+
+      Please refer: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_cli_tools#sect-Tagging_Nodes_into_Profiles for more information.
+
+::
+
+    openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computesriov
+    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computesriov" computesriov
+
+
+
+:Step 2: Assign SR-IOV nodes with the appropriate computesriov profile:
+
+::
+
+    openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
+
+
+:Step 3: Add the count and flavor for ComputeSriov Role in the node-info.yaml file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeSriov nodes:
+
+::
+
+    OvercloudControllerFlavor: control
+    ControllerCount: 1
+    OvercloudComputeSriovFlavor: computesriov
+    ComputeSriovCount: 2
+
+:Step 4: For "Deploy Overcloud", we need to pass /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml and /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml as environment files.
+
+
+:Step 5: There are no changes required for /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml. We need set some parameters in /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml and a sample file is provided in "Sample Templates" section.
+
+
+8. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
 
 
 
@@ -712,9 +755,9 @@ Phase 8: Build the Docker images.
 
 1. On the Undercloud, create a directory named *Nuage-OSPD-Dockerfiles*.
 
-2. Copy all the Docker files and the nuage.repo file from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles to the Nuage-OSPD-Dockerfiles directory.
+2. Copy all the Docker files and the nuage.repo file from `nuage-ospd13-dockerfiles <../../nuage-ospd13-dockerfiles>`_ to the Nuage-OSPD-Dockerfiles directory.
 
-3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-ospd13-dockerfiles/ to the Nuage-OSPD-Dockerfiles directory.
+3. For the AVRS integration, copy the nova-compute-avrs-dockerfile file and nuage_6wind.repo from `nuage-ospd13-dockerfiles <../../nuage-ospd13-dockerfiles>`_ to the Nuage-OSPD-Dockerfiles directory.
 
 4. Configure the Overcloud to use one of the registry methods: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/configuring-a-container-image-source.
 
@@ -973,6 +1016,12 @@ For AVRS, also include following role and environment files.
     openstack overcloud deploy --templates -r /home/stack/templates/ironic-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/services/ironic.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/services/ironic-inspector.yaml -e /home/stack/templates/ironic.yaml -e /home/stack/templates/ironic-inspector.yaml --ntp-server ntp-server
 
 
+7. For Smart NIC Integration with Nuage, use:
+
+::
+
+    openstack overcloud deploy --templates -r /home/stack/templates/sriov-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server
+
 where:
    * ``neutron-nuage-config.yaml`` is Controller specific parameter values.
    * ``nova-nuage-config.yaml`` is Compute specific parameter values.
@@ -985,7 +1034,9 @@ where:
    * ``neutron-sriov.yaml`` Neutron SRIOV specific parameter values
    * ``avrs-role.yaml`` Enables services required for Compute Avrs role
    * ``ironic-role.yaml`` Enables Ironic Inspector service for Controller role
-
+   * ``ovs-hw-offload.yaml`` Enables OVS Hardware Offload on Smart NIC Compute nodes
+   * ``host-config-and-reboot.yaml`` Enables SRIOV and performs Reboot on Smart NIC Compute Nodes
+   * ``ntp-server`` The NTP for overcloud nodes.
 
 
 
@@ -1304,6 +1355,33 @@ The following parameter is used to enable/disable ipxe on th Controller:
     Used to enable/disable ipxe
 
 
+Parameters Required for Smart NIC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following parameter is mapped to values in the /etc/default/grub file on the Smart NIC enabled Computes:
+
+::
+
+    KernelArgs
+    Maps to GRUB_CMDLINE_LINUX parameter. This is used to enable SRIOV feature in kernel.
+
+
+The following parameter is used for Tune-d profile activation on the Smart NIC enabled Computes:
+
+::
+
+    TunedProfileName
+    Tuned Profile to apply to the host
+
+
+The following parameter is mapped to config value required to enable OVS hardware offload on the Smart NIC enabled Computes:
+
+::
+
+    OvsHwOffload
+    Maps to OVS config value other_config:hw-offload.
+
+
 Parameters Required for Docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1566,6 +1644,43 @@ ironic-inspector.yaml for Ironic-Inspector Deployment
       #NOTE: IronicInspectorIpRange will not be used but we have to set it to dummy IP range
       IronicInspectorIpRange: '10.0.0.3,10.0.0.30'
       IronicInspectorExtraProcessingHooks: extra_hardware,lldp_basic,local_link_connection,nuage_lldp
+
+
+ovs-hw-offload.yaml
+~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    # A Heat environment file that enables OVS Hardware Offload in the overcloud.
+    # This works by configuring SR-IOV NIC with switchdev and OVS Hardware Offload on
+    # compute nodes. The feature supported in OVS 2.8.0
+
+    resource_registry:
+      OS::TripleO::Services::NeutronSriovHostConfig: ../puppet/services/neutron-sriov-host-config.yaml
+
+    parameter_defaults:
+
+      NovaSchedulerDefaultFilters: ['RetryFilter','AvailabilityZoneFilter','RamFilter','ComputeFilter','ComputeCapabilitiesFilter','ImagePropertiesFilter','ServerGroupAntiAffinityFilter','ServerGroupAffinityFilter','PciPassthroughFilter']
+      NovaSchedulerAvailableFilters: ["nova.scheduler.filters.all_filters","nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter"]
+
+      # Kernel arguments for ComputeSriov node
+      ComputeSriovParameters:
+        KernelArgs: "intel_iommu=on iommu=pt pci=realloc"
+        #NOTE: By default TunedProfileName is set to "cpu-partitioning" in sriov-role.yaml.
+        # If IsolCpusList is not set in your environment, then leave TunedProfileName below to set to empty string.
+        # If planning on setting IsolCpusList in your environment
+        #   1. You can comment the below line to set TunedProfileName to "cpu-partitioning" or
+        #   2. You can pass your custom Tuned Profile to apply to the host
+        TunedProfileName: ""
+        OvsHwOffload: True
+        # Number of VFs that needs to be configured for a physical interface
+        NeutronSriovNumVFs: ["enp23s0f1:4:switchdev"]
+        # Mapping of SR-IOV PF interface to neutron physical_network.
+        # In case of Vxlan/GRE physical_network should be null.
+        # In case of flat/vlan the physical_network should as configured in neutron.
+        NovaPCIPassthrough:
+          - devname: "enp23s0f1"
+            physical_network: null
 
 
 docker-insecure-registry.yaml for One Local Registry

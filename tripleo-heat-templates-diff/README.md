@@ -5,7 +5,7 @@ Clone this repo onto the undercloud director
 ```
 git clone https://github.com/nuagenetworks/nuage-ospdirector.git
 cd nuage-ospdirector
-git checkout OSPD13
+git checkout OSPD13_SMARTNIC
 cd tripleo-heat-templates-diff/
 ```
 
