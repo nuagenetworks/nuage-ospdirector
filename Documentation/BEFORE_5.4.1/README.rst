@@ -74,7 +74,7 @@ The cluster in your Layer 3 (L3) network should have the following components:
 
 .. _infrastructure_required:
 
-.. figure:: graphics/infrastructure_required.PNG
+.. figure:: ../../graphics/infrastructure_required.PNG
 
 These networks are used:
 
