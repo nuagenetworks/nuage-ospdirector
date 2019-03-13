@@ -6,7 +6,7 @@ Clone this repo onto the machine that is accessible to the nuage-rpms repo and m
 yum install libguestfs-tools -y
 git clone https://github.com/nuagenetworks/nuage-ospdirector.git
 cd nuage-ospdirector
-git checkout OSPD13
+git checkout OSPD13_SMARTNIC
 cd image-patching/stopgap-script/
 ```
 
