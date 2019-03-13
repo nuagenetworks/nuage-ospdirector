@@ -20,7 +20,7 @@
 .. ..  10/23/18    5.3.3     Jennifer - DOC-2112
 .. ..  10/24/18    5.3.3     Jennifer - DOC-2105 - AVRS
 .. ..  01/22/19    5.4.1     DOC-2202 - Edit file in github
-.. ..  03/04/19    5.4.1     PROD-9386 - Adding Smart NIC Documentation
+.. ..  03/04/19    5.4.1     PROD-9386 - Adding VRS Offload to Mellanox CX-5 Documentation
 
 
 ======================================================
@@ -128,14 +128,14 @@ The integration includes the following steps:
         - nuage-openstack-neutronclient
         - nuage-ironic-inspector (required for Ironic Inspector Integration)
         - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.1.0
+        - nuage-puppet-modules-0.0.0
         - selinux-policy-nuage
         - nuage-topology-collector
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.1.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-0.0.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -196,7 +196,7 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to `image-patching <../../image-patching>`_.
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-0.0.0), go to `image-patching <../../image-patching>`_.
 * For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_.
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_.
@@ -225,7 +225,7 @@ OSC and VRS Packages
     * Nuage-openstack-neutronclient
     * Nuage-ironic-inspector (required for Ironic Inspector Integration)
     * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.1.0)
+    * nuage-puppet-modules (Latest version 0.0.0)
     * Nuage-topology-collector
     * Selinux-policy-nuage
 
@@ -508,12 +508,12 @@ For AVRS integration, follow these steps:
         NovaPCIPassthrough: "[{"devname":"eno2","physical_network":"physnet1"},{"devname":"eno3","physical_network":"physnet2"}]"
     
     
-    * Include "neutron-sriov.yaml" file in the Overcloud deployment command. See the sample in the "Sample Templates" section.
+    * Include "neutron-sriov.yaml" file in the Overcloud deployment command. See the sample in the `Sample Templates`_ section.
 
 
 5. **(Optional)** To enable Linux bonding with VLANs, perform the following instructions:
 
-  Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample in the "Sample Templates" section.
+  Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample in the `Sample Templates`_ section.
 
   Nuage uses the default Linux bridge and Linux bonds. For this to take effect, modify this network file with the following required changes:
 
@@ -704,7 +704,10 @@ In OSPD 13 and later, /usr/share/openstack-tripleo-heat-templates/environments/n
         ...
 
 
-7. **(Optional)** To enable Smart NIC Integration, perform the following instrctions:
+7. **(Optional)** To enable VRS Offload (OVRS) with Mellanox CX-5, perform the following instrctions:
+
+.. Note:: In Mellanox CX-5 NIC, only single port is supported for VRS Offload.
+          This feature uses same role as ComputeSriov  and should not share the deployment with traditional SRIOV.
 
 :Step 1: Create a new sriov-role.yaml file to deploy SR-IOV Compute nodes. The command used to create this file is:
 
@@ -731,7 +734,7 @@ Create a flavor and profile for computesriov:
     openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
 
 
-:Step 3: Add the count and flavor for ComputeSriov Role in the node-info.yaml file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeSriov nodes:
+:Step 3: Add the count and flavor for ComputeSriov Role in the ``node-info.yaml`` file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeSriov nodes:
 
 ::
 
@@ -740,10 +743,10 @@ Create a flavor and profile for computesriov:
     OvercloudComputeSriovFlavor: computesriov
     ComputeSriovCount: 2
 
-:Step 4: For "Deploy Overcloud", we need to pass /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml and /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml as environment files.
+:Step 4: For "Deploy Overcloud", we need to pass ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`` and ``/usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml`` as environment files.
 
 
-:Step 5: There are no changes required for /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml. We need set some parameters in /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml and a sample file is provided in "Sample Templates" section.
+:Step 5: There are no changes required for ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml``. We need set some parameters in ``/usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml`` and a sample file is provided in `Sample Templates`_ section.
 
 
 8. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
@@ -938,7 +941,7 @@ Phase 8: Build the Docker images.
     DockerIronicInspectorConfigImage: 192.168.24.1:8787/rhosp13/openstack-nuage-ironic-inspector:<tag>
 
 
-19. Create the ``docker-insecure-registry.yaml`` at ``/home/stack/templates/docker-insecure-registry.yaml``. See the sample in the "Sample Templates" section.
+19. Create the ``docker-insecure-registry.yaml`` at ``/home/stack/templates/docker-insecure-registry.yaml``. See the sample in the `Sample Templates`_ section.
 
 
 Phase 9: Deploy the Overcloud.
@@ -1016,7 +1019,7 @@ For AVRS, also include following role and environment files.
     openstack overcloud deploy --templates -r /home/stack/templates/ironic-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/services/ironic.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/services/ironic-inspector.yaml -e /home/stack/templates/ironic.yaml -e /home/stack/templates/ironic-inspector.yaml --ntp-server ntp-server
 
 
-7. For Smart NIC Integration with Nuage, use:
+7. For VRS Offload to Mellanox CX-5 with Nuage, use:
 
 ::
 
@@ -1034,8 +1037,8 @@ where:
    * ``neutron-sriov.yaml`` Neutron SRIOV specific parameter values
    * ``avrs-role.yaml`` Enables services required for Compute Avrs role
    * ``ironic-role.yaml`` Enables Ironic Inspector service for Controller role
-   * ``ovs-hw-offload.yaml`` Enables OVS Hardware Offload on Smart NIC Compute nodes
-   * ``host-config-and-reboot.yaml`` Enables SRIOV and performs Reboot on Smart NIC Compute Nodes
+   * **``ovs-hw-offload.yaml``** Enables OVS Hardware Offload on VRS Offload Compute nodes
+   * **``host-config-and-reboot.yaml``** Enables SRIOV and performs Reboot on VRS Offload Compute Nodes
    * ``ntp-server`` The NTP for overcloud nodes.
 
 
@@ -1355,10 +1358,10 @@ The following parameter is used to enable/disable ipxe on th Controller:
     Used to enable/disable ipxe
 
 
-Parameters Required for Smart NIC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Parameters Required for VRS Offload
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following parameter is mapped to values in the /etc/default/grub file on the Smart NIC enabled Computes:
+The following parameter is mapped to values in the /etc/default/grub file on the VRS Offload enabled Computes:
 
 ::
 
@@ -1366,7 +1369,7 @@ The following parameter is mapped to values in the /etc/default/grub file on the
     Maps to GRUB_CMDLINE_LINUX parameter. This is used to enable SRIOV feature in kernel.
 
 
-The following parameter is used for Tune-d profile activation on the Smart NIC enabled Computes:
+The following parameter is used for Tune-d profile activation on the VRS Offload enabled Computes:
 
 ::
 
@@ -1374,7 +1377,7 @@ The following parameter is used for Tune-d profile activation on the Smart NIC e
     Tuned Profile to apply to the host
 
 
-The following parameter is mapped to config value required to enable OVS hardware offload on the Smart NIC enabled Computes:
+The following parameter is mapped to config value required to enable OVS hardware offload on the VRS Offload enabled Computes:
 
 ::
 
