@@ -734,7 +734,7 @@ Create a flavor and profile for computesriov:
     openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
 
 
-:Step 3: Add the count and flavor for ComputeSriov Role in the ``node-info.yaml`` file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeSriov nodes:
+:Step 3: Add the count and flavor for ComputeSriov Role in the ``node-info.yaml`` file. The following example shows how to create a deployment with one Controller node and two ComputeSriov nodes:
 
 ::
 
