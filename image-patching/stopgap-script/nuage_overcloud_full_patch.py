@@ -180,15 +180,16 @@ def install_packages(image):
 # Function to create the repo file
 #####
 
-def create_repo_file(reponame, repoUrl, image):
+def create_repo_file(reponame, repoUrl, image, publickey):
     cmds_run(['cat <<EOT > create_repo \n'
               'touch /etc/yum.repos.d/nuage.repo \n'
               'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "name=%s" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "baseurl=%s" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
-              'EOT' % (reponame, repoUrl)])
+              'echo "gpgcheck = 1" >> /etc/yum.repos.d/nuage.repo \n'
+              'echo "gpgkey = %s" >> /etc/yum.repos.d/nuage.repo \n'
+              'EOT' % (reponame, repoUrl, publickey)])
     virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
@@ -245,9 +246,9 @@ def main(args):
 
         cmds_run(['echo "Creating Repo File"'])
         if 'RepoName' in argsDict:
-            create_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            create_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0],argsDict['RpmPublicKey'][0])
         else:
-            create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0],argsDict['RpmPublicKey'][0])
 
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
