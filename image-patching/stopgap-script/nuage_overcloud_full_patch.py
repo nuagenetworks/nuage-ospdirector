@@ -96,6 +96,7 @@ def show_help():
     cmds_run(['echo " --RepoName=Name for the local repo hosting the Nuage RPMs"'])
     cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"'])
     cmds_run(['echo " --Version=OSP-Director version (10)"'])
+    cmds_run(['echo " --RpmPublicKey=GPG Key"'])
     cmds_run(['echo " -h or --help: Show this message"'])
 
 
