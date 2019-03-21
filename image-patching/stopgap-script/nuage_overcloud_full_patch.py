@@ -175,22 +175,10 @@ def install_packages(image):
     cmds_run(['cat <<EOT > nuage_packages \n'
               'yum install %s -y \n'
               'yum install %s -y \n'
-              'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES)])
+              'yum install %s -y \n'
+              'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES, NUAGE_VRS_PACKAGE)])
     virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f nuage_packages'])
-
-
-#####
-# Installing VRS and the dependencies for VRS
-#####
-
-def install_vrs(image):
-    cmds_run(['cat <<EOT > vrs_packages \n'
-              'yum install %s -y \n'
-              'EOT' % (NUAGE_VRS_PACKAGE)])
-    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f vrs_packages'])
-
 
 #####
 # Function to create the repo file
@@ -212,14 +200,6 @@ def create_repo_file(reponame, repoUrl, image):
 # Function to clean up the repo file
 #####
 def delete_repo_file(reponame, repoUrl, image):
-    cmds_run(['cat <<EOT > create_repo \n'
-              'touch /etc/yum.repos.d/nuage.repo \n'
-              'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "name=%s" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "baseurl=%s" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
-              'EOT' % (reponame, repoUrl)])
     virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
     cmds_run(['rm -f create_repo'])
 
@@ -306,14 +286,9 @@ def main(args):
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
 
-        cmds_run(['echo "Installing VRS"'])
-        install_vrs(argsDict['ImageName'][0])
-
         cmds_run(['echo "Cleaning up"'])
-        if 'RepoName' in argsDict:
-            delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
-        else:
-            delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+
+        delete_repo_file(argsDict['ImageName'][0])
 
 
         if 'AVRSBaseUrl' in argsDict:
@@ -326,7 +301,7 @@ def main(args):
                 copy_avrs_packages(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0])
 
             cmds_run(['echo "Cleaning up"'])
-            delete_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
+            delete_repo_file(argsDict['ImageName'][0])
 
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])
