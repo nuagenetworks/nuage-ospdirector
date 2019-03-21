@@ -14,12 +14,29 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 `cp overcloud-full.qcow2 overcloud-full-bk.qcow2`
 
-Now run the below command by providing required values   
 
-`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
+
+Now run the below command by providing required values   
+    
+### With GPG KEY   
+ 
+
+Make sure to copy GPG-Key file to the same folder as "nuage_overcloud_full_patch.py" patching script location.
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key'`
+
 
 For AVRS Integration, Please run below command
-`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key'`
+
+### Without GPG Key
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --no-signing-key`
+
+For AVRS Integration, Please run below command
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --no-signing-key`
 
 This script takes in following input parameters:   
   * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
@@ -30,6 +47,8 @@ This script takes in following input parameters:
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
   * Version is the OpenStack Platform director version (for Queens, the version is 13).
+  * RpmPublicKey is the GPG-Key file name
+  * no-signing-key is 'Image patching proceeds with package signature verification disabled'
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.   
 
