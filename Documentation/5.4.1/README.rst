@@ -340,8 +340,8 @@ This example shows how to create a deployment with one Controller node and two C
     {%- endif %}
                     dns_servers:
                       get_param: DnsServers
-                    **bonding_options:**
-                      **get_param: BondInterfaceOvsOptions**
+                  **bonding_options:**
+                    **get_param: BondInterfaceOvsOptions**
                     members:
                     - type: interface
                       name: nic2
@@ -350,7 +350,7 @@ This example shows how to create a deployment with one Controller node and two C
                       name: nic3
     {%- for network in networks if network.enabled|default(true) and network.name in role.networks %}
                   - type: vlan
-                    **device: bond1**
+                  **device: bond1**
                     vlan_id:
                       get_param: {{network.name}}NetworkVlanID
                     addresses:
