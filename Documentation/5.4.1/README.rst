@@ -267,6 +267,111 @@ This example shows how to create a deployment with one Controller node and two C
     OvercloudComputeFlavor: compute
     ComputeCount: 2
 
+4. **(Optional)** To enable Linux bonding with VLANs, perform the following instructions:
+
+  Rename single-nic-vlans as bond-with-vlans in network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample in the `Sample Templates`_ section.
+
+  Nuage uses the default Linux bridge and Linux bonds. For this to take effect, modify this network file with the following required changes and sample with those changes is provided below:
+
+::
+
+    /usr/share/openstack-tripleo-heat-templates/network/config/bond-with-vlans/role.role.j2.yaml
+
+
+:Step 1: Change ovs_bond to linux_bond
+
+:Step 2: Change br-bond and bridge_name to bond1
+
+:Step 3: Add bonding_options below dns_servers and point it to BondInterfaceOvsOptions
+
+:Step 4: Remove ovs_bond as member and move the containing members one level up.
+
+:Step5: Add the ``device`` option to the VLANs.
+
+::
+
+    ========
+    Original
+    ========
+    {%- if not role.name.startswith('ComputeOvsDpdk') %}
+                  - type: ovs_bridge
+    {%- if role.name.startswith('CephStorage') or role.name.startswith('ObjectStorage') or role.name.startswith('BlockStorage') %}
+                    name: br-bond
+    {%- else %}
+                    name: bridge_name
+    {%- endif %}
+                    dns_servers:
+                      get_param: DnsServers
+                    members:
+                    - type: ovs_bond
+                      name: bond1
+                      ovs_options:
+                        get_param: BondInterfaceOvsOptions
+                      members:
+                      - type: interface
+                        name: nic2
+                        primary: true
+                      - type: interface
+                        name: nic3
+    {%- for network in networks if network.enabled|default(true) and network.name in role.networks %}
+                    - type: vlan
+                      vlan_id:
+                        get_param: {{network.name}}NetworkVlanID
+                      addresses:
+                      - ip_netmask:
+                          get_param: {{network.name}}IpSubnet
+                      routes:
+                        list_concat_unique:
+                          - get_param: {{network.name}}InterfaceRoutes
+    {%- if network.name in role.default_route_networks %}
+                          - - default: true
+                              next_hop:
+                                get_param: {{network.name}}InterfaceDefaultRoute
+
+    ==================================
+    Modified (changes are **marked**)
+    ==================================
+    {%- if not role.name.startswith('ComputeOvsDpdk') %}
+                  - type: **linux_bond**
+    {%- if role.name.startswith('CephStorage') or role.name.startswith('ObjectStorage') or role.name.startswith('BlockStorage') %}
+                    name: **bond1**
+    {%- else %}
+                    name: **bond1**
+    {%- endif %}
+                    dns_servers:
+                      get_param: DnsServers
+                    **bonding_options:**
+                      **get_param: BondInterfaceOvsOptions**
+                    members:
+                    - type: interface
+                      name: nic2
+                      primary: true
+                    - type: interface
+                      name: nic3
+    {%- for network in networks if network.enabled|default(true) and network.name in role.networks %}
+                  - type: vlan
+                    **device: bond1**
+                    vlan_id:
+                      get_param: {{network.name}}NetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: {{network.name}}IpSubnet
+                    routes:
+                      list_concat_unique:
+                        - get_param: {{network.name}}InterfaceRoutes
+    {%- if network.name in role.default_route_networks %}
+                        - - default: true
+                            next_hop:
+                              get_param: {{network.name}}InterfaceDefaultRoute
+
+
+In OSPD 9 and later, a verification step was added where the Overcloud nodes ping the gateway to verify connectivity on the external network VLAN. Without this verification step, the deployment, such as one with Linux bonding and network isolation, would fail. For this verification step, the ExternalInterfaceDefaultRoute IP configured in the template network-environment.yaml should be reachable from the Overcloud Controller nodes on the external API VLAN. This gateway can also reside on the Undercloud. The gateway needs to be tagged with the same VLAN ID as that of the external API network of the Controller.
+
+In OSPD 13 and later, /usr/share/openstack-tripleo-heat-templates/environments/network-environment.j2.yaml gets the Network information for all the networks from /usr/share/openstack-tripleo-heat-templates/network_data.yaml file.
+
+.. Note:: ExternalInterfaceDefaultRoute IP should be able to reach outside because the Overcloud Controller uses this IP address as a default route to reach the Red Hat Registry to pull the Overcloud container images.
+
+
 
 Phase 7: Build the Docker images.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -384,10 +489,15 @@ Use the ``openstack overcloud deploy`` command options to pass the environment f
 
 ::
 
-    openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server
+    openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server
     
     For a virtual deployment, add the --libvirt-type parameter:
-    openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server
+    openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server
+
+3. For a Linux-bonding HA deployment with Nuage, use the following:
+
+::
+    openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server
 
 
 where:
@@ -395,6 +505,10 @@ where:
    * ``nova-nuage-config.yaml`` is Compute specific parameter values.
    * ``node-info.yaml`` is Information specifies count and flavor for Controller and Compute nodes.
    * ``overcloud_images.yaml`` is Nuage containers for Overcloud heat, Horizon and Neutron.
+   * ``network-environment.yaml`` Configures additional network environment variables
+   * ``network-isolation.yaml`` Enables creation of networks for isolated overcloud traffic
+   * ``net-bond-with-vlans.yaml`` Configures an IP address and a pair of bonded nics on each network
+
 
 
 Phase 10: Verify that OpenStack director has been deployed successfully.
@@ -740,6 +854,84 @@ nova-nuage-config.yaml For a KVM Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
+
+
+network-environment.j2.yaml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    #This file is an example of an environment file for defining the isolated
+    #networks and related parameters.
+    resource_registry:
+      # Network Interface templates to use (these files must exist). You can
+      # override these by including one of the net-*.yaml environment files,
+      # such as net-bond-with-vlans.yaml, or modifying the list here.
+    {%- for role in roles %}
+      # Port assignments for the {{role.name}}
+      OS::TripleO::{{role.name}}::Net::SoftwareConfig:
+        ../network/config/bond-with-vlans/{{role.deprecated_nic_config_name|default(role.name.lower() ~ ".yaml")}}
+    {%- endfor %}
+
+    parameter_defaults:
+      # This section is where deployment-specific configuration is done
+      #
+      # NOTE: (Since Rocky)
+      # ControlPlaneSubnetCidr: It is no longer a requirement to provide the
+      #                         parameter. The attribute is resolved from the
+      #                         ctlplane subnet(s).
+      # ControlPlaneDefaultRoute: It is no longer a requirement to provide this
+      #                           parameter. The attribute is resolved from the
+      #                           ctlplane subnet(s).
+      # EC2MetadataIp: It is no longer a requirement to provide this parameter. The
+      #                attribute is resolved from the ctlplane subnet(s).
+      #
+    {% for network in networks if network.enabled|default(true) %}
+      # Customize the IP subnet to match the local environment
+    {%-     if network.ipv6|default(false) %}
+      {{network.name}}NetCidr: '{{network.ipv6_subnet}}'
+    {%-     else %}
+      {{network.name}}NetCidr: '{{network.ip_subnet}}'
+    {%-     endif %}
+      # Customize the IP range to use for static IPs and VIPs
+    {%-     if network.name == 'External' %}
+      # Leave room if the external network is also used for floating IPs
+    {%-     endif %}
+    {%-     if network.ipv6|default(false) %}
+      {{network.name}}AllocationPools: {{network.ipv6_allocation_pools}}
+    {%-     else %}
+      {{network.name}}AllocationPools: {{network.allocation_pools}}
+    {%-     endif %}
+    {%-     if network.ipv6|default(false) and network.gateway_ipv6|default(false) %}
+      # Gateway router for routable networks
+      {{network.name}}InterfaceDefaultRoute: '{{network.gateway_ipv6}}'
+    {%-     elif network.gateway_ip|default(false) %}
+      # Gateway router for routable networks
+      {{network.name}}InterfaceDefaultRoute: '{{network.gateway_ip}}'
+    {%-     endif %}
+    {%-     if network.vlan is defined %}
+      # Customize the VLAN ID to match the local environment
+      {{network.name}}NetworkVlanID: {{network.vlan}}
+    {%-     endif %}
+    {%-     if network.enabled|default(true) and network.routes %}
+      # Routes to add to host_routes property of the subnets in neutron.
+      {{network.name}}Routes: {{network.routes|default([])}}
+    {%-     endif %}
+    {% endfor %}
+    {#- FIXME: These global parameters should be defined in a YAML file, e.g. network_data.yaml. #}
+      # Define the DNS servers (maximum 2) for the overcloud nodes
+      # When the list is no set or empty, the nameservers on the ctlplane subnets will be used.
+      # (ctlplane subnets nameservers are controlled by the ``undercloud_nameservers`` option in ``undercloud.conf``)
+      DnsServers: ['135.1.1.111']
+      # List of Neutron network types for tenant networks (will be used in order)
+      NeutronNetworkType: 'vxlan,vlan'
+      # The tunnel type for the tenant network (vxlan or gre). Set to '' to disable tunneling.
+      NeutronTunnelTypes: 'vxlan'
+      # Neutron VLAN ranges per network, for example 'datacentre:1:499,tenant:500:1000':
+      NeutronNetworkVLANRanges: 'datacentre:1:1000'
+      # Customize bonding options, e.g. "mode=4 lacp_rate=1 updelay=1000 miimon=100"
+      # for Linux bonds w/LACP, or "bond_mode=active-backup" for OVS active/backup.
+      BondInterfaceOvsOptions: "bond_mode=active-backup"
 
 
 node-info.yaml for Non-HA Deployments
