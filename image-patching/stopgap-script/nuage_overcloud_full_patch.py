@@ -194,7 +194,7 @@ def create_repo_file(reponame, repoUrl, image):
 #####
 # Function to clean up the repo file
 #####
-def delete_repo_file(reponame, repoUrl, image):
+def delete_repo_file(image):
     virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
     cmds_run(['rm -f create_repo'])
 
