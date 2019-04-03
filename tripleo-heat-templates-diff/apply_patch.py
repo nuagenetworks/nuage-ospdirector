@@ -22,7 +22,7 @@
 # Since different openstack-tripleo-heat-templates can require different
 # diff patches to be applied, this functionality takes care of hiding
 # those details while applying the right patch. Currently all versions
-# upto version openstack-tripleo-heat-templates-8.0.7-21 are handled.
+# upto version openstack-tripleo-heat-templates-8.2.0-6.2 are handled.
 # Later versions are not supported at this time.
 #
 # Usage: sudo ./apply_patch.py or sudo python apply_patch.py
