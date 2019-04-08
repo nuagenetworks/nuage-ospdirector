@@ -13,7 +13,7 @@ from logging import handlers
 # RhelPassword: Password for the RHEL subscription
 # RhelPool    : RHEL Pool to subscribe
 # RepoName    : Name of the local repository
-# RepoBaseUrl : Base URL of the local repository
+# RepoBaseUrl : URL to the repository for Nuage VRS and OpenStack packages to be installed
 # Version     : Version of OSP Director 14
 #
 # The following sequence is executed by the script
@@ -94,7 +94,7 @@ def show_help():
     cmds_run(['echo " --RhelPassword=Password for the RHEL Subscription"'])
     cmds_run(['echo " --RhelPool=Pool to subscribe to for base packages"'])
     cmds_run(['echo " --RepoName=Name for the local repo hosting the Nuage RPMs"'])
-    cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"'])
+    cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage VRS and OpenStack RPMs"'])
     cmds_run(['echo " --Version=OSP-Director version (14)"'])
     cmds_run(['echo " -h or --help: Show this message"'])
 
