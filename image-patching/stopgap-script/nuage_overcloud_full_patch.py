@@ -155,7 +155,6 @@ def add_files(image, version, workingDir):
     version = int(version)
     if version == 13:
         cmds_run(['cat <<EOT > version_13 \n'
-        'mkdir -p /etc/puppet/modules/nova/manifests/patch \n'
         'cp /etc/puppet/modules/nuage/manifests/13_files/neutron_init.pp /etc/puppet/modules/neutron/manifests/init.pp \n'
         'cp /etc/puppet/modules/nuage/manifests/13_files/conductor.pp /etc/puppet/modules/ironic/manifests/conductor.pp \n'
         'EOT'])
@@ -194,6 +193,7 @@ def create_repo_file(reponame, repoUrl, image):
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
     virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f create_repo'])
 
 
 #####
@@ -201,7 +201,6 @@ def create_repo_file(reponame, repoUrl, image):
 #####
 def delete_repo_file(image):
     virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
-    cmds_run(['rm -f create_repo'])
 
 
 #####
