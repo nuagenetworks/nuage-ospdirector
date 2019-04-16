@@ -297,7 +297,7 @@ def main(args):
         if 'no-signing-key' in argsDict:
 
             logger.warning("Image patching proceeding with package signature verification disabled. Nuage packages installed will not have package signatures verified.")
-	        global GPGCHECK, GPGKEY
+	    global GPGCHECK, GPGKEY
         cmds_run(['echo "Verifying pre-requisite packages for script"'])
         
         libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
@@ -349,7 +349,7 @@ def main(args):
 
         if 'AVRSBaseUrl' in argsDict:
             
-            create_repo_file('6wind', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0], GPGCHECK, GPGKEY)
+            create_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0], GPGCHECK, GPGKEY)
 
             cmds_run(['echo "Downloading AVRS Packages"'])
             if 'ProxyHostname' in argsDict and 'ProxyPort' in argsDict:
