@@ -13,7 +13,7 @@ from logging import handlers
 # RhelPassword: Password for the RHEL subscription
 # RhelPool    : RHEL Pool to subscribe
 # RepoName    : Name of the local repository
-# RepoBaseUrl : Base URL of the local repository
+# RepoBaseUrl : URL to the repository for Nuage VRS and OpenStack packages to be installed
 # Version     : Version of OSP Director 14
 #
 # The following sequence is executed by the script
@@ -32,6 +32,10 @@ NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage n
 NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
+
+### Gpg values
+GPGCHECK=0
+GPGKEY=''
 
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
@@ -94,8 +98,10 @@ def show_help():
     cmds_run(['echo " --RhelPassword=Password for the RHEL Subscription"'])
     cmds_run(['echo " --RhelPool=Pool to subscribe to for base packages"'])
     cmds_run(['echo " --RepoName=Name for the local repo hosting the Nuage RPMs"'])
-    cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"'])
+    cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage VRS and OpenStack RPMs"'])
     cmds_run(['echo " --Version=OSP-Director version (14)"'])
+    cmds_run(['echo " --RpmPublicKey=GPG Key"'])
+    cmds_run(['echo " --no-signing-key=Image patching proceeds with package signature verification disabled "'])
     cmds_run(['echo " -h or --help: Show this message"'])
 
 
@@ -146,6 +152,18 @@ def uninstall_packages(image, version):
             '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     virt_customize('"yum remove openvswitch[0-9]* -y" -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
 
+#####
+# Function to copy GPG Key to Overcloud image
+#####
+
+def copy_gpg(image, workingDir, gpg_file):
+    virt_copy('%s %s/%s /tmp' % (image, workingDir, gpg_file))
+    
+#####
+# Function to delete GPG Key from Overcloud image
+#####   
+def delete_gpg(image, gpg_file):
+    virt_customize('"rm -f /tmp/%s" -a %s --selinux-relabel' % (gpg_file, image))
 
 #####
 # Function to install Nuage packages that are required
@@ -155,18 +173,44 @@ def install_packages(image):
     cmds_run(['cat <<EOT > nuage_packages \n'
               'yum install %s -y \n'
               'yum install %s -y \n'
-	      'yum install %s -y \n'
-              'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES, NUAGE_VRS_PACKAGE)])
+              'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES)])
     virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f nuage_packages'])
 
+
+#####
+# Installing VRS and the dependencies for VRS
+#####
+
+def install_vrs(image):
+    cmds_run(['cat <<EOT > vrs_packages \n'
+              'yum install %s -y \n'
+              'EOT' % (NUAGE_VRS_PACKAGE)])
+    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f vrs_packages'])
 
 
 #####
 # Function to create the repo file
 #####
 
-def create_repo_file(reponame, repoUrl, image):
+def create_repo_file(reponame, repoUrl, image, gpgcheck, gpgkey):
+    cmds_run(['cat <<EOT > create_repo \n'
+              'touch /etc/yum.repos.d/nuage.repo \n'
+              'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
+              'echo "name=%s" >> /etc/yum.repos.d/nuage.repo \n'
+              'echo "baseurl=%s" >> /etc/yum.repos.d/nuage.repo \n'
+              'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
+              'echo "gpgcheck = %s" >> /etc/yum.repos.d/nuage.repo \n'
+	      'echo "gpgkey = file://%s" >> /etc/yum.repos.d/nuage.repo \n'
+              'EOT' % (reponame, repoUrl, gpgcheck, gpgkey)])
+    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f create_repo'])
+
+#####
+# Function to clean up the repo file
+#####
+def delete_repo_file(reponame, repoUrl, image):
     cmds_run(['cat <<EOT > create_repo \n'
               'touch /etc/yum.repos.d/nuage.repo \n'
               'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
@@ -175,14 +219,8 @@ def create_repo_file(reponame, repoUrl, image):
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
               'EOT' % (reponame, repoUrl)])
-    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-
-
-#####
-# Function to clean up the repo file
-#####
-def delete_repo_file(image):
     virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel --edit \'/usr/lib/systemd/system/rhel-autorelabel.service: $_ = "" if /StandardInput=tty/\'' % (image))
+    cmds_run(['rm -f create_repo'])
 
 
 def main(args):
@@ -195,7 +233,12 @@ def main(args):
                 try:
                     (key, val) = inputArg.split("=")
                 except ValueError:
-                    continue
+		    if '--no-signing-key' in args:
+                        argsDict['no-signing-key'] = ''
+                        continue
+                    else:
+			logger.error("Some of the keys provided in input arguments doesnt have proper values")
+                        raise show_help()
                 key = key[2:]
                 argsDict[key] = [val]
 
@@ -211,10 +254,32 @@ def main(args):
         workingDir = os.path.dirname(os.path.abspath(__file__))
 
         cmds_run(['echo "Verifying pre-requisite packages for script"'])
+	if 'RpmPublicKey' not in argsDict and 'no-signing-key' not in argsDict:
+
+            logger.error("'--RpmPublicKey' or '--no-signing-key' are not passed in image patching command, If verification of Nuage-supplied packages is not required, please restart image patching with the --no-signing-key option.")
+            sys.exit(1)
+            
+        if 'no-signing-key' in argsDict:
+
+            logger.warning("Image patching proceeding with package signature verification disabled. Nuage packages installed will not have package signatures verified.")
+	    global GPGCHECK, GPGKEY
+
+        cmds_run(['echo "Verifying pre-requisite packages for script"'])
         libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
         if 'not installed' in libguestfs:
             cmds_run(['echo "Please install libguestfs-tools-c package for the script to run"'])
             sys.exit()
+	
+	if 'RpmPublicKey' in argsDict:
+            file_exists = os.path.isfile(argsDict['RpmPublicKey'][0])
+            if file_exists:
+               GPGCHECK = 1
+               GPGKEY = '/tmp/' + argsDict['RpmPublicKey'][0]
+               cmds_run(['echo "Copying GpgKey"'])
+               copy_gpg(argsDict['ImageName'][0], workingDir, argsDict['RpmPublicKey'][0])
+            else:
+               logger.error("Nuage package signing key is not present in %s ,Installation cannot proceed.  Please place the signing key in the correct location and retry" %(argsDict['RpmPublicKey'][0]))
+               sys.exit(1)
 
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             cmds_run(['echo "Creating the RHEL subscription"'])
@@ -230,16 +295,23 @@ def main(args):
 
         cmds_run(['echo "Creating Repo File"'])
         if 'RepoName' in argsDict:
-            create_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            create_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0], GPGCHECK, GPGKEY)
         else:
-            create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0], GPGCHECK, GPGKEY)
 
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
 
-        if 'RepoName' in argsDict:
-            delete_repo_file(argsDict['ImageName'][0])
+        cmds_run(['echo "Installing VRS"'])
+        install_vrs(argsDict['ImageName'][0])
 
+        if 'RepoName' in argsDict:
+            delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+        else:
+            delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+	
+	if GPGCHECK:
+            delete_gpg(argsDict['ImageName'][0], argsDict['RpmPublicKey'][0])
 
         if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
             rhel_remove_subscription(argsDict['ImageName'][0])

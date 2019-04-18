@@ -16,7 +16,18 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 Now run the below command by providing required values
 
-`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=14`
+### With GPG KEY   
+ 
+
+Make sure to copy GPG-Key file to the same folder as "nuage_overcloud_full_patch.py" patching script location.
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=14 --RpmPublicKey='GPG-Key'`
+
+
+### Without GPG Key
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=14 --no-signing-key`
+
 
 This script takes in following input parameters:
   * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
@@ -27,6 +38,8 @@ This script takes in following input parameters:
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/14/html/director_installation_and_usage/preparing-for-director-installation#preparing-the-undercloud) in the 11th point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
   * Version is the OpenStack Platform director version (for Rocky, the version is 14).
+  * RpmPublicKey is the GPG-Key file name
+  * no-signing-key is 'Image patching proceeds with package signature verification disabled'
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.
 
