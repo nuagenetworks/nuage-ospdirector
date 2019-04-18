@@ -22,7 +22,7 @@
 # Since different openstack-tripleo-heat-templates can require different
 # diff patches to be applied, this functionality takes care of hiding
 # those details while applying the right patch. Currently all versions
-# upto version openstack-tripleo-heat-templates-8.0.7-21 are handled.
+# upto version openstack-tripleo-heat-templates-8.2.0-6.2 are handled.
 # Later versions are not supported at this time.
 #
 # Usage: sudo ./apply_patch.py or sudo python apply_patch.py
@@ -102,6 +102,7 @@ def main():
     (e2, v2, r2) = stringToVersion(constants.VERSION_2_CHECK)
     (e3, v3, r3) = stringToVersion(constants.VERSION_3_CHECK)
     (e4, v4, r4) = stringToVersion(constants.VERSION_4_CHECK)
+    (e5, v5, r5) = stringToVersion(constants.VERSION_5_CHECK)
 
     
 
@@ -110,6 +111,7 @@ def main():
     version_2_rc = version_compare((e0, v0, r0), (e2, v2, r2))
     version_3_rc = version_compare((e0, v0, r0), (e3, v3, r3))
     version_4_rc = version_compare((e0, v0, r0), (e4, v4, r4))
+    version_5_rc = version_compare((e0, v0, r0), (e5, v5, r5))
 
     if version_1_rc <= 0:
         diff_version = constants.VERSION_1_DIFF
@@ -123,7 +125,10 @@ def main():
     elif version_3_rc > 0 and version_4_rc <= 0:
         diff_version = constants.VERSION_4_DIFF
 
-    elif version_4_rc > 0:
+    elif version_4_rc > 0 and version_5_rc <= 0:
+        diff_version = constants.VERSION_5_DIFF
+
+    elif version_5_rc > 0:
         print "Not supported for %s" % version
         sys.exit(1)
 
