@@ -1023,7 +1023,7 @@ For AVRS, also include following role and environment files.
 
 ::
 
-    openstack overcloud deploy --templates -r /home/stack/templates/sriov-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server
+    openstack overcloud deploy --templates -r /home/stack/templates/sriov-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server
 
 where:
    * ``neutron-nuage-config.yaml`` is Controller specific parameter values.
