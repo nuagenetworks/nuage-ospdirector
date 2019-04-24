@@ -18,15 +18,15 @@ VERSION_1_CHECK = "openstack-tripleo-heat-templates-8.0.2-4.el7ost.noarch"
 VERSION_2_CHECK = "openstack-tripleo-heat-templates-8.0.2-43.el7ost.noarch"
 VERSION_3_CHECK = "openstack-tripleo-heat-templates-8.0.7-4.el7ost.noarch"
 VERSION_4_CHECK = "openstack-tripleo-heat-templates-8.0.7-21.el7ost.noarch"
-VERSION_5_CHECK = "openstack-tripleo-heat-templates-8.2.0-6.2.el7ost.noarch"
+VERSION_5_CHECK = "openstack-tripleo-heat-templates-8.3.1-12.el7ost.noarch"
 VERSION_1_DIFF = "8.0.2-4"
 VERSION_2_DIFF = "8.0.2-43"
 VERSION_3_DIFF = "8.0.7-4"
 VERSION_4_DIFF = "8.0.7-21"
-VERSION_5_DIFF = "8.2.0-6.2"
+VERSION_5_DIFF = "8.3.1-12"
 DIFF = 'diff_'
 
 SUPPORTED_FEATURES = ['avrs']
 COMMON_PATCH = ["common"]
 
-PATCH_COMMAND = "patch -p0 -N -d /usr/share < "
+PATCH_COMMAND = "patch -p0 -N -d / < "

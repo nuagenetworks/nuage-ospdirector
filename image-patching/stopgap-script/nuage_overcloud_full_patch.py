@@ -31,6 +31,8 @@ from logging import handlers
 NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage nuage-bgp nuage-openstack-neutronclient"
 NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
+MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint"
+KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
 logger = logging.getLogger('')
@@ -253,6 +255,35 @@ def copy_avrs_packages(image, avrs_baseurl, proxy_hostname = None, proxy_port = 
     cmds_run(['rm -f nuage_avrs_packages'])
 
 
+#####
+# Installing Mellanox Packages
+#####
+
+def install_mellanox(image, workingDir):
+    # This is a temporary WA unitl all the patches for os-net-config will be merged and available in overcloud-full.qcow2
+    virt_copy('%s %s/os-net-config/os_net_config/* /usr/lib/python2.7/site-packages/os_net_config' % (image, workingDir))
+
+    #Installing Mellanox OFED Packages
+    cmds_run(['cat <<EOT > mellanox_packages \n'
+              'yum install %s -y \n'
+              'systemctl disable mlnx-en.d \n'
+              'EOT' % (MLNX_OFED_PACKAGES)])
+    virt_customize_run('mellanox_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f mellanox_packages'])
+
+
+#####
+# Updating kernel to Red Hat Hot Fix
+#####
+
+def update_kernel(image):
+    # Updating Kernel
+    cmds_run(['cat <<EOT > kernel_packages \n'
+              'yum install %s -y \n'
+              'EOT' % (KERNEL_PACKAGES)])
+    virt_customize_run('kernel_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f kernel_packages'])
+
 
 def main(args):
     argsDict = {}
@@ -303,11 +334,17 @@ def main(args):
         else:
             create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
 
+        cmds_run(['echo "Updating Kernel"'])
+        update_kernel(argsDict['ImageName'][0])
+
         cmds_run(['echo "Installing Nuage Packages"'])
         install_packages(argsDict['ImageName'][0])
 
         cmds_run(['echo "Installing VRS"'])
         install_vrs(argsDict['ImageName'][0])
+
+        cmds_run(['echo "Installing MLNX OFED Packages"'])
+        install_mellanox(argsDict['ImageName'][0], workingDir)
 
         cmds_run(['echo "Cleaning up"'])
         if 'RepoName' in argsDict:

@@ -14,6 +14,9 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 `cp overcloud-full.qcow2 overcloud-full-bk.qcow2`
 
+Note: This is a temporary WA unitl all the patches for os-net-config will be merged and available in overcloud-full.qcow2
+Untar the os-net-config.tar.gz provided by Mellanox and place it in the same location as overcloud-full.qcow2.
+
 Now run the below command by providing required values   
 
 `python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
@@ -25,7 +28,7 @@ This script takes in following input parameters:
   * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
   * RhelPassword is the password for the RedHat Enterprise Linux subscription
   * RepoName is the name of the local repository hosting the Nuage RPMs.
-  * RepoBaseUrl is the base URL for the repository hosting the Nuage RPMs (such as http://IP/reponame)
+  * RepoBaseUrl is the base URL for the repository hosting the Nuage, Mellanox OFED and Red Hat Hot Fix RPMs (such as http://IP/reponame)
   * AVRSBaseUrl is the base URL for the repository hosting the 6Wind and AVRS RPMs (such as http://IP/reponame)
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
