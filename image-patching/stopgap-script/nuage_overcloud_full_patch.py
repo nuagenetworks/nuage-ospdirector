@@ -30,7 +30,7 @@ from logging import handlers
 
 ### List of Nuage packages
 NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage nuage-bgp nuage-openstack-neutronclient"
-NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
@@ -163,7 +163,6 @@ def add_files(image, version, workingDir):
     if version == 13:
         cmds_run(['cat <<EOT > version_13 \n'
         'cp /etc/puppet/modules/nuage/manifests/13_files/neutron_init.pp /etc/puppet/modules/neutron/manifests/init.pp \n'
-        'cp /etc/puppet/modules/nuage/manifests/13_files/conductor.pp /etc/puppet/modules/ironic/manifests/conductor.pp \n'
         'EOT'])
         virt_customize(
             '"mkdir -p /etc/puppet/modules/nuage/manifests/13_files" -a %s --memsize %s --selinux-relabel' % (
