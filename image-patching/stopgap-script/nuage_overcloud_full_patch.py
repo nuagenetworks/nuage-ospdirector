@@ -260,7 +260,7 @@ def copy_avrs_packages(image, avrs_baseurl, proxy_hostname = None, proxy_port = 
 #####
 
 def install_mellanox(image, workingDir):
-    # This is a temporary WA unitl all the patches for os-net-config will be merged and available in overcloud-full.qcow2
+    # This is a temporary workaround until all the patches for os-net-config will be merged and available in overcloud-full.qcow2
     virt_copy('%s %s/os-net-config/os_net_config/* /usr/lib/python2.7/site-packages/os_net_config' % (image, workingDir))
 
     #Installing Mellanox OFED Packages

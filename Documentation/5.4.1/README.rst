@@ -725,8 +725,7 @@ In OSPD 13 and later, /usr/share/openstack-tripleo-heat-templates/environments/n
 
 7. **(Optional)** To enable VRS Offload (OVRS) with Mellanox CX-5, perform the following instrctions:
 
-.. Note:: In Mellanox CX-5 NIC, only single port is supported for VRS Offload.
-          This feature uses same role as ComputeSriov  and should not share the deployment with traditional SRIOV.
+.. Note:: This feature uses same role as ComputeSriov and should not share the deployment with traditional SRIOV.
 
 :Step 1: Create a new sriov-role.yaml file to deploy SR-IOV Compute nodes. The command used to create this file is:
 
@@ -763,33 +762,34 @@ Create a flavor and profile for computesriov:
     ComputeSriovCount: 2
 
 
-:Step 4: Create FW folder that will contain all the Mellanox Firmware bin files on a machine that has httpd server running. (User can use the undercloud itself)
+:Step 4: As part of overcloud deployment, Mellanox firstboot template ``/home/stack/templates-original/mellanox_fw_update.yaml`` will be updating firmware on CX5 interface. Create FW folder that will contain all the Mellanox Firmware bin files on a machine that has httpd server running. (User can use the undercloud itself)
 
 ::
+
     $ mkdir -p /var/www/html/FW_<VERSION>
 
 
-:Step 5: Download and place all the Mellanox Firmware bins to the folder created above
+:Step 5: Download and place all the Mellanox Firmware bins to the folder created above and set ``BIN_DIR_URL`` in ``/home/stack/templates/mellanox-environment.yaml`` to the above URL. Sample is provided in `Sample Templates`_ section.
 
 
 :Step 6: Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample for Offload VRS in the `Sample Templates`_ section.
 
 
-:Step 7: Modify the network-templates based on your topology and configure CX-5 NIC as shown below
+:Step 7: Modify the network-templates based on your topology and configure CX-5 NIC on Compute nodes as shown below
 
 ::
 
         * Single Interface
             - Define "MellanoxTenantPort1" as type string in parameters section
-        ::
+
                 ...
                     MellanoxTenantPort1:
                       description: Mellanox Tenant Port1
                       type: string
                 ...
 
-            - Sample netwrok-config for CX5 NIC using new os-net-config is shown below
-        ::
+            - Sample netwrok-config for CX5 NIC on Compute nodes using new os-net-config is shown below
+
                 ...
                     - type: sriov_pf
                       name:
@@ -800,6 +800,52 @@ Create a flavor and profile for computesriov:
                       addresses:
                       - ip_netmask:
                           get_param: TenantIpSubnet
+                ...
+
+        * Linux Bonding with vlan
+            - Define "MellanoxTenantPort1" and "MellanoxTenantPort2" as type string in parameters section
+
+                ...
+                    MellanoxTenantPort1:
+                      description: Mellanox Tenant Port1
+                      type: string
+                    MellanoxTenantPort2:
+                      description: Mellanox Tenant Port2
+                      type: string
+                ...
+
+            - Sample netwrok-config for Linux Bonding over CX5 NICs on Compute nodes using new os-net-config is shown below
+
+                ...
+                  - type: linux_bond
+                    name: tenant-bond
+                    dns_servers:
+                      get_param: DnsServers
+                    bonding_options:
+                      get_param: BondInterfaceOvsOptions
+                    members:
+                    - type: sriov_pf
+                      name:
+                        get_param: MellanoxTenantPort1
+                      link_mode: switchdev
+                      numvfs: 8
+                      promisc: true
+                      use_dhcp: false
+                      primary: true
+                    - type: sriov_pf
+                      name:
+                        get_param: MellanoxTenantPort2
+                      link_mode: switchdev
+                      numvfs: 8
+                      promisc: true
+                      use_dhcp: false
+                  - type: vlan
+                    device: tenant-bond
+                    vlan_id:
+                      get_param: TenantNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: TenantIpSubnet
                 ...
 
 
