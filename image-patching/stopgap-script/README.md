@@ -14,7 +14,7 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 `cp overcloud-full.qcow2 overcloud-full-bk.qcow2`
 
-Note: This is a temporary WA unitl all the patches for os-net-config will be merged and available in overcloud-full.qcow2
+Note: This is a temporary workaround until all the patches for os-net-config will be merged and available in overcloud-full.qcow2
 Untar the os-net-config.tar.gz provided by Mellanox and place it in the same location as overcloud-full.qcow2.
 
 Now run the below command by providing required values   
