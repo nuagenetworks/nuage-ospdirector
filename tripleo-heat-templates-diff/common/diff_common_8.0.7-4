@@ -1,6 +1,6 @@
-diff -ruN openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml
---- openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml 2018-12-17 17:21:10.278072387 -0500
-+++ openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml  2018-12-17 17:21:10.278072387 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml /usr/share/openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml 2018-12-17 17:21:10.278072387 -0500
++++ /usr/share/openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml  2018-12-17 17:21:10.278072387 -0500
 @@ -84,6 +84,8 @@
              - - {get_attr: [IronicConductorBase, role_data, step_config]}
                - {get_attr: [MySQLClient, role_data, step_config]}
@@ -10,9 +10,9 @@ diff -ruN openstack-tripleo-heat-templates-original/docker/services/ironic-condu
        kolla_config:
          /var/lib/kolla/config_files/ironic_conductor.json:
            command: /usr/bin/ironic-conductor
-diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml	2018-12-17 17:21:10.278072387 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml	2018-12-17 17:25:00.448072387 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml	2018-12-17 17:21:10.278072387 -0500
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml	2018-12-17 17:25:00.448072387 -0500
 @@ -161,6 +161,10 @@
    MonitoringSubscriptionIronicConductor:
      default: 'overcloud-ironic-conductor'
@@ -44,9 +44,9 @@ diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-condu
            - ironic::conductor::api_url: {get_param: [EndpointMap, IronicInternal, uri_no_suffix]}
              ironic::conductor::cleaning_disk_erase: {get_param: IronicCleaningDiskErase}
              ironic::conductor::cleaning_network: {get_param: IronicCleaningNetwork}
-diff -ruN openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml	2018-12-17 17:21:10.279072387 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml	2018-12-17 17:22:06.767072387 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-base.yaml	2018-12-17 17:21:10.279072387 -0500
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-base.yaml	2018-12-17 17:22:06.767072387 -0500
 @@ -116,6 +116,12 @@
    EnableInternalTLS:
      type: boolean

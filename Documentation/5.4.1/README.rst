@@ -120,17 +120,27 @@ The integration includes the following steps:
 
     - The typical OpenStack director deployment scenario assumes that all the packages are installed on the overcloud-full image. The Overcloud qcow image (for example, overcloud-full.qcow2) needs to be patched with the following RPMs:
 
-        - nuage-bgp
-        - nuage-metadata-agent
-        - nuage-openstack-heat
-        - nuage-openstack-horizon
-        - nuage-openstack-neutron
-        - nuage-openstack-neutronclient
-        - nuage-ironic-inspector (required for Ironic Inspector Integration)
-        - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-0.0.0
-        - selinux-policy-nuage
-        - nuage-topology-collector
+        - Nuage Packages
+            - nuage-bgp
+            - nuage-metadata-agent
+            - nuage-openstack-heat
+            - nuage-openstack-horizon
+            - nuage-openstack-neutron
+            - nuage-openstack-neutronclient
+            - nuage-ironic-inspector (required for Ironic Inspector Integration)
+            - nuage-openvswitch (Nuage VRS)
+            - nuage-puppet-modules-0.0.0
+            - selinux-policy-nuage
+            - nuage-topology-collector
+        - Mellanox Packages
+            - kmod-mlnx-en
+            - mlnx-en-utils
+            - mstflint
+        - Red Hat Packages
+            - kernel
+            - kernel-tools
+            - kernel-tools-libs
+            - python-perf
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
@@ -216,19 +226,28 @@ Create separate repositories for the following packages:
 OSC and VRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~
 
-    * Nuage-bgp
-    * Nuage-metadata-agent
-    * Nuage-nova-extensions
-    * Nuage-openstack-heat
-    * Nuage-openstack-horizon
-    * Nuage-openstack-neutron
-    * Nuage-openstack-neutronclient
-    * Nuage-ironic-inspector (required for Ironic Inspector Integration)
-    * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 0.0.0)
-    * Nuage-topology-collector
-    * Selinux-policy-nuage
-
+    * Nuage Packages
+        * Nuage-bgp
+        * Nuage-metadata-agent
+        * Nuage-nova-extensions
+        * Nuage-openstack-heat
+        * Nuage-openstack-horizon
+        * Nuage-openstack-neutron
+        * Nuage-openstack-neutronclient
+        * Nuage-ironic-inspector (required for Ironic Inspector Integration)
+        * nuage-openvswitch (VRS)
+        * nuage-puppet-modules (Latest version 0.0.0)
+        * Nuage-topology-collector
+        * Selinux-policy-nuage
+    * Mellanox Packages
+        * kmod-mlnx-en
+        * mlnx-en-utils
+        * mstflint
+    * Red Hat Packages
+        * kernel
+        * kernel-tools
+        * kernel-tools-libs
+        * python-perf
 
 6WIND and AVRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -513,7 +532,7 @@ For AVRS integration, follow these steps:
 
 5. **(Optional)** To enable Linux bonding with VLANs, perform the following instructions:
 
-  Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample in the `Sample Templates`_ section.
+  Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample for Linux Bonding in the `Sample Templates`_ section.
 
   Nuage uses the default Linux bridge and Linux bonds. For this to take effect, modify this network file with the following required changes:
 
@@ -706,8 +725,7 @@ In OSPD 13 and later, /usr/share/openstack-tripleo-heat-templates/environments/n
 
 7. **(Optional)** To enable VRS Offload (OVRS) with Mellanox CX-5, perform the following instrctions:
 
-.. Note:: In Mellanox CX-5 NIC, only single port is supported for VRS Offload.
-          This feature uses same role as ComputeSriov  and should not share the deployment with traditional SRIOV.
+.. Note:: This feature uses same role as ComputeSriov and should not share the deployment with traditional SRIOV.
 
 :Step 1: Create a new sriov-role.yaml file to deploy SR-IOV Compute nodes. The command used to create this file is:
 
@@ -743,10 +761,102 @@ Create a flavor and profile for computesriov:
     OvercloudComputeSriovFlavor: computesriov
     ComputeSriovCount: 2
 
-:Step 4: For "Deploy Overcloud", we need to pass ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`` and ``/usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml`` as environment files.
+
+:Step 4: As part of overcloud deployment, Mellanox firstboot template ``/home/stack/templates-original/mellanox_fw_update.yaml`` will be updating firmware on CX5 interface. Create FW folder that will contain all the Mellanox Firmware bin files on a machine that has httpd server running. (User can use the undercloud itself)
+
+::
+
+    $ mkdir -p /var/www/html/FW_<VERSION>
 
 
-:Step 5: There are no changes required for ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml``. We need set some parameters in ``/usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml`` and a sample file is provided in `Sample Templates`_ section.
+:Step 5: Download and place all the Mellanox Firmware bins to the folder created above and set ``BIN_DIR_URL`` in ``/home/stack/templates/mellanox-environment.yaml`` to the above URL. Sample is provided in `Sample Templates`_ section.
+
+
+:Step 6: Edit network-environment.j2.yaml file in /usr/share/openstack-tripleo-heat-templates/environments/. See the sample for Offload VRS in the `Sample Templates`_ section.
+
+
+:Step 7: Modify the network-templates based on your topology and configure CX-5 NIC on Compute nodes as shown below
+
+::
+
+        * Single Interface
+            - Define "MellanoxTenantPort1" as type string in parameters section
+
+                ...
+                    MellanoxTenantPort1:
+                      description: Mellanox Tenant Port1
+                      type: string
+                ...
+
+            - Sample netwrok-config for CX5 NIC on Compute nodes using new os-net-config is shown below
+
+                ...
+                    - type: sriov_pf
+                      name:
+                        get_param: MellanoxTenantPort1
+                      link_mode: switchdev
+                      numvfs: 15
+                      use_dhcp: false
+                      addresses:
+                      - ip_netmask:
+                          get_param: TenantIpSubnet
+                ...
+
+        * Linux Bonding with vlan
+            - Define "MellanoxTenantPort1" and "MellanoxTenantPort2" as type string in parameters section
+
+                ...
+                    MellanoxTenantPort1:
+                      description: Mellanox Tenant Port1
+                      type: string
+                    MellanoxTenantPort2:
+                      description: Mellanox Tenant Port2
+                      type: string
+                ...
+
+            - Sample netwrok-config for Linux Bonding over CX5 NICs on Compute nodes using new os-net-config is shown below
+
+                ...
+                  - type: linux_bond
+                    name: tenant-bond
+                    dns_servers:
+                      get_param: DnsServers
+                    bonding_options:
+                      get_param: BondInterfaceOvsOptions
+                    members:
+                    - type: sriov_pf
+                      name:
+                        get_param: MellanoxTenantPort1
+                      link_mode: switchdev
+                      numvfs: 8
+                      promisc: true
+                      use_dhcp: false
+                      primary: true
+                    - type: sriov_pf
+                      name:
+                        get_param: MellanoxTenantPort2
+                      link_mode: switchdev
+                      numvfs: 8
+                      promisc: true
+                      use_dhcp: false
+                  - type: vlan
+                    device: tenant-bond
+                    vlan_id:
+                      get_param: TenantNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: TenantIpSubnet
+                ...
+
+
+:Step 8: For "Deploy Overcloud", we need to pass ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`` as environment file.
+
+
+:Step 9: We also need to create ``/home/stack/templates/ovs-hw-offload.yaml`` and ``/home/stack/templates/mellanox-environment.yaml`` environment files.
+
+
+:Step 10: There are no changes required for ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml``. We need set some parameters in ``/home/stack/templates/ovs-hw-offload.yaml`` and ``/home/stack/templates/mellanox-environment.yaml``. A sample file is provided in `Sample Templates`_ section.
+
 
 
 8. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
@@ -1023,7 +1133,7 @@ For AVRS, also include following role and environment files.
 
 ::
 
-    openstack overcloud deploy --templates -r /home/stack/templates/sriov-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/ovs-hw-offload.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server
+    openstack overcloud deploy --templates -r /home/stack/templates/sriov-role.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/docker-insecure-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/net-multiple-nics.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/mellanox-environment.yaml -e /home/stack/templates/ovs-hw-offload.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server
 
 where:
    * ``neutron-nuage-config.yaml`` is Controller specific parameter values.
@@ -1039,6 +1149,7 @@ where:
    * ``ironic-role.yaml`` Enables Ironic Inspector service for Controller role
    * **``ovs-hw-offload.yaml``** Enables OVS Hardware Offload on VRS Offload Compute nodes
    * **``host-config-and-reboot.yaml``** Enables SRIOV and performs Reboot on VRS Offload Compute Nodes
+   * **``mellanox-environment.yaml``** Mellanox First Boot Firmware Config
    * ``ntp-server`` The NTP for overcloud nodes.
 
 
@@ -1403,8 +1514,8 @@ Sample Templates
 For the latest templates, go to the `Links to Nuage and OpenStack Resources`_ section.
 
 
-network-environment.j2.yaml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+network-environment.j2.yaml for Linux Bonding
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1418,6 +1529,76 @@ network-environment.j2.yaml
       # Port assignments for the {{role.name}}
       OS::TripleO::{{role.name}}::Net::SoftwareConfig:
         ../network/config/bond-with-vlans/{{role.deprecated_nic_config_name|default(role.name.lower() ~ ".yaml")}}
+    {%- endfor %}
+
+    parameter_defaults:
+      # This section is where deployment-specific configuration is done
+      # CIDR subnet mask length for provisioning network
+      ControlPlaneSubnetCidr: '24'
+      # Gateway router for the provisioning network (or Undercloud IP)
+      ControlPlaneDefaultRoute: 192.168.24.1
+      EC2MetadataIp: 192.168.24.1  # Generally the IP of the Undercloud
+      # Customize the IP subnets to match the local environment
+    {%- for network in networks if network.enabled|default(true) %}
+    {%- if network.ipv6|default(false) %}
+      {{network.name}}NetCidr: '{{network.ipv6_subnet}}'
+    {%- else %}
+      {{network.name}}NetCidr: '{{network.ip_subnet}}'
+    {%- endif %}
+    {%- endfor %}
+      # Customize the VLAN IDs to match the local environment
+    {%- for network in networks if network.enabled|default(true) %}
+    {%- if network.vlan is defined %}
+      {{network.name}}NetworkVlanID: {{network.vlan}}
+    {%- endif %}
+    {%- endfor %}
+    {%- for network in networks if network.enabled|default(true) %}
+    {%- if network.name == 'External' %}
+      # Leave room if the external network is also used for floating IPs
+    {%- endif %}
+    {%- if network.ipv6|default(false) %}
+      {{network.name}}AllocationPools: {{network.ipv6_allocation_pools}}
+    {%- else %}
+      {{network.name}}AllocationPools: {{network.allocation_pools}}
+    {%- endif %}
+    {%- endfor %}
+      # Gateway routers for routable networks
+    {%- for network in networks if network.enabled|default(true) %}
+    {%- if network.ipv6|default(false) and network.gateway_ipv6|default(false) %}
+      {{network.name}}InterfaceDefaultRoute: '{{network.gateway_ipv6}}'
+    {%- elif network.gateway_ip|default(false) %}
+      {{network.name}}InterfaceDefaultRoute: '{{network.gateway_ip}}'
+    {%- endif %}
+    {%- endfor %}
+    {#- FIXME: These global parameters should be defined in a YAML file, e.g. network_data.yaml. #}
+      # Define the DNS servers (maximum 2) for the overcloud nodes
+      DnsServers: ["135.1.1.111","135.227.146.166"]
+      # List of Neutron network types for tenant networks (will be used in order)
+      NeutronNetworkType: 'vxlan,vlan'
+      # The tunnel type for the tenant network (vxlan or gre). Set to '' to disable tunneling.
+      NeutronTunnelTypes: 'vxlan'
+      # Neutron VLAN ranges per network, for example 'datacentre:1:499,tenant:500:1000':
+      NeutronNetworkVLANRanges: 'datacentre:1:1000'
+      # Customize bonding options, e.g. "mode=4 lacp_rate=1 updelay=1000 miimon=100"
+      # for Linux bonds w/LACP, or "bond_mode=active-backup" for OVS active/backup.
+      BondInterfaceOvsOptions: "bond_mode=active-backup"
+
+
+network-environment.j2.yaml for Offload VRS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    #This file is an example of an environment file for defining the isolated
+    #networks and related parameters.
+    resource_registry:
+      # Network Interface templates to use (these files must exist). You can
+      # override these by including one of the net-*.yaml environment files,
+      # such as net-bond-with-vlans.yaml, or modifying the list here.
+    {%- for role in roles %}
+      # Port assignments for the {{role.name}}
+      OS::TripleO::{{role.name}}::Net::SoftwareConfig:
+        ../network/config/multiple-nics/{{role.deprecated_nic_config_name|default(role.name.lower() ~ ".yaml")}}
     {%- endfor %}
 
     parameter_defaults:
@@ -1658,9 +1839,6 @@ ovs-hw-offload.yaml
     # This works by configuring SR-IOV NIC with switchdev and OVS Hardware Offload on
     # compute nodes. The feature supported in OVS 2.8.0
 
-    resource_registry:
-      OS::TripleO::Services::NeutronSriovHostConfig: ../puppet/services/neutron-sriov-host-config.yaml
-
     parameter_defaults:
 
       NovaSchedulerDefaultFilters: ['RetryFilter','AvailabilityZoneFilter','RamFilter','ComputeFilter','ComputeCapabilitiesFilter','ImagePropertiesFilter','ServerGroupAntiAffinityFilter','ServerGroupAffinityFilter','PciPassthroughFilter']
@@ -1676,14 +1854,35 @@ ovs-hw-offload.yaml
         #   2. You can pass your custom Tuned Profile to apply to the host
         TunedProfileName: ""
         OvsHwOffload: True
-        # Number of VFs that needs to be configured for a physical interface
-        NeutronSriovNumVFs: ["enp23s0f1:4:switchdev"]
         # Mapping of SR-IOV PF interface to neutron physical_network.
         # In case of Vxlan/GRE physical_network should be null.
         # In case of flat/vlan the physical_network should as configured in neutron.
         NovaPCIPassthrough:
           - devname: "enp23s0f1"
             physical_network: null
+
+
+mellanox-environment.yaml
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    resource_registry:
+      OS::TripleO::ComputeSriov::NodeUserData: ./mellanox_fw_update.yaml
+
+    parameter_defaults:
+      ################
+      # Nic's params #
+      ################
+      MellanoxTenantPort1: "ens15f0"
+
+      ########################
+      # FIRST Boot FW config #
+      ########################
+
+      BIN_DIR_URL: "http://192.168.24.1/FW_16_25_0310/"
+      NUM_OF_VFS: 64
+      SRIOV_EN: True
 
 
 docker-insecure-registry.yaml for One Local Registry

@@ -1,6 +1,6 @@
-diff -ruN openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml
---- openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml     2019-01-31 14:39:48.255175754 -0500
-+++ openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml      2019-01-31 14:44:25.647175754 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml /usr/share/openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/docker/services/ironic-conductor.yaml     2019-01-31 14:39:48.255175754 -0500
++++ /usr/share/openstack-tripleo-heat-templates/docker/services/ironic-conductor.yaml      2019-01-31 14:44:25.647175754 -0500
 @@ -84,6 +84,8 @@
              - - {get_attr: [IronicConductorBase, role_data, step_config]}
                - {get_attr: [MySQLClient, role_data, step_config]}
@@ -10,9 +10,9 @@ diff -ruN openstack-tripleo-heat-templates-original/docker/services/ironic-condu
        kolla_config:
          /var/lib/kolla/config_files/ironic_conductor.json:
            command: /usr/bin/ironic-conductor
-diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml     2019-01-31 14:39:48.334175754 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml      2019-01-31 14:42:16.246175754 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/ironic-conductor.yaml     2019-01-31 14:39:48.334175754 -0500
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/ironic-conductor.yaml      2019-01-31 14:42:16.246175754 -0500
 @@ -161,6 +161,10 @@
    MonitoringSubscriptionIronicConductor:
      default: 'overcloud-ironic-conductor'
@@ -44,9 +44,9 @@ diff -ruN openstack-tripleo-heat-templates-original/puppet/services/ironic-condu
            - ironic::conductor::api_url: {get_param: [EndpointMap, IronicInternal, uri_no_suffix]}
              ironic::conductor::cleaning_disk_erase: {get_param: IronicCleaningDiskErase}
              ironic::conductor::cleaning_network: {get_param: IronicCleaningNetwork}
-diff -ruN openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml openstack-tripleo-heat-templates/docker/services/neutron-api.yaml
---- openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml  2019-01-31 14:39:48.445175754 -0500
-+++ openstack-tripleo-heat-templates/docker/services/neutron-api.yaml   2019-01-31 21:10:57.576175754 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml /usr/share/openstack-tripleo-heat-templates/docker/services/neutron-api.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/docker/services/neutron-api.yaml  2019-01-31 14:39:48.445175754 -0500
++++ /usr/share/openstack-tripleo-heat-templates/docker/services/neutron-api.yaml   2019-01-31 21:10:57.576175754 -0500
 @@ -244,6 +244,11 @@
            when:
              - step|int == 6
@@ -59,9 +59,9 @@ diff -ruN openstack-tripleo-heat-templates-original/docker/services/neutron-api.
          - name: Neutron package update workaround
            yum: name=python-networking-odl state=latest
            when:
-diff -ruN openstack-tripleo-heat-templates-original/puppet/services/neutron-compute-plugin-nuage.yaml openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/neutron-compute-plugin-nuage.yaml 2019-01-31 00:27:45.770000000 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml  2019-01-31 00:26:21.594000000 -0500
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-compute-plugin-nuage.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-compute-plugin-nuage.yaml 2019-01-31 00:27:45.770000000 -0500
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-compute-plugin-nuage.yaml  2019-01-31 00:26:21.594000000 -0500
 @@ -75,6 +75,25 @@
      description: Support for non-default MTU configured on each Compute node
      type: string

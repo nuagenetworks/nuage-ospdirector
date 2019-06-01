@@ -1,6 +1,6 @@
-diff -ruN openstack-tripleo-heat-templates-original/common/deploy-steps.j2 openstack-tripleo-heat-templates/common/deploy-steps.j2
---- openstack-tripleo-heat-templates-original/common/deploy-steps.j2	2019-04-03 13:53:57.240175754 -0400
-+++ openstack-tripleo-heat-templates/common/deploy-steps.j2	2019-04-03 13:55:11.314175754 -0400
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/common/deploy-steps.j2 /usr/share/openstack-tripleo-heat-templates/common/deploy-steps.j2
+--- /usr/share/openstack-tripleo-heat-templates-original/common/deploy-steps.j2	2019-04-03 13:53:57.240175754 -0400
++++ /usr/share/openstack-tripleo-heat-templates/common/deploy-steps.j2	2019-04-03 13:55:11.314175754 -0400
 @@ -355,7 +355,7 @@
    {%- for dep in enabled_roles %}
        - {{dep.name}}Deployment_Step{{deploy_steps_max - 1}}
@@ -10,9 +10,9 @@ diff -ruN openstack-tripleo-heat-templates-original/common/deploy-steps.j2 opens
      properties:
          servers: {get_param: [servers, {{role.name}}]}
  
-diff -ruN openstack-tripleo-heat-templates-original/docker/services/nova-compute-avrs.yaml openstack-tripleo-heat-templates/docker/services/nova-compute-avrs.yaml
---- openstack-tripleo-heat-templates-original/docker/services/nova-compute-avrs.yaml	1969-12-31 19:00:00.000000000 -0500
-+++ openstack-tripleo-heat-templates/docker/services/nova-compute-avrs.yaml	2019-04-03 13:55:39.937175754 -0400
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/docker/services/nova-compute-avrs.yaml /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute-avrs.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/docker/services/nova-compute-avrs.yaml	1969-12-31 19:00:00.000000000 -0500
++++ /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute-avrs.yaml	2019-04-03 13:55:39.937175754 -0400
 @@ -0,0 +1,129 @@
 +heat_template_version: queens
 +
@@ -143,9 +143,9 @@ diff -ruN openstack-tripleo-heat-templates-original/docker/services/nova-compute
 +      fast_forward_upgrade_tasks:
 +        get_attr: [NovaComputeAvrsDockerBase, role_data, fast_forward_upgrade_tasks]
 +
-diff -ruN openstack-tripleo-heat-templates-original/extraconfig/post_deploy/avrs-post.yaml openstack-tripleo-heat-templates/extraconfig/post_deploy/avrs-post.yaml
---- openstack-tripleo-heat-templates-original/extraconfig/post_deploy/avrs-post.yaml	1969-12-31 19:00:00.000000000 -0500
-+++ openstack-tripleo-heat-templates/extraconfig/post_deploy/avrs-post.yaml	2019-04-03 13:55:39.937175754 -0400
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/extraconfig/post_deploy/avrs-post.yaml /usr/share/openstack-tripleo-heat-templates/extraconfig/post_deploy/avrs-post.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/extraconfig/post_deploy/avrs-post.yaml	1969-12-31 19:00:00.000000000 -0500
++++ /usr/share/openstack-tripleo-heat-templates/extraconfig/post_deploy/avrs-post.yaml	2019-04-03 13:55:39.937175754 -0400
 @@ -0,0 +1,80 @@
 +heat_template_version: 2014-10-16
 +description: 'Extra Post Deployment Config'
@@ -227,9 +227,9 @@ diff -ruN openstack-tripleo-heat-templates-original/extraconfig/post_deploy/avrs
 +            $DPVI_MASK: {get_param: FastPathDPVI}
 +            $FP_OPTIONS: {get_param: FastPathOptions}
 +
-diff -ruN openstack-tripleo-heat-templates-original/firstboot/avrs-first-boot.yaml openstack-tripleo-heat-templates/firstboot/avrs-first-boot.yaml
---- openstack-tripleo-heat-templates-original/firstboot/avrs-first-boot.yaml	1969-12-31 19:00:00.000000000 -0500
-+++ openstack-tripleo-heat-templates/firstboot/avrs-first-boot.yaml	2019-04-03 13:55:39.938175754 -0400
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/firstboot/avrs-first-boot.yaml /usr/share/openstack-tripleo-heat-templates/firstboot/avrs-first-boot.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/firstboot/avrs-first-boot.yaml	1969-12-31 19:00:00.000000000 -0500
++++ /usr/share/openstack-tripleo-heat-templates/firstboot/avrs-first-boot.yaml	2019-04-03 13:55:39.938175754 -0400
 @@ -0,0 +1,71 @@
 +heat_template_version: 2014-10-16
 +
@@ -302,9 +302,9 @@ diff -ruN openstack-tripleo-heat-templates-original/firstboot/avrs-first-boot.ya
 +  OS::stack_id:
 +    value: {get_resource: userdata}
 +
-diff -ruN openstack-tripleo-heat-templates-original/overcloud-resource-registry-puppet.j2.yaml openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml
---- openstack-tripleo-heat-templates-original/overcloud-resource-registry-puppet.j2.yaml	2019-04-03 13:53:57.551175754 -0400
-+++ openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2019-04-03 13:55:39.939175754 -0400
+diff -ruN /usr/share/openstack-tripleo-heat-templates-original/overcloud-resource-registry-puppet.j2.yaml /usr/share/openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/overcloud-resource-registry-puppet.j2.yaml	2019-04-03 13:53:57.551175754 -0400
++++ /usr/share/openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.j2.yaml	2019-04-03 13:55:39.939175754 -0400
 @@ -60,6 +60,7 @@
    OS::TripleO::NodeUserData: firstboot/userdata_default.yaml
  {% for role in roles %}

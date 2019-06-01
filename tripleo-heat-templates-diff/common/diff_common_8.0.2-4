@@ -1,6 +1,6 @@
-diff -r -u -N openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml
---- openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml	2018-03-14 05:06:16.000000000 -0400
-+++ openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml	2018-04-16 19:04:33.000000000 -0400
+diff -r -u -N /usr/share/openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml /usr/share/openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/docker/services/neutron-plugin-ml2.yaml	2018-03-14 05:06:16.000000000 -0400
++++ /usr/share/openstack-tripleo-heat-templates/docker/services/neutron-plugin-ml2.yaml	2018-04-16 19:04:33.000000000 -0400
 @@ -32,6 +32,10 @@
      default: {}
      description: Parameters specific to the role
@@ -21,9 +21,9 @@ diff -r -u -N openstack-tripleo-heat-templates-original/docker/services/neutron-
          step_config:
            get_attr: [NeutronBase, role_data, step_config]
          config_image: {get_param: DockerNeutronConfigImage}
-diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml	2018-02-12 15:46:44.000000000 -0500
-+++ openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-04-17 01:47:16.000000000 -0400
+diff -r -u -N /usr/share/openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/heat-engine.yaml	2018-02-12 15:46:44.000000000 -0500
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/heat-engine.yaml	2018-04-17 01:47:16.000000000 -0400
 @@ -68,6 +68,10 @@
      type: number
      default: 1000
@@ -43,9 +43,9 @@ diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/heat-eng
            -
              if:
              - heat_workers_unset
-diff -r -u -N openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
---- openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-03-14 05:06:16.000000000 -0400
-+++ openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-04-17 10:00:50.000000000 -0400
+diff -r -u -N /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml
+--- /usr/share/openstack-tripleo-heat-templates-original/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-03-14 05:06:16.000000000 -0400
++++ /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2-nuage.yaml	2018-04-17 10:00:50.000000000 -0400
 @@ -79,7 +79,7 @@
  
  resources:
