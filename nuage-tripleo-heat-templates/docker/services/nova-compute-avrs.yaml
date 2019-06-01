@@ -1,0 +1,304 @@
+heat_template_version: queens
+
+description: >
+  OpenStack containerized Nova Compute Avrs service
+parameters:
+  DockerNovaComputeAvrsImage:
+    description: image
+    type: string
+  DockerNovaLibvirtAvrsConfigImage:
+    description: The container image to use for the nova_libvirt config_volume
+    type: string
+  ServiceData:
+    default: {}
+    description: Dictionary packing service data
+    type: json
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.  This
+                 mapping overrides those in ServiceNetMapDefaults.
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  RoleName:
+    default: ''
+    description: Role name on which the service is applied
+    type: string
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  EnableInstanceHA:
+    default: false
+    description: Whether to enable an Instance Ha configurarion or not.
+                 This setup requires the Compute role to have the
+                 PacemakerRemote service added to it.
+    type: boolean
+  FastPathMask:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathNics:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  CorePortMapping:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathMemory:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  VmMemory:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  NbMbuf:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathOffload:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathNicDescriptors:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathOptions:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+  FastPathDPVI:
+    type: string
+    default: ""
+    tags:
+      - role_specific
+
+resources:
+  RoleParametersValue:
+    type: OS::Heat::Value
+    properties:
+      type: json
+      value:
+        map_replace:
+          - map_replace:
+            - FP_MASK: FastPathMask
+              FP_PORTS: FastPathNics
+              CORE_PORT_MAPPING: CorePortMapping
+              FP_MEMORY: FastPathMemory
+              VM_MEMORY: VmMemory
+              NB_MBUF: NbMbuf
+              FP_OFFLOAD: FastPathOffload
+              FPNSDK_OPTIONS: FastPathNicDescriptors
+              DPVI_MASK: FastPathDPVI
+              FP_OPTIONS: FastPathOptions
+            - values: {get_param: [RoleParameters]}
+          - values:
+              FastPathMask: {get_param: FastPathMask}
+              FastPathNics: {get_param: FastPathNics}
+              CorePortMapping: {get_param: CorePortMapping}
+              FastPathMemory: {get_param: FastPathMemory}
+              VmMemory: {get_param: VmMemory}
+              NbMbuf: {get_param: NbMbuf}
+              FastPathOffload: {get_param: FastPathOffload}
+              FastPathNicDescriptors: {get_param: FastPathNicDescriptors}
+              FastPathDPVI: {get_param: FastPathDPVI}
+              FastPathOptions: {get_param: FastPathOptions}
+
+  ContainersCommon:
+    type: /usr/share/openstack-tripleo-heat-templates/docker/services/containers-common.yaml
+
+  MySQLClient:
+    type: /usr/share/openstack-tripleo-heat-templates/puppet/services/database/mysql-client.yaml
+
+  NovaComputeCommon:
+    type: /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute-common.yaml
+    properties:
+      EndpointMap: {get_param: EndpointMap}
+      ServiceData: {get_param: ServiceData}
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+
+  NovaComputeAvrsBase:
+    type: /usr/share/openstack-tripleo-heat-templates/puppet/services/nova-compute.yaml
+    properties:
+      EndpointMap: {get_param: EndpointMap}
+      ServiceData: {get_param: ServiceData}
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+
+  NovaComputeAvrsDockerBase:
+    type: /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute.yaml
+    properties:
+      EnableInstanceHA: {get_param: EnableInstanceHA}
+      DockerNovaComputeImage: {get_param: DockerNovaComputeAvrsImage}
+      EndpointMap: {get_param: EndpointMap}
+      ServiceData: {get_param: ServiceData}
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+
+  NovaLogging:
+    type: OS::TripleO::Services::Logging::NovaCommon
+    properties:
+      DockerNovaImage: {get_param: DockerNovaComputeAvrsImage}
+      NovaServiceName: 'compute'
+
+conditions:
+  enable_instance_ha: {equals: [{get_param: EnableInstanceHA}, true]}
+
+outputs:
+  role_data:
+    description: Role data for the Nova Compute service.
+    value:
+      service_name: {get_attr: [NovaComputeAvrsBase, role_data, service_name]}
+      cellv2_discovery: true
+      config_settings:
+        map_merge:
+          - get_attr: [NovaComputeAvrsBase, role_data, config_settings]
+          - get_attr: [NovaLogging, config_settings]
+      logging_source: {get_attr: [NovaComputeAvrsBase, role_data, logging_source]}
+      logging_groups: {get_attr: [NovaComputeAvrsBase, role_data, logging_groups]}
+      service_config_settings: {get_attr: [NovaComputeAvrsBase, role_data, service_config_settings]}
+      puppet_config:
+        config_volume: nova_libvirt
+        puppet_tags: nova_config,nova_paste_api_ini
+        step_config:
+          list_join:
+            - "\n"
+            - - {get_attr: [NovaComputeAvrsBase, role_data, step_config]}
+              - {get_attr: [MySQLClient, role_data, step_config]}
+        config_image: {get_param: DockerNovaLibvirtAvrsConfigImage}
+      kolla_config:
+        get_attr: [NovaComputeAvrsDockerBase, role_data, kolla_config]
+      docker_config_scripts:Making Re
+        get_attr: [NovaComputeCommon, docker_config_scripts]
+      docker_config:
+        get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]
+      host_prep_tasks:
+        list_concat:
+        - {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
+        - - name: Check if 6wind is installed
+            shell: rpm -qa | grep -q 6wind
+            failed_when: false
+            register: sixwind_check
+          - name: Install 6wind and AVRS packages
+            block:
+            - name: create repo
+              shell: createrepo /6wind/.
+            - name: Setup repo
+              yum_repository:
+                name: nuage_6wind
+                baseurl: file:///6wind
+                enabled: yes
+                gpgcheck: no
+                description: Nuage_6wind
+            - name: install base packages
+              yum:
+                name: "{{ packages }}"
+                state: present
+              vars:
+                packages:
+                  - selinux-policy-nuage-avrs
+                  - python-pyelftools
+                  - dkms
+            - name: remove dpdk
+              yum:
+                name: dpdk
+                state: absent
+            - name: install 6wind packages
+              yum:
+                name: "6windgate*"
+                state: present
+            - name: remove nuage-openvswitch
+              yum:
+                name: nuage-openvswitch
+                state: absent
+            - name: install nuage packages
+              yum:
+                name: "{{ packages }}"
+                state: present
+              vars:
+                packages:
+                  - nuage-openvswitch*
+                  - nuage-metadata-agent*
+                  - virtual-accelerator*
+            - name: cleanup repo
+              yum_repository:
+                name: nuage_6wind
+                state: absent
+            - name: remove repodata
+              shell: rm -rf /6wind/repodata
+            when: sixwind_check.rc == 1
+
+          - name: adding sockfolder pmd-vhost param
+            ini_file:
+              path: /etc/fp-vdev.ini
+              section: pmd-vhost
+              option: sockfolder
+              value: /var/lib/vhost_sockets
+          - name: Set params in fast-path.env file
+            lineinfile:
+              dest: /etc/fast-path.env
+              line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+              regexp: '^: \$[{]{{ item.param }}:='
+              state: present
+              create: yes
+            loop:
+                - { param: 'FP_MASK', val: {get_attr: [RoleParametersValue, value, FP_MASK]}}
+                - { param: 'FP_PORTS', val: {get_attr: [RoleParametersValue, value, FP_PORTS]}}
+                - { param: 'CORE_PORT_MAPPING', val: {get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING]}}
+                - { param: 'FP_MEMORY', val: {get_attr: [RoleParametersValue, value, FP_MEMORY]}}
+                - { param: 'VM_MEMORY', val: {get_attr: [RoleParametersValue, value, VM_MEMORY]}}
+                - { param: 'NB_MBUF', val: {get_attr: [RoleParametersValue, value, NB_MBUF]}}
+                - { param: 'FP_OFFLOAD', val: {get_attr: [RoleParametersValue, value, FP_OFFLOAD]}}
+                - { param: 'FPNSDK_OPTIONS', val: {get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS]}}
+                - { param: 'DPVI_MASK', val: {get_attr: [RoleParametersValue, value, DPVI_MASK]}}
+                - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
+            register: lineinfile_result
+          - name: Stoping Network Manager
+              service:
+                name: NetworkManager
+                state: stopped
+                enabled: no
+          - name : Restarting Virtual-accelerator and Network service
+            block:
+            - name: Restart Virtual-accelerator on AVRS nodes
+              service:
+                name: virtual-accelerator
+                state: restarted
+            - name: Restart Network service on the AVRS nodes
+              # Network Service tends to fail when all the interface on the node are not up.
+              # But restart it would restart the network interface which are up anyway which solves
+              # our purpose
+              shell: nohup sh -c 'systemctl restart network' > /dev/null &
+            when: lineinfile_result.changed
+
+
+      upgrade_tasks:
+        get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]
+      fast_forward_upgrade_tasks:
+        get_attr: [NovaComputeAvrsDockerBase, role_data, fast_forward_upgrade_tasks]
