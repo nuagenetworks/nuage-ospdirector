@@ -858,7 +858,6 @@ Create a flavor and profile for computesriov:
 :Step 10: There are no changes required for ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml``. We need set some parameters in ``/home/stack/templates/ovs-hw-offload.yaml`` and ``/home/stack/templates/mellanox-environment.yaml``. A sample file is provided in `Sample Templates`_ section.
 
 
-
 8. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
 
 
@@ -1883,6 +1882,8 @@ mellanox-environment.yaml
       BIN_DIR_URL: "http://192.168.24.1/FW_16_25_0310/"
       NUM_OF_VFS: 64
       SRIOV_EN: True
+      ESWITCH_IPV4_TTL_MODIFY_ENABLE: True
+      PRIO_TAG_REQUIRED_EN: True
 
 
 docker-insecure-registry.yaml for One Local Registry
