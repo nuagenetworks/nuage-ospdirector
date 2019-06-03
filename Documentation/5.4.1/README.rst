@@ -857,6 +857,8 @@ Create a flavor and profile for computesriov:
 
 :Step 10: There are no changes required for ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml``. We need set some parameters in ``/home/stack/templates/ovs-hw-offload.yaml`` and ``/home/stack/templates/mellanox-environment.yaml``. A sample file is provided in `Sample Templates`_ section.
 
+:Step 11: Once the overcloud deployment is up, there are some manual steps that need to be done on ComputeSriov nodes. Please follow instructions in `Offload VRS manual steps`_ section.
+
 
 
 8. Please follow **Phase 6** steps again for verfication of all the nodes are assigned with correct flavors.
@@ -2043,3 +2045,20 @@ If the following issue occurs:
 
 The workaround is to apply this upstream `change https://review.openstack.org/#/c/617215/3/docker/services/nova-ironic.yaml`_ .
 The upstream bug id for this is `here https://bugzilla.redhat.com/show_bug.cgi?id=1648998`_ .
+
+
+Offload VRS manual steps
+------------------------
+
+Configuring TTL Work Around
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Install or update to mft-4.11.0-103 or later Mellanox firmware tools
+2) Unzip the TTL WA zip file, and cd to the associated folder
+3) Run mst start
+4) Run mst status and find the pci device name.
+   Eg: /dev/mst/mt4119_pciconf0
+5) Run mlxconfig -d <pci device name> -f ./ mlxconfig_raw_ttl_enable.txt set_raw
+6) Run mlxfwreset -d <pci device name> r
+7) Verify that that the TTL WA is enabled:
+   a. mcra  <pci device name> 0xb8a4.6  (should return 0x00000001 if WA is enabled)
