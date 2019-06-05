@@ -762,7 +762,7 @@ Create a flavor and profile for computesriov:
     ComputeSriovCount: 2
 
 
-:Step 4: As part of overcloud deployment, Mellanox firstboot template ``/home/stack/templates-original/mellanox_fw_update.yaml`` will be updating firmware on CX5 interface. Create FW folder that will contain all the Mellanox Firmware bin files on a machine that has httpd server running. (User can use the undercloud itself)
+:Step 4: As part of overcloud deployment, Mellanox firstboot template ``/home/stack/templates/mellanox_fw_update.yaml`` will be updating firmware on CX5 interface. Create FW folder that will contain all the Mellanox Firmware bin files on a machine that has httpd server running. (User can use the undercloud itself)
 
 ::
 
@@ -788,7 +788,7 @@ Create a flavor and profile for computesriov:
                       type: string
                 ...
 
-            - Sample netwrok-config for CX5 NIC on Compute nodes using new os-net-config is shown below
+            - Sample network-config for CX5 NIC on Compute nodes using new os-net-config is shown below
 
                 ...
                     - type: sriov_pf
@@ -814,7 +814,7 @@ Create a flavor and profile for computesriov:
                       type: string
                 ...
 
-            - Sample netwrok-config for Linux Bonding over CX5 NICs on Compute nodes using new os-net-config is shown below
+            - Sample network-config for Linux Bonding over CX5 NICs on Compute nodes using new os-net-config is shown below
 
                 ...
                   - type: linux_bond
@@ -1861,8 +1861,8 @@ ovs-hw-offload.yaml
             physical_network: null
 
 
-mellanox-environment.yaml
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+mellanox-environment.yaml for single interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1874,6 +1874,32 @@ mellanox-environment.yaml
       # Nic's params #
       ################
       MellanoxTenantPort1: "ens15f0"
+
+      ########################
+      # FIRST Boot FW config #
+      ########################
+
+      BIN_DIR_URL: "http://192.168.24.1/FW_16_25_0310/"
+      NUM_OF_VFS: 64
+      SRIOV_EN: True
+      ESWITCH_IPV4_TTL_MODIFY_ENABLE: True
+      PRIO_TAG_REQUIRED_EN: True
+
+
+mellanox-environment.yaml for Linux bond with vlan
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    resource_registry:
+      OS::TripleO::ComputeSriov::NodeUserData: ./mellanox_fw_update.yaml
+
+    parameter_defaults:
+      ################
+      # Nic's params #
+      ################
+      MellanoxTenantPort1: "ens15f0"
+      MellanoxTenantPort2: "ens15f1"
 
       ########################
       # FIRST Boot FW config #
