@@ -17,9 +17,23 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 Note: This is a temporary workaround until all the patches for os-net-config will be merged and available in overcloud-full.qcow2
 Untar the os-net-config.tar.gz provided by Mellanox and place it in the same location as overcloud-full.qcow2.
 
-Now run the below command by providing required values   
+Now run the below command by providing required values
 
-`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13`
+### With GPG KEY
+
+#### Note: Any Nuage package signing keys are delivered with other Nuage artifacts.  See "nuage-package-signing-keys-*.tar.gz". Mellanox signing keys can be found on their website
+
+Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script location.
+
+For single GPG-Key run the below command
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --RpmPublicKey='GPG-Key'`
+
+For passing multiple GPG-keys, please repeat option "--RpmPublicKey" to set multiple GPG Keys, for example
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --RpmPublicKey='GPG-Key1' --RpmPublicKey='GPG-Key2'`
+
+### Without GPG Key
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --no-signing-key`
 
 This script takes in following input parameters:   
   * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
@@ -28,7 +42,9 @@ This script takes in following input parameters:
   * RepoBaseUrl is the base URL for the repository hosting the Nuage, Mellanox OFED and Red Hat Hot Fix RPMs (such as http://IP/reponame)
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
-  * Version is the OpenStack Platform director version (for Queens, the version is 13).
+  * RpmPublicKey is used to pass RPM GPG Key (repeat option to set multiple RPM GPG Keys)
+  * no-signing-key is for image patching to proceed with package signature verification disabled.
+  * logFile is to pass log file name.
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.   
 

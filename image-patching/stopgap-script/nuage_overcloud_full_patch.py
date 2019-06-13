@@ -1,43 +1,57 @@
+import argparse
 import subprocess
 import sys
 import logging
 import os
-from logging import handlers
 
 #
 # This script is used to patch an existing OpenStack
 # image with Nuage components
 #
 # This script takes in following input parameters:
-# RhelUserName: User name for the RHEL subscription
-# RhelPassword: Password for the RHEL subscription
-# RhelPool    : RHEL Pool to subscribe
-# RepoName    : Name of the local repository
-# RepoBaseUrl : Base URL of the local repository
-# Version     : Version of OSP Director 13
+# ImageName      : Name of the qcow2 image (overcloud-full.qcow2 for
+# example)
+# RhelUserName   : User name for the RHEL subscription
+# RhelPassword   : Password for the RHEL subscription
+# RhelPool       : RHEL Pool to subscribe
+# RepoName       : Name of the local repository
+# RepoBaseUrl    : Base URL of the local repository
+# RpmPublicKey   : RPM GPG Key (repeat option to set multiple RPM GPG
+#  Keys)
+# no-signing-key : Image patching proceeds with package signature
+# verification disabled
+# logFile        : Log file name
 #
 # The following sequence is executed by the script
 # 1. Subscribe to RHEL and the pool
 # 2. Uninstall OVS
 # 3. Create the local repo file for Nuage, Mellanox and Red Hat packages
 # 4. Update kernel to Red Hat Hot Fix
-# 5. Install nuage-openvswitch, nuage-metadata-agent and nuage-openstack-neutronclient packages
-# 6. Install Mellanox OFED packages and add Mellanox os-net-config scripts
+# 5. Install nuage-openvswitch, nuage-metadata-agent and
+# nuage-openstack-neutronclient packages
+# 6. Install Mellanox OFED packages and add Mellanox os-net-config
+# scripts
 # 7. Unsubscribe from RHEL
 #
 #
 
 ### List of Nuage packages
-NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage nuage-bgp nuage-openstack-neutronclient"
-NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient lldpad"
+NUAGE_PACKAGES = "nuage-metadata-agent nuage-puppet-modules " \
+                 "selinux-policy-nuage nuage-bgp " \
+                 "nuage-openstack-neutronclient"
+NUAGE_DEPENDENCIES = "libvirt perl-JSON lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint"
 KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
+### Gpg value
+GPGCHECK = 1
+
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 consoleHandler = logging.StreamHandler(sys.stdout)
 consoleHandler.setFormatter(formatter)
 logger.addHandler(consoleHandler)
@@ -74,53 +88,61 @@ def cmds_run(cmds):
 
 
 def virt_customize(command):
-    return cmds_run(['export LIBGUESTFS_BACKEND=direct;virt-customize --run-command %s' % command])
+    return cmds_run([
+        'export '
+        'LIBGUESTFS_BACKEND=direct;virt-customize '
+        '--run-command %s' % command])
 
 
 def virt_customize_run(command):
-    return cmds_run(['export LIBGUESTFS_BACKEND=direct;virt-customize --run %s' % command])
+    return cmds_run([
+        'export '
+        'LIBGUESTFS_BACKEND=direct;virt-customize '
+        '--run %s' % command])
 
 
 def virt_copy(command):
-    return cmds_run(['export LIBGUESTFS_BACKEND=direct;virt-copy-in -a %s' % command])
-
-
-#####
-# Function to print help message
-#####
-
-def show_help():
-    cmds_run(['echo "Options are"'])
-    cmds_run(['echo " --ImageName= Name of the qcow2 image (overcloud-full.qcow2 for example)"'])
-    cmds_run(['echo " --RhelUserName=User name for RHELSubscription"'])
-    cmds_run(['echo " --RhelPassword=Password for the RHEL Subscription"'])
-    cmds_run(['echo " --RhelPool=Pool to subscribe to for base packages"'])
-    cmds_run(['echo " --RepoName=Name for the local repo hosting the Nuage RPMs"'])
-    cmds_run(['echo " --RepoBaseUrl=Base URL for the repo hosting the Nuage RPMs"'])
-    cmds_run(['echo " --Version=OSP-Director version (10)"'])
-    cmds_run(['echo " -h or --help: Show this message"'])
+    return cmds_run([
+        'export '
+        'LIBGUESTFS_BACKEND=direct;virt-copy-in -a '
+        '%s' % command])
 
 
 #####
 # Function to add RHEL subscription using guestfish
 #####
 
-def rhel_subscription(username, password, pool, image, proxy_hostname = None, proxy_port = None):
+def rhel_subscription(username, password, pool, image,
+                      proxy_hostname=None, proxy_port=None):
     subscription_command = ''
     if proxy_hostname != None:
-        subscription_command = subscription_command + 'cat <<EOT > rhel_subscription \n' \
-                                                      'subscription-manager config --server.proxy_hostname=%s' \
-                                                      ' --server.proxy_port=%s \n' % (proxy_hostname, proxy_port)
+        subscription_command = subscription_command + \
+                               'cat <<EOT > ' \
+                               'rhel_subscription \n' \
+                               'subscription-manager config ' \
+                               '--server.proxy_hostname=%s' \
+                               ' --server.proxy_port=%s \n' % (
+                                   proxy_hostname, proxy_port)
     else:
-        subscription_command = subscription_command + 'cat <<EOT > rhel_subscription \n'
+        subscription_command = subscription_command + \
+                               'cat <<EOT > ' \
+                               'rhel_subscription \n'
 
-    subscription_command = subscription_command + 'subscription-manager register --username=%s --password=\'%s\' \n' \
-                                                  'subscription-manager subscribe --pool=%s \n' \
-                                                  'subscription-manager repos --enable=rhel-7-server-optional-rpms \n' \
-                                                  'subscription-manager repos --enable=rhel-7-server-rpms \n' \
-                                                  'EOT' % (username, password, pool)
+    subscription_command = subscription_command + \
+                           'subscription-manager register ' \
+                           '--username=%s --password=\'%s\' \n' \
+                           'subscription-manager subscribe --pool=%s ' \
+                           '\n' \
+                           'subscription-manager repos ' \
+                           '--enable=rhel-7-server-optional-rpms \n' \
+                           'subscription-manager repos ' \
+                           '--enable=rhel-7-server-rpms \n' \
+                           'EOT' % (
+                               username, password, pool)
     cmds_run([subscription_command])
-    virt_customize_run('rhel_subscription -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run(
+        'rhel_subscription -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
 
     cmds_run(['rm -f rhel_subscription'])
 
@@ -133,7 +155,9 @@ def rhel_remove_subscription(image):
     cmds_run(['cat <<EOT > rhel_unsubscribe \n'
               'subscription-manager unregister \n'
               'EOT'])
-    virt_customize_run('rhel_unsubscribe -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run(
+        'rhel_unsubscribe -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f rhel_unsubscribe'])
 
 
@@ -141,12 +165,11 @@ def rhel_remove_subscription(image):
 # Function to remove packages that are not needed
 #####
 
-def uninstall_packages(image, version):
-    # For Newton and above, use standard python-openvswitch
-    if version <= 9:
-        virt_customize(
-            '"yum remove python-openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    virt_customize('"yum remove openvswitch -y" -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+def uninstall_packages(image):
+    virt_customize(
+        '"yum remove openvswitch -y" -a %s --memsize %s '
+        '--selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
@@ -157,53 +180,41 @@ def install_packages(image):
     cmds_run(['cat <<EOT > nuage_packages \n'
               'yum install %s -y \n'
               'yum install %s -y \n'
-              'EOT' % (NUAGE_DEPENDENCIES, NUAGE_PACKAGES)])
-    virt_customize_run('nuage_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f nuage_packages'])
-
-
-#####
-# Installing VRS and the dependencies for VRS
-#####
-
-def install_vrs(image):
-    cmds_run(['cat <<EOT > vrs_packages \n'
               'yum install %s -y \n'
-              'EOT' % (NUAGE_VRS_PACKAGE)])
-    virt_customize_run('vrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f vrs_packages'])
+              'EOT' % (
+                  NUAGE_DEPENDENCIES, NUAGE_PACKAGES,
+                  NUAGE_VRS_PACKAGE)])
+    virt_customize_run(
+        'nuage_packages -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
+    cmds_run(['rm -f nuage_packages'])
 
 
 #####
 # Function to create the repo file
 #####
 
-def create_repo_file(reponame, repoUrl, image):
+def create_repo_file(reponame, repoUrl, image, gpgcheck):
     cmds_run(['cat <<EOT > create_repo \n'
               'touch /etc/yum.repos.d/nuage.repo \n'
               'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "name=%s" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "baseurl=%s" >> /etc/yum.repos.d/nuage.repo \n'
               'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
-              'EOT' % (reponame, repoUrl)])
-    virt_customize_run('create_repo -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+              'echo "gpgcheck =  %s" >> /etc/yum.repos.d/nuage.repo \n'
+              'EOT' % (reponame, repoUrl, gpgcheck)])
+    virt_customize_run(
+        'create_repo -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
 
 
 #####
 # Function to clean up the repo file
 #####
-def delete_repo_file(reponame, repoUrl, image):
-    cmds_run(['cat <<EOT > create_repo \n'
-              'touch /etc/yum.repos.d/nuage.repo \n'
-              'echo "[Nuage]" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "name=%s" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "baseurl=%s" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "enabled = 1" >> /etc/yum.repos.d/nuage.repo \n'
-              'echo "gpgcheck = 0" >> /etc/yum.repos.d/nuage.repo \n'
-              'EOT' % (reponame, repoUrl)])
-    virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
-    cmds_run(['rm -f create_repo'])
+def delete_repo_file(image):
+    virt_customize(
+        '"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel'
+        % (image))
 
 
 #####
@@ -211,15 +222,21 @@ def delete_repo_file(reponame, repoUrl, image):
 #####
 
 def install_mellanox(image, workingDir):
-    # This is a temporary workaround until all the patches for os-net-config will be merged and available in overcloud-full.qcow2
-    virt_copy('%s %s/os-net-config/os_net_config/* /usr/lib/python2.7/site-packages/os_net_config' % (image, workingDir))
+    # This is a temporary workaround until all the patches for
+    # os-net-config will be merged and available in overcloud-full.qcow2
+    virt_copy(
+        '%s %s/os-net-config/os_net_config/* '
+        '/usr/lib/python2.7/site-packages/os_net_config' % (
+            image, workingDir))
 
-    #Installing Mellanox OFED Packages
+    # Installing Mellanox OFED Packages
     cmds_run(['cat <<EOT > mellanox_packages \n'
               'yum install %s -y \n'
               'systemctl disable mlnx-en.d \n'
               'EOT' % (MLNX_OFED_PACKAGES)])
-    virt_customize_run('mellanox_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run(
+        'mellanox_packages -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f mellanox_packages'])
 
 
@@ -232,79 +249,142 @@ def update_kernel(image):
     cmds_run(['cat <<EOT > kernel_packages \n'
               'yum install %s -y \n'
               'EOT' % (KERNEL_PACKAGES)])
-    virt_customize_run('kernel_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
+    virt_customize_run(
+        'kernel_packages -a %s --memsize %s --selinux-relabel' % (
+            image, VIRT_CUSTOMIZE_MEMSIZE))
     cmds_run(['rm -f kernel_packages'])
 
 
-def main(args):
-    argsDict = {}
-    if len(args) < 3:
-        show_help()
-    else:
-        for inputArg in args:
-            if inputArg.startswith('--'):
-                try:
-                    (key, val) = inputArg.split("=")
-                except ValueError:
-                    continue
-                key = key[2:]
-                argsDict[key] = [val]
+#####
+# Importing Gpgkeys to Overcloud image
+#####
 
-        if '-h' in argsDict or '--help' in argsDict:
-            show_help()
-            sys.exit()
-
-        if 'logFile' in argsDict:
-            handler = logging.FileHandler(argsDict['logFile'][0])
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-
-        workingDir = os.path.dirname(os.path.abspath(__file__))
-
-        cmds_run(['echo "Verifying pre-requisite packages for script"'])
-        libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
-        if 'not installed' in libguestfs:
-            cmds_run(['echo "Please install libguestfs-tools-c package for the script to run"'])
-            sys.exit()
-
-        if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
-            cmds_run(['echo "Creating the RHEL subscription"'])
-            if 'ProxyHostname' in argsDict and 'ProxyPort' in argsDict:
-                rhel_subscription(argsDict['RhelUserName'][0], argsDict['RhelPassword'][0], argsDict['RhelPool'][0],
-                              argsDict['ImageName'][0], argsDict['ProxyHostname'][0], argsDict['ProxyPort'][0])
-            else:
-                rhel_subscription(argsDict['RhelUserName'][0], argsDict['RhelPassword'][0], argsDict['RhelPool'][0],
-                                  argsDict['ImageName'][0])
-
-        cmds_run(['echo "Uninstalling packages"'])
-        uninstall_packages(argsDict['ImageName'][0], argsDict['Version'][0])
-
-        cmds_run(['echo "Creating Repo File"'])
-        if 'RepoName' in argsDict:
-            create_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+def importing_gpgkeys(image, workingDir, gpgkeys):
+    for gpgkey in gpgkeys:
+        file_exists = os.path.isfile(gpgkey[0])
+        if file_exists:
+            virt_copy('%s %s/%s /tmp/' % (image, workingDir, gpgkey[0]))
+            virt_customize(
+                '"rpm --import /tmp/%s" -a %s --memsize %s '
+                '--selinux-relabel' % (
+                    gpgkey[0], image, VIRT_CUSTOMIZE_MEMSIZE))
         else:
-            create_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            logger.error(
+                "Nuage package signing key is not present in %s ,"
+                "Installation cannot proceed.  Please place the "
+                "signing key in the correct location and retry" % (
+                    gpgkey[0]))
+            sys.exit(1)
 
-        cmds_run(['echo "Updating Kernel"'])
-        update_kernel(argsDict['ImageName'][0])
 
-        cmds_run(['echo "Installing Nuage Packages"'])
-        install_packages(argsDict['ImageName'][0])
+def image_patching(args):
 
-        cmds_run(['echo "Installing VRS"'])
-        install_vrs(argsDict['ImageName'][0])
+    global GPGCHECK
 
-        cmds_run(['echo "Installing MLNX OFED Packages"'])
-        install_mellanox(argsDict['ImageName'][0], workingDir)
+    if args.logFile:
+        handler = logging.FileHandler(args.logFile)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
-        cmds_run(['echo "Cleaning up"'])
-        if 'RepoName' in argsDict:
-            delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+    workingDir = os.path.dirname(os.path.abspath(__file__))
+
+    if not args.no_signing_key and args.RpmPublicKey == None:
+        logger.error(
+            "'--RpmPublicKey' or '--no-signing-key' are not passed in "
+            "image patching command, If verification of "
+            "Nuage-supplied packages is not required, please restart "
+            "image patching with the --no-signing-key option.")
+        sys.exit(1)
+
+    if args.no_signing_key:
+        logger.warning(
+            "Image patching proceeding with package signature "
+            "verification disabled. Nuage packages installed will not "
+            "have package signatures verified.")
+        GPGCHECK = 0
+
+    cmds_run(['echo "Verifying pre-requisite packages for script"'])
+    libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
+    if 'not installed' in libguestfs:
+        cmds_run([
+            'echo "Please install libguestfs-tools-c package '
+            'for the script to run"'])
+        sys.exit()
+
+    if args.RpmPublicKey:
+        cmds_run(['echo "Importing gpgkey(s) to overcloud image"'])
+        importing_gpgkeys(args.ImageName, workingDir, args.RpmPublicKey)
+
+    if args.RhelUserName and args.RhelPassword and args.RhelPool:
+        cmds_run(['echo "Creating the RHEL subscription"'])
+        if args.ProxyHostname and args.ProxyPort:
+            rhel_subscription(args.RhelUserName, args.RhelPassword,
+                              args.RhelPool,
+                              args.ImageName, args.ProxyHostname,
+                              args.ProxyPort)
         else:
-            delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
+            rhel_subscription(args.RhelUserName, args.RhelPassword,
+                              args.RhelPool,
+                              args.ImageName)
 
-        cmds_run(['echo "Done"'])
+    cmds_run(['echo "Uninstalling packages"'])
+    uninstall_packages(args.ImageName)
+
+    cmds_run(['echo "Creating Repo File"'])
+    create_repo_file(args.RepoName, args.RepoBaseUrl, args.ImageName,
+                     GPGCHECK)
+
+    cmds_run(['echo "Updating Kernel"'])
+    update_kernel(args.ImageName)
+
+    cmds_run(['echo "Installing Nuage Packages"'])
+    install_packages(args.ImageName)
+
+    cmds_run(['echo "Installing MLNX OFED Packages"'])
+    install_mellanox(args.ImageName, workingDir)
+
+    cmds_run(['echo "Cleaning up"'])
+    delete_repo_file(args.ImageName)
+
+    if args.RhelUserName and args.RhelPassword and args.RhelPool:
+        rhel_remove_subscription(args.ImageName)
+
+    cmds_run(['echo "Done"'])
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ImageName", type=str, required=True,
+                        help="Name of the qcow2 image ("
+                             "overcloud-full.qcow2 for example)")
+    parser.add_argument("--RhelUserName", type=str,
+                        help="User name for RHELSubscription")
+    parser.add_argument("--RhelPassword", type=str,
+                        help="Password for the RHEL Subscription")
+    parser.add_argument("--RhelPool", type=str,
+                        help="Pool to subscribe to for base packages")
+    parser.add_argument("--RepoName", type=str, default='Nuage',
+                        help="Name for the local repo hosting the "
+                             "Nuage RPMs")
+    parser.add_argument("--RepoBaseUrl", type=str, required=True,
+                        help="Base URL for the repo hosting the Nuage "
+                             "VRS RPMs")
+    parser.add_argument("--RpmPublicKey", action='append', nargs=1,
+                        help="RPM GPG Key (repeat option to set "
+                             "multiple RPM GPG Keys)")
+    parser.add_argument("--no-signing-key", dest="no_signing_key",
+                        action="store_true",
+                        help="Image patching proceeds with package "
+                             "signature verification disabled")
+    parser.add_argument("--ProxyHostname", type=str,
+                        help="Proxy Hostname")
+    parser.add_argument("--ProxyPort", type=str, help="Proxy Port")
+    parser.add_argument("--logFile", type=str,
+                        default='nuage_image_patching.log',
+                        help="Log file name")
+    args = parser.parse_args()
+    image_patching(args)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
