@@ -18,7 +18,7 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script location.
 
-For single GPG-jey run the below command
+For single GPG-key run the below command
 `python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --RpmPublicKey='GPG-Key'`
 
 For passing multiple GPG-keys, please repeat option "--RpmPublicKey" to set multiple GPG keys, for example
