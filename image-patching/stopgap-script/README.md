@@ -18,17 +18,28 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 Now run the below command by providing required values   
     
-### With GPG KEY   
- 
+### With GPG Key(s)  
 
-Make sure to copy GPG-Key file to the same folder as "nuage_overcloud_full_patch.py" patching script location.
+Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script location.
 
+For single GPG-jey run the below command
 `python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key'`
 
 
-For AVRS Integration, Please run below command
+For AVRS Integration with single GPG-key, please run below command
 
 `python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key'`
+
+
+For passing multiple GPG-keys, please repeat option "--RpmPublicKey" to set multiple GPG keys, for example
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key1' --RpmPublicKey='GPG-Key2'`
+
+
+For AVRS Integration with multiple GPG-keys, please run below command
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --AVRSBaseUrl=http://IP/reponame --ImageName='<value>' --Version=13 --RpmPublicKey='GPG-Key1' --RpmPublicKey='GPG-Key2'`
+
 
 ### Without GPG Key
 
@@ -47,8 +58,9 @@ This script takes in following input parameters:
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
   * Version is the OpenStack Platform director version (for Queens, the version is 13).
-  * RpmPublicKey is the GPG-Key file name
+  * RpmPublicKey is the GPG-Key file name (repeat option to set multiple RPM GPG Keys).
   * no-signing-key is 'Image patching proceeds with package signature verification disabled'
+  * logFile is to pass log file name
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.   
 
