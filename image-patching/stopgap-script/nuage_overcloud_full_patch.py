@@ -36,8 +36,7 @@ import os
 NUAGE_PACKAGES = "nuage-metadata-agent nuage-puppet-modules " \
                  "selinux-policy-nuage nuage-bgp " \
                  "nuage-openstack-neutronclient"
-NUAGE_DEPENDENCIES = "libvirt perl-JSON python-novaclient " \
-                     "openstack-neutron-sriov-nic-agent lldpad"
+NUAGE_DEPENDENCIES = "libvirt perl-JSON python-novaclient lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
