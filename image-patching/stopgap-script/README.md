@@ -14,9 +14,16 @@ Copy the overcloud-full.qcow2 from undercloud-director /home/stack/images/ to th
 
 `cp overcloud-full.qcow2 overcloud-full-bk.qcow2`
 
-Now run the below command by providing required values
+### With GPG Key(s)  
 
-`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --Version=14`
+Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script location.
+
+For single GPG-key run the below command
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --RpmPublicKey='GPG-Key'`
+
+For passing multiple GPG-keys, please repeat option "--RpmPublicKey" to set multiple GPG keys, for example
+
+`python nuage_overcloud_full_patch.py --RhelUserName='<value>' --RhelPassword='<value>' --RhelPool=<pool-id> --RepoName=<value> --RepoBaseUrl=http://IP/reponame --ImageName='<value>' --RpmPublicKey='GPG-Key1' --RpmPublicKey='GPG-Key2'`
 
 This script takes in following input parameters:
   * RhelUserName is the user name for the RedHat Enterprise Linux subscription.
@@ -25,7 +32,9 @@ This script takes in following input parameters:
   * RepoBaseUrl is the base URL for the repository hosting the Nuage VRS and OpenStack RPMs (such as http://IP/reponame)
   * RhelPool is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/14/html/director_installation_and_usage/preparing-for-director-installation#preparing-the-undercloud) in the 11th point.
   * ImageName is the name of the qcow2 image (for example, overcloud-full.qcow2)
-  * Version is the OpenStack Platform director version (for Rocky, the version is 14).
+  * RpmPublicKey is the GPG-Key file name (repeat option to set multiple RPM GPG Keys).
+  * no-signing-key is 'Image patching proceeds with package signature verification disabled'
+  * logFile is to pass log file name
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.
 
