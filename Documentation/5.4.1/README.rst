@@ -310,7 +310,7 @@ User can have Single or Mutli-Roles for AVRS nodes.
     ::
 
         cd /home/stack/nuage-tripleo-heat-templates/scripts/create_roles
-        ./create_compute_avrs_multirole_sample.sh
+        ./create_compute_avrs_multirole.sh
 
 
 
@@ -405,7 +405,7 @@ This example shows how to create a deployment with one Controller node and two C
 
 ::
 
-    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml Controller Compute ComputeAvrsSingle ComputeAvrsDual"
+    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml Controller Compute ComputeAvrsSingle ComputeAvrsDual
 
 .. Note:: given ``compute-avrs-role.yaml`` file can get updated with newer release
 
@@ -775,7 +775,7 @@ Phase 8. Nuage Docker Containers.
 
 ::
 
-    $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pulling_nuage_containers/
+    $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
 
 3. Configure `nuage_container_config.yaml` with appropriate values and a sample is given below.
 

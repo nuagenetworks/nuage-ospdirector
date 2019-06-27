@@ -298,10 +298,10 @@ def image_patching(args):
 
     if not args.no_signing_key and args.RpmPublicKey == None:
         logger.error(
-            "'--RpmPublicKey' or '--no_signing_key' are not passed in "
+            "'--RpmPublicKey' or '--no-signing-key' are not passed in "
             "image patching command, If verification of "
             "Nuage-supplied packages is not required, please restart "
-            "image patching with the --no_signing_key option.")
+            "image patching with the --no-signing-key option.")
         sys.exit(1)
 
     if args.no_signing_key:

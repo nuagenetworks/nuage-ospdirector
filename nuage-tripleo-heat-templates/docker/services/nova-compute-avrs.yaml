@@ -194,7 +194,7 @@ outputs:
         config_image: {get_param: DockerNovaLibvirtAvrsConfigImage}
       kolla_config:
         get_attr: [NovaComputeAvrsDockerBase, role_data, kolla_config]
-      docker_config_scripts:Making Re
+      docker_config_scripts:
         get_attr: [NovaComputeCommon, docker_config_scripts]
       docker_config:
         get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]
@@ -280,10 +280,10 @@ outputs:
                 - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
             register: lineinfile_result
           - name: Stoping Network Manager
-              service:
-                name: NetworkManager
-                state: stopped
-                enabled: no
+            service:
+              name: NetworkManager
+              state: stopped
+              enabled: no
           - name : Restarting Virtual-accelerator and Network service
             block:
             - name: Restart Virtual-accelerator on AVRS nodes
