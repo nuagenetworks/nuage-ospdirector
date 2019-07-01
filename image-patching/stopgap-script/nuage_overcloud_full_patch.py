@@ -272,7 +272,7 @@ def importing_gpgkeys(image, workingDir, gpgkeys):
         file_exists = os.path.isfile(gpgkey[0])
         file_name = os.path.basename(gpgkey[0])
         if file_exists:
-            virt_copy('%s %s/%s /tmp/' % (image, workingDir, gpgkey[0]))
+            virt_copy('%s %s /tmp/' % (image, gpgkey[0]))
             virt_customize(
                 '"rpm --import /tmp/%s" -a %s --memsize %s '
                 '--selinux-relabel' % (
