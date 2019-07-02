@@ -11,13 +11,12 @@ parameter_defaults:
     FastPathNics: "0000:06:00.1 0000:06:00.2"
     FastPathMask: "1,9"
     FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-    FastPathOptions: "\"--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000\""
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
     FastPathDPVI: "0"
     FastPathOffload: "off"
 
   ComputeAvrsExtraConfig:
-    nova::config::nova_config:
-      monkey_patch:
-         value: true
-      monkey_patch_modules:
-         value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+    DEFAULT/monkey_patch:
+      value: true
+    DEFAULT/monkey_patch_modules:
+      value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator

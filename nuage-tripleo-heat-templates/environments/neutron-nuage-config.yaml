@@ -6,8 +6,8 @@ resource_registry:
   OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
   OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
   OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
-  # Override the NeutronCorePlugin to use Nuage
 
+  # Override the NeutronMl2PluginBase to use Nuage inside Docker container
   OS::TripleO::Docker::NeutronMl2PluginBase: ../puppet/services/neutron-plugin-ml2-nuage.yaml
 
 parameter_defaults:

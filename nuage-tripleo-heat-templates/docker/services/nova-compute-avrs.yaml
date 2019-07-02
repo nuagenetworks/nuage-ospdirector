@@ -279,6 +279,7 @@ outputs:
                 - { param: 'DPVI_MASK', val: {get_attr: [RoleParametersValue, value, DPVI_MASK]}}
                 - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
             register: lineinfile_result
+            when: item.val != ''
           - name: Stoping Network Manager
             service:
               name: NetworkManager
@@ -291,12 +292,12 @@ outputs:
                 name: virtual-accelerator
                 state: restarted
             - name: Restart Network service on the AVRS nodes
-              # Network Service tends to fail when all the interface on the node are not up.
-              # But restart it would restart the network interface which are up anyway which solves
-              # our purpose
-              shell: nohup sh -c 'systemctl restart network' > /dev/null &
+              service:
+                name: network
+                state: restarted
+              # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+              ignore_errors: yes
             when: lineinfile_result.changed
-
 
       upgrade_tasks:
         get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]
