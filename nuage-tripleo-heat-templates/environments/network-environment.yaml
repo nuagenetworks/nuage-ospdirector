@@ -1,0 +1,37 @@
+parameter_defaults:
+  # This section is where deployment-specific configuration is done
+  # CIDR subnet mask length for provisioning network
+  ControlPlaneSubnetCidr: '24'
+  # Gateway router for the provisioning network (or Undercloud IP)
+  ControlPlaneDefaultRoute: 192.168.24.1
+  EC2MetadataIp: 192.168.24.1  # Generally the IP of the Undercloud
+  # Customize the IP subnets to match the local environment
+  StorageNetCidr: '172.16.1.0/24'
+  StorageMgmtNetCidr: '172.16.3.0/24'
+  InternalApiNetCidr: '172.16.2.0/24'
+  TenantNetCidr: '172.16.0.0/24'
+  ExternalNetCidr: '10.0.0.0/24'
+  ManagementNetCidr: '10.0.1.0/24'
+  # Customize the VLAN IDs to match the local environment
+  StorageNetworkVlanID: 30
+  StorageMgmtNetworkVlanID: 40
+  InternalApiNetworkVlanID: 20
+  TenantNetworkVlanID: 50
+  ExternalNetworkVlanID: 10
+  ManagementNetworkVlanID: 60
+  StorageAllocationPools: [{'start': '172.16.1.4', 'end': '172.16.1.250'}]
+  StorageMgmtAllocationPools: [{'start': '172.16.3.4', 'end': '172.16.3.250'}]
+  InternalApiAllocationPools: [{'start': '172.16.2.4', 'end': '172.16.2.250'}]
+  TenantAllocationPools: [{'start': '172.16.0.4', 'end': '172.16.0.250'}]
+  # Leave room if the external network is also used for floating IPs
+  ExternalAllocationPools: [{'start': '10.0.0.4', 'end': '10.0.0.250'}]
+  ManagementAllocationPools: [{'start': '10.0.1.4', 'end': '10.0.1.250'}]
+  # Gateway routers for routable networks
+  ExternalInterfaceDefaultRoute: '10.0.0.1'
+  # Define the DNS servers (maximum 2) for the overcloud nodes
+  DnsServers: ["135.1.1.111","135.227.146.166"]
+  # The tunnel type for the tenant network (vxlan or gre). Set to '' to disable tunneling.
+  NeutronTunnelTypes: 'vxlan'
+  # Customize bonding options, e.g. "mode=4 lacp_rate=1 updelay=1000 miimon=100"
+  # for Linux bonds w/LACP, or "bond_mode=active-backup" for OVS active/backup.
+  BondInterfaceOvsOptions: "bond_mode=active-backup"

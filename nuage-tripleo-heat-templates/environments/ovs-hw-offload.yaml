@@ -1,0 +1,25 @@
+# A Heat environment file that enables OVS Hardware Offload in the overcloud.
+
+parameter_defaults:
+
+  NovaSchedulerDefaultFilters: ['RetryFilter','AvailabilityZoneFilter','RamFilter','ComputeFilter','ComputeCapabilitiesFilter','ImagePropertiesFilter','ServerGroupAntiAffinityFilter','ServerGroupAffinityFilter','PciPassthroughFilter']
+  NovaSchedulerAvailableFilters: ["nova.scheduler.filters.all_filters","nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter"]
+
+  # Kernel arguments for ComputeSriov node
+  ComputeSriovParameters:
+    KernelArgs: "intel_iommu=on iommu=pt pci=realloc"
+    #NOTE: By default TunedProfileName is set to "cpu-partitioning" in sriov-role.yaml.
+    # If IsolCpusList is not set in your environment, then leave TunedProfileName below to set to empty string.
+    # If planning on setting IsolCpusList in your environment
+    #   1. You can comment the below line to set TunedProfileName to "cpu-partitioning" or
+    #   2. You can pass your custom Tuned Profile to apply to the host
+    TunedProfileName: ""
+    OvsHwOffload: True
+    # Mapping of SR-IOV PF interface to neutron physical_network.
+    # In case of Vxlan/GRE physical_network should be null.
+    # In case of flat/vlan the physical_network should as configured in neutron.
+    NovaPCIPassthrough:
+      - devname: "ens15f0"
+        physical_network: null
+      - devname: "ens15f1"
+        physical_network: null

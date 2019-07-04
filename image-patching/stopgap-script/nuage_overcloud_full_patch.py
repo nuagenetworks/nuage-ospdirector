@@ -19,17 +19,17 @@ from logging import handlers
 # The following sequence is executed by the script
 # 1. Subscribe to RHEL and the pool
 # 2. Uninstall OVS
-# 3. Create the local repo file for Nuage packages
-# 4. Install neutron-client, netlib, metadata agent
-# 5. Install VRS
-# 6. Unsubscribe from RHEL
-# 7. Add the files post-patching
+# 3. Create the local repo file for Nuage, Mellanox and Red Hat packages
+# 4. Update kernel to Red Hat Hot Fix
+# 5. Install nuage-openvswitch, nuage-metadata-agent and nuage-openstack-neutronclient packages
+# 6. Install Mellanox OFED packages and add Mellanox os-net-config scripts
+# 7. Unsubscribe from RHEL
 #
 #
 
 ### List of Nuage packages
 NUAGE_PACKAGES="nuage-metadata-agent nuage-puppet-modules selinux-policy-nuage nuage-bgp nuage-openstack-neutronclient"
-NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient openstack-neutron-sriov-nic-agent lldpad"
+NUAGE_DEPENDENCIES="libvirt perl-JSON python-novaclient lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
 MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint"
 KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
@@ -150,26 +150,6 @@ def uninstall_packages(image, version):
 
 
 #####
-# Function to add files based on the version
-#####
-
-def add_files(image, version, workingDir):
-    version = int(version)
-    if version == 13:
-        virt_customize(
-            '"mkdir -p /etc/puppet/modules/nuage/manifests/13_files" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_copy('%s %s/13_files/neutron_init.pp /etc/puppet/modules/nuage/manifests/13_files' % (image, workingDir))
-        virt_copy('%s %s/13_files/conductor.pp /etc/puppet/modules/nuage/manifests/13_files' % (image, workingDir))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/13_files/neutron_init.pp /etc/puppet/modules/neutron/manifests/init.pp" -a %s --memsize %s --selinux-relabel' % (
-            image, VIRT_CUSTOMIZE_MEMSIZE))
-        virt_customize(
-            '"cp /etc/puppet/modules/nuage/manifests/13_files/conductor.pp /etc/puppet/modules/ironic/manifests/conductor.pp" -a %s --memsize %s --selinux-relabel' % (
-                image, VIRT_CUSTOMIZE_MEMSIZE))
-
-
-#####
 # Function to install Nuage packages that are required
 #####
 
@@ -224,35 +204,6 @@ def delete_repo_file(reponame, repoUrl, image):
               'EOT' % (reponame, repoUrl)])
     virt_customize('"rm -f /etc/yum.repos.d/nuage.repo" -a %s --selinux-relabel' % (image))
     cmds_run(['rm -f create_repo'])
-
-
-#####
-# Function to install Nuage AVRS packages that are required
-#####
-
-def copy_avrs_packages(image, avrs_baseurl, proxy_hostname = None, proxy_port = None):
-    if proxy_hostname != None and proxy_port != None:
-        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n' \
-                    'export http_proxy=http://%s:%s \n' \
-                    'export https_proxy=http://%s:%s \n'% (proxy_hostname, proxy_port, proxy_hostname, proxy_port)
-    else:
-        avrs_cmds = 'cat <<EOT > nuage_avrs_packages \n'
-
-    avrs_cmds = avrs_cmds + 'mkdir ./6wind \n' \
-                            'rm -rf /var/cache/yum/Nuage \n' \
-                            'yum clean all \n' \
-                            'touch /kernel-version \n' \
-                            'rpm -q kernel | awk \'{ print substr(\$1,8) }\' > /kernel-version \n' \
-                            'yum install -y createrepo \n' \
-                            'yum install --downloadonly --downloaddir=./6wind kernel-headers-\$(cat /kernel-version) kernel-devel-\$(cat /kernel-version) kernel-debug-devel-\$(cat /kernel-version) python-pyelftools* dkms* 6windgate* nuage-openvswitch nuage-metadata-agent virtual-accelerator* \n' \
-                            'yum install --downloadonly --downloaddir=./6wind selinux-policy-nuage-avrs* \n' \
-                            'yum install --downloadonly --downloaddir=./6wind 6wind-openstack-extensions \n' \
-                            'rm -rf /kernel-version \n' \
-                            'EOT'
-
-    cmds_run([avrs_cmds])
-    virt_customize_run('nuage_avrs_packages -a %s --memsize %s --selinux-relabel' % (image, VIRT_CUSTOMIZE_MEMSIZE))
-    cmds_run(['rm -f nuage_avrs_packages'])
 
 
 #####
@@ -351,25 +302,6 @@ def main(args):
             delete_repo_file(argsDict['RepoName'][0], argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
         else:
             delete_repo_file('Nuage', argsDict['RepoBaseUrl'][0], argsDict['ImageName'][0])
-
-
-        if 'AVRSBaseUrl' in argsDict:
-            create_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-
-            cmds_run(['echo "Downloading AVRS Packages"'])
-            if 'ProxyHostname' in argsDict and 'ProxyPort' in argsDict:
-                copy_avrs_packages(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0], argsDict['ProxyHostname'][0], argsDict['ProxyPort'][0])
-            else:
-                copy_avrs_packages(argsDict['ImageName'][0], argsDict['AVRSBaseUrl'][0])
-
-            cmds_run(['echo "Cleaning up"'])
-            delete_repo_file('6wind', argsDict['AVRSBaseUrl'][0], argsDict['ImageName'][0])
-
-        if 'RhelUserName' in argsDict and 'RhelPassword' in argsDict and 'RhelPool' in argsDict:
-            rhel_remove_subscription(argsDict['ImageName'][0])
-
-        cmds_run(['echo "Adding files post-patching"'])
-        add_files(argsDict['ImageName'][0], argsDict['Version'][0], workingDir)
 
         cmds_run(['echo "Done"'])
 

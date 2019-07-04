@@ -1,0 +1,47 @@
+# A Heat environment file which can be used to enable a
+# a Neutron Nuage backend on the controller, configured via puppet
+resource_registry:
+  OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
+  OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
+  OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
+  OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
+  OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
+  # Override the NeutronCorePlugin to use Nuage
+
+  OS::TripleO::Docker::NeutronMl2PluginBase: ../puppet/services/neutron-plugin-ml2-nuage.yaml
+
+parameter_defaults:
+  NeutronNuageNetPartitionName: 'default_name'
+  NeutronNuageVSDIp: '0.0.0.0:0'
+  NeutronNuageVSDUsername: 'username'
+  NeutronNuageVSDPassword: 'password'
+  NeutronNuageVSDOrganization: 'organization'
+  NeutronNuageBaseURIVersion: 'default_uri_version'
+  NeutronNuageCMSId: ''
+  UseForwardedFor: true
+  NeutronPluginMl2PuppetTags: 'neutron_plugin_ml2,neutron_plugin_nuage'
+  NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3'
+  NeutronDBSyncExtraParams: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --config-file /etc/neutron/plugins/nuage/plugin.ini'
+  NeutronTypeDrivers: 'vxlan'
+  NeutronNetworkType: 'vxlan'
+  NeutronMechanismDrivers: 'nuage'
+  NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security'
+  NeutronFlatNetworks: '*'
+  NeutronTunnelIdRanges: ''
+  NeutronNetworkVLANRanges: ''
+  NeutronVniRanges: '1001:2000'
+  NovaOVSBridge: 'alubr0'
+  NeutronMetadataProxySharedSecret: 'default'
+  InstanceNameTemplate: 'inst-%08x'
+  HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
+  HorizonCustomizationModule: 'nuage_horizon.customization'
+  HorizonVhostExtraParams:
+    add_listen: true
+    priority: 10
+    access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
+    aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python2.7/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
+    directories: [{'path': '/usr/lib/python2.7/site-packages/nuage_horizon', 'options': ['FollowSymLinks'], 'allow_override': ['None'], 'require': 'all granted'}]
+  ControllerExtraConfig:
+    neutron::config::server_config:
+      DEFAULT/ipam_driver:
+        value: nuage_internal
