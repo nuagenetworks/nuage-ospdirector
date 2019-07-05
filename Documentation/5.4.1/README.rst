@@ -1117,7 +1117,7 @@ The following parameters are mapped to values in the /etc/neutron/neutron.conf f
 
 ::
 
-    NeutronCorePlugin
+    NeutronMl2PluginBase
     Maps to core_plugin parameter in [DEFAULT] section
 
     NeutronServicePlugins
@@ -1405,7 +1405,7 @@ neutron-nuage-config.yaml
       OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
       OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
       OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
-      # Override the NeutronCorePlugin to use Nuage
+      # Override the NeutronMl2PluginBase to use Nuage inside Docker container
       OS::TripleO::Docker::NeutronMl2PluginBase: OS::TripleO::Services::NeutronCorePluginML2Nuage
 
     parameter_defaults:
