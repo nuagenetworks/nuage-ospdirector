@@ -129,7 +129,6 @@ The integration includes the following steps:
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
         - 6windgate-dpdk
-        - 6windgate-dpdk-pmd-mellanox-ofa-kernel
         - 6windgate-dpdk-pmd-mellanox-rdma-core
         - 6windgate-dpdk-pmd-virtio-host
         - 6windgate-fp
@@ -140,7 +139,6 @@ The integration includes the following steps:
         - 6windgate-linux-fp-sync-ovs
         - 6windgate-linux-fp-sync-vrf
         - 6windgate-product-base
-        - 6windgate-qlogic-fastlinq
         - 6windgate-tools-common-libs-daemonctl
         - 6windgate-tools-common-libs-libconsole
         - 6windgate-tools-common-libs-pyroute2
@@ -148,11 +146,12 @@ The integration includes the following steps:
         - dkms
         - nuage-metadata-agent (6wind version)
         - nuage-openvswitch (6wind version)
-        - selinux-policy-nuage-avrs
         - python-pyelftools
-        - virtual-accelerator
-        - virtual-accelerator-addon-mellanox
+        - selinux-policy-nuage-avrs
         - virtual-accelerator-base
+        - virtual-accelerator (Only requried for VA version <= 1.8.3)
+
+.. Note:: The change in what VA packages required to be installed only changed in 1.8.4.m1. With 1.8.4.m1 and newer, only virtual-accelerator-base needs to be installed. Prior to 1.8.4.m1, both virtual-accelerator-base and virtual-accelerator needs to be installed.
 
 
 * Adding Nuage Heat Templates ( `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_  )
@@ -211,35 +210,28 @@ OSC and VRS Packages
 6WIND and AVRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    * 6wind-openstack-extensions
     * 6windgate-dpdk
-    * 6windgate-dpdk-pmd-mellanox-ofa-kernel
     * 6windgate-dpdk-pmd-mellanox-rdma-core
     * 6windgate-dpdk-pmd-virtio-host
     * 6windgate-fp
-    * 6windgate-fp-ovs
     * 6windgate-fpn-sdk-dpdk
+    * 6windgate-fp-ovs
     * 6windgate-linux-fp-sync
     * 6windgate-linux-fp-sync-fptun
-    * 6windgate-linux-fp-sync-ovs.
+    * 6windgate-linux-fp-sync-ovs
     * 6windgate-linux-fp-sync-vrf
     * 6windgate-product-base
     * 6windgate-tools-common-libs-daemonctl
     * 6windgate-tools-common-libs-libconsole
     * 6windgate-tools-common-libs-pyroute2
-    * Python-pyelftools
-    * Dkms
-    * Elfutils
-    * Elfutils-default-yama-scope
-    * Elfutils-libelf
-    * Elfutils-libelf-devel
-    * Elfutils-libs
+    * 6wind-openstack-extensions
+    * dkms
     * nuage-metadata-agent (from el7-6wind)
     * nuage-openvswitch (from el7-6wind)
-    * Virtual-accelerator
-    * Virtual-accelerator-addon-mellanox
-    * Virtual-accelerator-base
+    * python-pyelftools
     * selinux-policy-nuage-avrs
+    * virtual-accelerator-base
+    * virtual-accelerator (Only requried for VA version <= 1.8.3)
 
 
 Deployment Process
@@ -371,7 +363,7 @@ Phase 7: Create the Heat templates.
 
 3. Create the environment file ``node-info.yaml`` under ``/home/stack/templates/`` to specify the count and flavor for ``Controller`` and ``Compute`` roles.
 
-  Assign Controller and Compute nodes with their respective profiles:
+Assign Controller and Compute nodes with their respective profiles:
 
 ::
 
@@ -379,7 +371,7 @@ Phase 7: Create the Heat templates.
     openstack baremetal node set --property capabilities='profile:compute,boot_option:local' <node-uuid>
 
 
-  The syntax for ``node-info.yaml`` is:
+The syntax for ``node-info.yaml`` is:
 
 ::
 
@@ -1153,6 +1145,9 @@ For the latest templates, go to the `Links to Nuage and OpenStack Resources`_ se
 
 network-environment.yaml
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
     parameter_defaults:
       # This section is where deployment-specific configuration is done
       # CIDR subnet mask length for provisioning network
@@ -1521,7 +1516,19 @@ While deploying overcloud with Ironic service enabled
 If the following issue occurs:
 
 ::
+
     resources.ControllerServiceChain: Error in 102 output role_data: The Parameter (UpgradeRemoveUnusedPackages) was not provided
 
 The workaround is to apply this upstream `change https://review.openstack.org/#/c/617215/3/docker/services/nova-ironic.yaml`_ .
 The upstream bug id for this is `here https://bugzilla.redhat.com/show_bug.cgi?id=1648998`_ .
+
+Known Issues
+~~~~~~~~~~~~
+
+1. When deploying overcloud computeavrs without network isolation, creation of any fastpath VMs is create unnecessary ifcfg scripts. which prevents network restart.
+
+Problem: When a fastpath VM is created on an AVRS through Openstack, `ifcfg` network configuration files are created and `BOOTPROTO` is set to DHCP. When the `systemctl restart network.service` command is run on the ComputeAvrs, the service returns a status of failed as the tap interface unnecessarily tries to acquire an IP address through DHCP.
+
+Workaround: Delete all the ifcfg-tap* configuration files from /etc/sysconfig/network-scripts/ prior to running `systemctl restart network.service`. This needs to be done every time before running `systemctl restart network.service` or `systemctl stop network.service` followed by `systemctl start network.service`.
+
+Recommended Solution: Deploy overcloud nodes using network isolation.
