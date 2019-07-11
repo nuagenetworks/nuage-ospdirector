@@ -1,0 +1,22 @@
+resource_registry:
+  OS::TripleO::Services::NovaComputeAvrs: ../docker/services/nova-compute-avrs.yaml
+
+parameter_defaults:
+  # An array of filters used by Nova to filter a node.These filters will be applied in the order they are listed,
+  # so place your most restrictive filters first to make the filtering process more efficient.
+  NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+  ComputeAvrsParameters:
+    KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+    NovaVcpuPinSet: "2-7,10-15"
+    FastPathNics: "0000:06:00.1 0000:06:00.2"
+    FastPathMask: "1,9"
+    FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+    FastPathDPVI: "0"
+    FastPathOffload: "off"
+
+  ComputeAvrsExtraConfig:
+    DEFAULT/monkey_patch:
+      value: true
+    DEFAULT/monkey_patch_modules:
+      value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator

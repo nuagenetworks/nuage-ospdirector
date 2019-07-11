@@ -1,0 +1,15 @@
+parameter_defaults:
+  DockerHeatApiCfnConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-api-cfn-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHeatApiCfnImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-api-cfn-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHeatApiConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-api-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHeatApiImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-api-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHeatConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-api-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHeatEngineImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-heat-engine-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHorizonConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-horizon-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerHorizonImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-horizon-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerInsecureRegistryAddress:
+  - {{ nuage_config['local_registry'] }}
+  DockerNeutronApiImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-neutron-server-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerNeutronConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-neutron-server-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerNovaComputeAvrsImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  DockerNovaLibvirtAvrsConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}

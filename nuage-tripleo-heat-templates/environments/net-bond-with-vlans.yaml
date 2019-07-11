@@ -1,0 +1,13 @@
+resource_registry:
+  # Port assignments for the Controller
+  OS::TripleO::Controller::Net::SoftwareConfig: ../network/config/bond-with-vlans/controller.yaml
+  # Port assignments for the Compute
+  OS::TripleO::Compute::Net::SoftwareConfig: ../network/config/bond-with-vlans/compute.yaml
+  # Port assignments for the ComputeSriov
+  OS::TripleO::ComputeSriov::Net::SoftwareConfig: ../network/config/bond-with-vlans/computesriov.yaml
+  # Port assignments for the ComputeAvrs
+  OS::TripleO::ComputeAvrs::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeavrs.yaml
+  # Port assignments for the ComputeAvrsSingle2
+  OS::TripleO::ComputeAvrsSingle::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeavrssingle.yaml
+  # Port assignments for the ComputeAvrsDual2
+  OS::TripleO::ComputeAvrsDual::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeavrsdual.yaml
