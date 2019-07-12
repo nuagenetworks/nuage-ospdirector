@@ -220,6 +220,8 @@ outputs:
               yum:
                 name: "{{ packages }}"
                 state: present
+                disablerepo: '*'
+                enablerepo: nuage_6wind
               vars:
                 packages:
                   - selinux-policy-nuage-avrs
@@ -233,6 +235,8 @@ outputs:
               yum:
                 name: "6windgate*"
                 state: present
+                disablerepo: '*'
+                enablerepo: nuage_6wind
             - name: remove nuage-openvswitch
               yum:
                 name: nuage-openvswitch
@@ -291,6 +295,7 @@ outputs:
               service:
                 name: virtual-accelerator
                 state: restarted
+                enabled: yes
             - name: Restart Network service on the AVRS nodes
               service:
                 name: network
