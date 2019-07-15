@@ -530,6 +530,9 @@ This example shows how to create a deployment with one Controller node and two C
 
     .. Note:: Above kernel arguments are consumed by the another env file which include in deployment command `/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`
 
+    .. Note:: We also can set GpgCheck to "no" in environment files if user want to disable GPG Check while installating packages on AVRS Node deployment.
+
+
 
 4. **(Optional)** To enable SR-IOV, perform the following instructions:
 
@@ -1319,14 +1322,16 @@ compute-avrs-environment.yaml for AVRS integration
       # so place your most restrictive filters first to make the filtering process more efficient.
       NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
       ComputeAvrsParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
+        IsolCpusList: "1-7,9-15"
         NovaVcpuPinSet: "2-7,10-15"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
         FastPathDPVI: "0"
         FastPathOffload: "off"
+        GpgCheck: "yes"
       ComputeAvrsExtraConfig:
         nova::config::nova_config:
           DEFAULT/monkey_patch:
@@ -1357,23 +1362,27 @@ compute-avrs-multirole-environment.yaml for AVRS integration
           DEFAULT/monkey_patch_modules:
              value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
       ComputeAvrsSingleParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7"
+        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
+        IsolCpusList: "1-7"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
         FastPathDPVI: "0"
         FastPathOffload: "off"
         NovaVcpuPinSet: "2-7"
+        GpgCheck: "yes"
       ComputeAvrsDualParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
+        IsolCpusList: "1-7,9-15"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
         FastPathDPVI: "0"
         FastPathOffload: "off"
         NovaVcpuPinSet: "2-7,10-15"
+        GpgCheck: "yes"
 
 
 node-info.yaml for Non-HA Deployments
