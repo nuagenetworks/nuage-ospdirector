@@ -1,0 +1,77 @@
+# Name of the qcow2 image
+# type: string
+# required
+ImageName: "overcloud-full.qcow2"
+
+# DeploymentType for your Deployment
+# type: string
+# required ( Please choose one of them )
+# Eg:  ["ovrs"] or ["avrs"]
+DeploymentType: []
+
+# User name for RHEL Subscription
+# type: string
+# optional
+RhelUserName: ''
+
+# Password for the RHEL Subscription 
+# type: string
+# optional
+RhelPassword: ''
+
+#Pool to subscribe to for base packages
+# type: string
+# optional
+RhelPool: ''
+
+# RPM GPG Key
+# type: list
+# optional
+RpmPublicKey: []
+
+# Path for the Repo File
+# type: string
+# required
+RepoFile: ''
+
+# Name for the repo hosting the Nuage O/VRS RPMs
+# type:  list
+# required
+# Eg:  ["vrs_repo_name1", "vrs_repo_name2"]
+VRSRepoNames: []
+
+# Name for the repo hosting the Nuage AVRS RPMs 
+# type: list
+# optional
+# Eg:  ["avrs_repo_name1", "avrs_repo_name2"]
+AVRSRepoNames: []
+
+# Name for the repo hosting the Mellanox and os-net-config RPMs
+# type: list
+# optional
+# Eg:  ["mlnx_repo_name1", "mlnx_repo_name2"]
+MellanoxRepoNames: []
+
+# Name for the repo hosting the Kernel RPMs
+# type: list
+# optional
+# Eg:  ["rh_kernel_repo_name1", "rh_kernel_repo_name2"]
+KernelRepoNames: []
+
+# To install Kernel Hot Fix or not and defaults to False.
+# When this is set to True, KernelRepoNames can't be empty.
+# type: boolean
+# optional
+# Eg: KernelHF: True
+KernelHF: False
+
+# Log file name
+# type: string
+# optional
+logFileName: "nuage_image_patching.log"
+
+# If you are behind Proxy you can enter Proxy Server information here
+# type: string
+# optional
+ProxyHostname: ''
+ProxyPort: ''
