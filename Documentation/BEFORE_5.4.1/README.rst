@@ -137,7 +137,7 @@ The integration includes the following steps:
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
         - 6windgate-dpdk
-        - 6windgate-dpdk-pmd-mellanox-ofa-kernel
+        - 6windgate-dpdk-pmd-mellanox-ofa-kernel (Only requried for VA version <= 1.7.12)
         - 6windgate-dpdk-pmd-mellanox-rdma-core
         - 6windgate-dpdk-pmd-virtio-host
         - 6windgate-fp
@@ -148,7 +148,6 @@ The integration includes the following steps:
         - 6windgate-linux-fp-sync-ovs
         - 6windgate-linux-fp-sync-vrf
         - 6windgate-product-base
-        - 6windgate-qlogic-fastlinq
         - 6windgate-tools-common-libs-daemonctl
         - 6windgate-tools-common-libs-libconsole
         - 6windgate-tools-common-libs-pyroute2
@@ -156,11 +155,13 @@ The integration includes the following steps:
         - dkms
         - nuage-metadata-agent (6wind version)
         - nuage-openvswitch (6wind version)
-        - selinux-policy-nuage-avrs
         - python-pyelftools
+        - selinux-policy-nuage-avrs
         - virtual-accelerator
-        - virtual-accelerator-addon-mellanox
+        - virtual-accelerator-addon-mellanox (Only requried for VA version <= 1.7.12)
         - virtual-accelerator-base
+
+.. Note:: The virtual-accelerator-addon-mellanox in only available in VA version 1.7.x. This provides Mellanox drivers for RHEL 7.4 and older. Along with installing 1.7.x virtual-accelerator-addon-mellanox it is also required to install 6windgate-dpdk-pmd-mellanox-ofa-kernel.
 
 
 * Updating the Undercloud codebase
@@ -229,35 +230,30 @@ OSC and VRS Packages
 6WIND and AVRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    * 6wind-openstack-extensions
     * 6windgate-dpdk
-    * 6windgate-dpdk-pmd-mellanox-ofa-kernel
+    * 6windgate-dpdk-pmd-mellanox-ofa-kernel (Only requried for VA version <= 1.7.12)
     * 6windgate-dpdk-pmd-mellanox-rdma-core
     * 6windgate-dpdk-pmd-virtio-host
     * 6windgate-fp
-    * 6windgate-fp-ovs
     * 6windgate-fpn-sdk-dpdk
+    * 6windgate-fp-ovs
     * 6windgate-linux-fp-sync
     * 6windgate-linux-fp-sync-fptun
-    * 6windgate-linux-fp-sync-ovs.
+    * 6windgate-linux-fp-sync-ovs
     * 6windgate-linux-fp-sync-vrf
     * 6windgate-product-base
     * 6windgate-tools-common-libs-daemonctl
     * 6windgate-tools-common-libs-libconsole
     * 6windgate-tools-common-libs-pyroute2
-    * Python-pyelftools
-    * Dkms
-    * Elfutils
-    * Elfutils-default-yama-scope
-    * Elfutils-libelf
-    * Elfutils-libelf-devel
-    * Elfutils-libs
+    * 6wind-openstack-extensions
+    * dkms
     * nuage-metadata-agent (from el7-6wind)
     * nuage-openvswitch (from el7-6wind)
-    * Virtual-accelerator
-    * Virtual-accelerator-addon-mellanox
-    * Virtual-accelerator-base
+    * python-pyelftools
     * selinux-policy-nuage-avrs
+    * virtual-accelerator
+    * virtual-accelerator-addon-mellanox (Only requried for VA version <= 1.7.12)
+    * virtual-accelerator-base
 
 
 Deployment Process
