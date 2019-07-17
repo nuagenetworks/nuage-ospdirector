@@ -9,6 +9,7 @@ resource_registry:
 
   # Override the NeutronMl2PluginBase to use Nuage inside Docker container
   OS::TripleO::Docker::NeutronMl2PluginBase: ../puppet/services/neutron-plugin-ml2-nuage.yaml
+  OS::TripleO::Services::NeutronCorePlugin: ../docker/services/neutron-plugin-ml2-nuage.yaml
 
 parameter_defaults:
   NeutronNuageNetPartitionName: 'default_name'
