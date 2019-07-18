@@ -41,3 +41,12 @@ parameter_defaults:
     directories: [{'allow_override': ['None'], 'path': '/usr/lib/python2.7/site-packages/nuage_horizon', 'require': 'all granted', 'options': ['FollowSymLinks']}]
     add_listen: True
     aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python2.7/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
+  ControllerExtraConfig:
+    neutron::config::server_config:
+      DEFAULT/ipam_driver:
+        value: nuage_internal
+      DEFAULT/enable_snat_by_default:
+        value: false
+    neutron::config::plugin_nuage_config:
+      RESTPROXY/nuage_pat:
+        value: legacy_disabled
