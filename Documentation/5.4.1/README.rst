@@ -134,6 +134,7 @@ The integration includes the following steps:
             - kmod-mlnx-en
             - mlnx-en-utils
             - mstflint
+            - os-net-config
         - Red Hat Packages
             - kernel
             - kernel-tools
@@ -233,6 +234,7 @@ OSC and VRS Packages
         * kmod-mlnx-en
         * mlnx-en-utils
         * mstflint
+        * os-net-config
     * Red Hat Packages
         * kernel
         * kernel-tools
