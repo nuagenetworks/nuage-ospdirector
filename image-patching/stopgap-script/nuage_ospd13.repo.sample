@@ -1,0 +1,73 @@
+########################################################################################################################
+############## Repositories which user want to enable by default on the overcloud image while patching #################
+########################################################################################################################
+
+# This repo should contain following packages:
+# nuage-puppet-modules
+# selinux-policy-nuage
+# nuage-bgp
+# nuage-openstack-neutronclient
+[nuage]
+name=nuage_osp13_5.4.1.u4_nuage
+baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_5.4.1/nuage_extra
+enabled=1
+gpgcheck=1
+
+# These are some placeholder for some other repos that user want to enable these packages.
+# This repo should contain following packages:
+# libvirt
+# perl-JSON
+# lldpad
+# libguestfs-tools etc...
+[extra]
+name=satellite
+baseurl=http://satellite.com/extra_repo
+enabled=1
+gpgcheck=1
+
+
+########################################################################################################################
+############## Repositories which we recommend user to disable by default ##############################################
+########################################################################################################################
+
+# This repo should contain following packages:
+# nuage-openvswitch
+# nuage-metadata
+[nuage_vrs]
+name=nuage_osp13_5.4.1.u4_nuage
+baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_5.4.1/nuage_vrs
+enabled=1
+gpgcheck=1
+
+# This repo should contain following packages (Kernel HF provided by Redhat):
+# kernel
+# kernel-tools
+# kernel-tools-libs
+# python-perf
+[kernel]
+name=satellite1
+baseurl=http://<HOST-IP-HOSTING-REPOS>/repo
+enabled=0
+gpgcheck=1
+
+# kmod-mlnx-en
+# mlnx-en-utils
+# mstflint
+# os-net-config
+# Note: This is only required for OVRS Deployment.
+[mlnx]
+name=satellite2
+baseurl=http://<HOST-IP-HOSTING-REPOS>/repo
+enabled=0
+gpgcheck=1
+
+# This repo should contain following packages:
+# nuage-openvswitch
+# nuage-metadata
+# 6wind packages
+# Note: This is only required for AVRS Deployment
+[nuage_avrs]
+name=nuage_osp13_5.4.1.u4_avrs
+baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_5.4.1/avrs
+enabled=0
+gpgcheck=1
