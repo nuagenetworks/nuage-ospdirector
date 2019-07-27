@@ -45,3 +45,8 @@ parameter_defaults:
     neutron::config::server_config:
       DEFAULT/ipam_driver:
         value: nuage_internal
+      DEFAULT/enable_snat_by_default:
+        value: false
+    neutron::config::plugin_nuage_config:
+      RESTPROXY/nuage_pat:
+        value: legacy_disabled
