@@ -91,6 +91,11 @@ parameters:
     default: ""
     tags:
       - role_specific
+  GpgCheck:
+    type: string
+    default: yes
+    tag:
+      - role_specific
 
 resources:
   RoleParametersValue:
@@ -110,6 +115,7 @@ resources:
               FPNSDK_OPTIONS: FastPathNicDescriptors
               DPVI_MASK: FastPathDPVI
               FP_OPTIONS: FastPathOptions
+              GPG_CHECK: GpgCheck
             - values: {get_param: [RoleParameters]}
           - values:
               FastPathMask: {get_param: FastPathMask}
@@ -122,6 +128,7 @@ resources:
               FastPathNicDescriptors: {get_param: FastPathNicDescriptors}
               FastPathDPVI: {get_param: FastPathDPVI}
               FastPathOptions: {get_param: FastPathOptions}
+              GpgCheck: {get_param: GpgCheck}
 
   ContainersCommon:
     type: /usr/share/openstack-tripleo-heat-templates/docker/services/containers-common.yaml
@@ -214,7 +221,7 @@ outputs:
                 name: nuage_6wind
                 baseurl: file:///6wind
                 enabled: yes
-                gpgcheck: no
+                gpgcheck: {get_attr: [RoleParametersValue, value, GPG_CHECK]}
                 description: Nuage_6wind
             - name: install base packages
               yum:
