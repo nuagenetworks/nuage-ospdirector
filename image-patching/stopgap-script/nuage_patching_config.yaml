@@ -19,7 +19,7 @@ RhelUserName: ''
 # optional
 RhelPassword: ''
 
-#Pool to subscribe to for base packages
+# Pool to subscribe to for base packages
 # type: string
 # optional
 RhelPool: ''
@@ -27,11 +27,13 @@ RhelPool: ''
 # RPM GPG Key
 # type: list
 # optional
+# Note: Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py"
 RpmPublicKey: []
 
 # Path for the Repo File
 # type: string
 # required
+# Note: Make sure to place repo file in the same folder as "nuage_overcloud_full_patch.py"
 RepoFile: ''
 
 # Name for the repo hosting the Nuage O/VRS RPMs
