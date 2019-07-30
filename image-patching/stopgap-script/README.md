@@ -1,9 +1,17 @@
-#Steps:
+# Requirements:
 
-Clone this repo onto the machine that is accessible to the nuage-rpms repo and make sure the machine also has `libguestfs-tools` and `libguestfs-tools-c` are installed.
+Required packages are `libguestfs-tools` and `python-yaml`
 
 ```
-yum install libguestfs-tools -y
+yum install libguestfs-tools python-yaml -y
+```
+
+
+# Steps:
+
+Clone this repo onto the hypervisor machine that is accessible to the nuage-rpms repo.
+
+```
 git clone https://github.com/nuagenetworks/nuage-ospdirector.git
 cd nuage-ospdirector
 git checkout OSPD13
@@ -12,7 +20,7 @@ cd image-patching/stopgap-script/
 
 Copy the `overcloud-full.qcow2` from undercloud-director /home/stack/images/ to this location and make a backup of overcloud-full.qcow2    
 
-    cp overcloud-full.qcow2 overcloud-full-bk.qcow2`
+    cp overcloud-full.qcow2 overcloud-full-bk.qcow2
 
 
 This script takes in `nuage_patching_config.yaml` as input parameters:  Please configure the following parameters. 
@@ -29,13 +37,16 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
         Note: 
             Any Nuage package signing keys are delivered with other Nuage artifacts.  See "nuage-package-signing-keys-*.tar.gz". Mellanox signing keys can be found on their website.
             Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script directory. 
-  * RepoFile(required) is the name of the repository hosting the RPMs required for patching. 
-                
+  * RepoFile(required) is the name of the repository hosting the RPMs required for patching.
+   
+        Note: 
+           Make sure to place repo file in the same folder as "nuage_overcloud_full_patch.py" patching script directory.
+                    
     **we are providing RepoFile exmaple `nuage_ospd13.repo.sample`** 
     
     **RepoFile can contain multiple repos. Please read following for more information about the repos in RepoFile:**
   
-        [nuage] repo should have: ( We recommend user to enable this repo "enabled=1" by default as below packages will be installed via this repo)
+        [nuage] repo should have: (We recommend user to enable this repo "enabled=1" by default as below packages will be installed via this repo)
             nuage-puppet-modules
             selinux-policy-nuage 
             nuage-bgp 
