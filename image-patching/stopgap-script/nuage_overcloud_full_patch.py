@@ -41,7 +41,7 @@ NUAGE_PACKAGES = "nuage-metadata-agent nuage-puppet-modules " \
                  "nuage-openstack-neutronclient"
 NUAGE_DEPENDENCIES = "libvirt perl-JSON lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch"
-MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint"
+MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint os-net-config"
 KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 
@@ -221,13 +221,7 @@ def delete_repo_file(image):
 # Installing Mellanox Packages
 #####
 
-def install_mellanox(image, workingDir):
-    # This is a temporary workaround until all the patches for
-    # os-net-config will be merged and available in overcloud-full.qcow2
-    virt_copy(
-        '%s %s/os-net-config/os_net_config/* '
-        '/usr/lib/python2.7/site-packages/os_net_config' % (
-            image, workingDir))
+def install_mellanox(image):
 
     # Installing Mellanox OFED Packages
     cmds_run(['cat <<EOT > mellanox_packages \n'
@@ -340,8 +334,8 @@ def image_patching(args):
     cmds_run(['echo "Installing Nuage Packages"'])
     install_packages(args.ImageName)
 
-    cmds_run(['echo "Installing MLNX OFED Packages"'])
-    install_mellanox(args.ImageName, workingDir)
+    cmds_run(['echo "Installing MLNX OFED and os-net-config Packages"'])
+    install_mellanox(args.ImageName)
 
     cmds_run(['echo "Cleaning up"'])
     delete_repo_file(args.ImageName)
