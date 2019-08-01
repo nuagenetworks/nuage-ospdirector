@@ -840,11 +840,11 @@ Phase 8. Nuage Docker Containers.
     Login Succeeded!
 
 
-2. Now change the working directory to /home/stack/nuage-tripleo-heat-templates/scripts/pulling_nuage_containers/
+2. Now change the working directory to /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
 
 ::
 
-    $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pulling_nuage_containers/
+    $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
 
 
 3. Configure nuage_container_config.yaml with appropriate values and a sample is given below.
