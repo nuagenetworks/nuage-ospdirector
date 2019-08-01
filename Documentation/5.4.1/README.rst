@@ -715,7 +715,7 @@ Phase 8. Nuage Docker Containers.
     Password: ${REGISTRY-SERVICE-ACCOUNT-PASSWORD}
     Login Succeeded!
 
-2. Now change the working directory to /home/stack/nuage-tripleo-heat-templates/scripts/pulling_nuage_containers/
+2. Now change the working directory to /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
 
 ::
 
