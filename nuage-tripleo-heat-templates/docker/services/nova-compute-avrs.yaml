@@ -94,7 +94,7 @@ parameters:
   GpgCheck:
     type: string
     default: yes
-    tag:
+    tags:
       - role_specific
 
 resources:
@@ -208,7 +208,12 @@ outputs:
       host_prep_tasks:
         list_concat:
         - {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
-        - - name: Check if 6wind is installed
+        - - name: Stoping Network Manager
+            service:
+              name: NetworkManager
+              state: stopped
+              enabled: no
+          - name: Check if 6wind is installed
             shell: rpm -qa | grep -q 6wind
             failed_when: false
             register: sixwind_check
@@ -291,26 +296,14 @@ outputs:
                 - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
             register: lineinfile_result
             when: item.val != ''
-          - name: Stoping Network Manager
+          - name: Restarting AVRS service
             service:
-              name: NetworkManager
-              state: stopped
-              enabled: no
-          - name : Restarting Virtual-accelerator and Network service
-            block:
-            - name: Restart Virtual-accelerator on AVRS nodes
-              service:
-                name: virtual-accelerator
-                state: restarted
-                enabled: yes
-            - name: Restart Network service on the AVRS nodes
-              service:
-                name: network
-                state: restarted
-              # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
-              ignore_errors: yes
+              name: avrs
+              state: restarted
+              enabled: yes
+            # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+            ignore_errors: yes
             when: lineinfile_result.changed
-
       upgrade_tasks:
         get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]
       fast_forward_upgrade_tasks:
