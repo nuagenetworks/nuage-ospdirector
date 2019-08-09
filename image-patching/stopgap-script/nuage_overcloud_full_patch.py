@@ -28,8 +28,11 @@ This script takes in following input parameters:
  RhelPassword      : Password for the RHEL subscription
  RhelPool          : RHEL Pool to subscribe
  RepoFile          : Name for the file repo hosting the Nuage RPMs
- VRSRepoNames       : Name for the repo hosting the Nuage O/VRS RPMs 
- AVRSRepoNames      : Name for the repo hosting the Nuage AVRS RPMs
+ DeploymentType    : ["ovrs"] --> OVRS deployment
+                     ["avrs"] --> AVRS + VRS deployment
+                     ["vrs"]  --> VRS deployment
+ VRSRepoNames      : Name for the repo hosting the Nuage O/VRS RPMs 
+ AVRSRepoNames     : Name for the repo hosting the Nuage AVRS RPMs
  MellanoxRepoNames : Name for the repo hosting the Mellanox RPMs
  KernelRepoNames   : Name for the repo hosting the Kernel RPMs
  RpmPublicKey      : RPM GPG Key 
@@ -399,38 +402,54 @@ def image_patching(nuage_config):
         ' %s -a %s --memsize %s --selinux-relabel' % (
             SCRIPT_NAME, nuage_config["ImageName"],
             VIRT_CUSTOMIZE_MEMSIZE))
+    logger.info("Reset the Machine ID")
+    cmds_run([VIRT_CUSTOMIZE_ENV + "virt-sysprep --operation machine-id -a %s" % nuage_config["ImageName"]])
     logger.info("Done")
 
 
 def check_config(nuage_config):
     missing_config = []
-    for key in ["ImageName", "DeploymentType", "RepoFile", "VRSRepoNames"]:
+    for key in ["ImageName", "RepoFile", "VRSRepoNames"]:
         if not (nuage_config.get(key)):
             missing_config.append(key)
     if missing_config:
         logger.error("Please provide missing config %s value "
                      "in your config file. \n" % missing_config)
         sys.exit(1)
-    if "avrs" in nuage_config["DeploymentType"] and "ovrs" in nuage_config["DeploymentType"]:
-        logger.error(
-            "Currently Nuage doesn't support both AVRS and OVRS deployment together"
-            "Please choose only one between them")
+    file_exists(nuage_config["ImageName"])
+    if nuage_config.get("KernelHF"):
+        if not nuage_config.get("KernelRepoNames"):
+            logger.error(
+                "Please provide KernelRepoNames for Kernel Hot Fix")
+            sys.exit(1)
+    msg = "DeploymentType config option %s is not correct or supported " \
+          " Please enter:\n ['vrs'] --> for VRS deployment\n " \
+          "['avrs'] --> for AVRS + VRS deployment\n " \
+          "['ovrs'] --> for OVRS deployment" % nuage_config["DeploymentType"]
+    if len(nuage_config["DeploymentType"]) > 1:
+        new_msg = "Multiple " + msg
+        logger.error(new_msg)
         sys.exit(1)
-    if "avrs" in nuage_config["DeploymentType"]:
+    elif "vrs" in nuage_config["DeploymentType"]:
+        logger.info("Overcloud Image will be patched with Nuage VRS rpms")
+    elif "avrs" in nuage_config["DeploymentType"]:
+        logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
         if not nuage_config.get("AVRSRepoNames"):
             logger.error("Please provide AVRSRepoNames for AVRS deployment")
             sys.exit(1)
-    if "ovrs" in nuage_config["DeploymentType"]:
-        for reponame in ["KernelRepoNames", "MellanoxRepoNames"]:
-            if not nuage_config.get(reponame):
-                logger.error(
-                    "Please provide %s for OVRS deployment" % reponame)
-                sys.exit(1)
-
+    elif  "ovrs" in nuage_config["DeploymentType"]:
+        logger.info("Overcloud Image will be patched with OVRS rpms")
+        if not nuage_config.get("MellanoxRepoNames"):
+            logger.error(
+                "Please provide MellanoxRepoNames for OVRS deployment")
+            sys.exit(1)
+    else:
+        logger.error(msg)
+        sys.exit(1)
     logger.info("Verifying pre-requisite packages for script")
-    libguestfs = cmds_run(['rpm -q libguestfs-tools'])
+    libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
     if 'not installed' in libguestfs:
-        logger.info("Please install libguestfs-tools package for the script to run")
+        logger.info("Please install libguestfs-tools-c package for the script to run")
         sys.exit(1)
 
 
@@ -444,11 +463,15 @@ def main():
         help="path to nuage_patching_config.yaml")
     args = parser.parse_args()
 
-    try:
-        with open(args.nuage_config) as nuage_config:
+    with open(args.nuage_config) as nuage_config:
+        try:
             nuage_config = yaml.load(nuage_config)
-    except Exception:
-        raise
+        except yaml.YAMLError as exc:
+            logger.error(
+                'Error parsing file {filename}: {exc}. Please fix and try '
+                'again with correct yaml file.'.format(filename=args.nuage_config, exc=exc))
+            sys.exit(1)
+    logger.info("nuage_overcloud_full_patch.py was run with following config options %s " % nuage_config)
     check_config(nuage_config)
     image_patching(nuage_config)
 
