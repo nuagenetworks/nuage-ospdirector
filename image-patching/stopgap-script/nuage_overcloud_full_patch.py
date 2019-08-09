@@ -417,18 +417,17 @@ def check_config(nuage_config):
                      "in your config file. \n" % missing_config)
         sys.exit(1)
     file_exists(nuage_config["ImageName"])
-    if nuage_config.get("KernelHF"):
-        if not nuage_config.get("KernelRepoNames"):
-            logger.error(
-                "Please provide KernelRepoNames for Kernel Hot Fix")
-            sys.exit(1)
     msg = "DeploymentType config option %s is not correct or supported " \
           " Please enter:\n ['vrs'] --> for VRS deployment\n " \
           "['avrs'] --> for AVRS + VRS deployment\n " \
           "['ovrs'] --> for OVRS deployment" % nuage_config["DeploymentType"]
     if len(nuage_config["DeploymentType"]) > 1:
-        new_msg = "Multiple " + msg
-        logger.error(new_msg)
+        logger.error(msg)
+        sys.exit(1)
+    elif "avrs" in nuage_config["DeploymentType"] and "ovrs" in nuage_config["DeploymentType"]:
+        logger.error(
+            "Currently Nuage doesn't support both AVRS and OVRS deployment together"
+            "Please choose only one between them")
         sys.exit(1)
     elif "vrs" in nuage_config["DeploymentType"]:
         logger.info("Overcloud Image will be patched with Nuage VRS rpms")
@@ -439,19 +438,14 @@ def check_config(nuage_config):
             sys.exit(1)
     elif  "ovrs" in nuage_config["DeploymentType"]:
         logger.info("Overcloud Image will be patched with OVRS rpms")
-        if not nuage_config.get("MellanoxRepoNames"):
-            logger.error(
-                "Please provide MellanoxRepoNames for OVRS deployment")
-            sys.exit(1)
+        for reponame in ["KernelRepoNames", "MellanoxRepoNames"]:
+            if not nuage_config.get(reponame):
+                logger.error(
+                    "Please provide %s for OVRS deployment" % reponame)
+                sys.exit(1)
     else:
         logger.error(msg)
         sys.exit(1)
-    logger.info("Verifying pre-requisite packages for script")
-    libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
-    if 'not installed' in libguestfs:
-        logger.info("Please install libguestfs-tools-c package for the script to run")
-        sys.exit(1)
-
 
 def main():
     parser = argparse.ArgumentParser()
