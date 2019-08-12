@@ -350,7 +350,16 @@ If image patching fails for some reason then remove the partially patched overcl
     cp overcloud-full-bk.qcow2 overcloud-full.qcow2
 
 
-Once the patching is done successfully copy back the patched image to /home/stack/images/ on undercloud-director   
+The image patching script uses libguestfs virt-customize function, which adds the machine-id to the overcloud-full.qcow2 resulting in all the overcloud nodes to have the same machine-id. The following command needs to be applied once the patching is done successfully to remove the machine-id from the overcloud-full.qcow2.
+ 	
+    virt-sysprep --operation machine-id -a overcloud-full.qcow2
+ 
+In order to verify that  machine-id is clear in the overcloud image, run the following command and you should see empty output:
+
+	guestfish -a overcloud-full.qcow2 run : mount /dev/sda / : cat /etc/machine-id 
+
+Now you can copy back the patched image to /home/stack/images/ on undercloud-director
+
 
 Run the below commands:    
 
