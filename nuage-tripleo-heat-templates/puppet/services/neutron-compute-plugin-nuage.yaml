@@ -75,10 +75,33 @@ parameters:
     description: Support for non-default MTU configured on each Compute node
     type: string
     default: ''
+  OvsHwOffload:
+    default: false
+    description: |
+      Enable OVS Hardware Offload.
+    type: boolean
   VrsExtraConfigs:
     description: Extra config params and values for nuage-openvswitch
     default: {}
     type: json
+    tags:
+      - role_specific
+
+resources:
+
+  RoleParametersValue:
+    type: OS::Heat::Value
+    properties:
+      type: json
+      value:
+        map_replace:
+          - map_replace:
+            - nuage::vrs::enable_hw_offload: OvsHwOffload
+              nuage::vrs::vrs_extra_configs: VrsExtraConfigs
+            - values: {get_param: [RoleParameters]}
+          - values:
+              OvsHwOffload: {get_param: OvsHwOffload}
+              VrsExtraConfigs: {get_param: VrsExtraConfigs}
 
 outputs:
   role_data:
@@ -86,26 +109,27 @@ outputs:
     value:
       service_name: neutron_compute_plugin_nuage
       config_settings:
-        nuage::vrs::active_controller: {get_param: NuageActiveController}
-        nuage::vrs::standby_controller: {get_param: NuageStandbyController}
-        nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
-        nuage::vrs::vrs_extra_configs: {get_param: VrsExtraConfigs}
-        nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
-        nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
-        nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
-        nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
-        nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
-        nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
-        nuage::metadataagent::nova_api_endpoint_type: {get_param: NuageNovaApiEndpoint}
-        nuage::metadataagent::nova_region_name: {get_param: NuageNovaRegionName}
-        tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
-        tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
-        tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
-        tripleo.neutron_compute_plugin_nuage.firewall_rules:
-          '118 neutron vxlan networks':
-            proto: 'udp'
-            dport: 4789
-          '100 metadata agent':
-            dport: {get_param: NuageMetadataPort}
+        map_merge:
+          - get_attr: [RoleParametersValue, value]
+          - nuage::vrs::active_controller: {get_param: NuageActiveController}
+            nuage::vrs::standby_controller: {get_param: NuageStandbyController}
+            nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
+            nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
+            nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
+            nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
+            nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
+            nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
+            nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
+            nuage::metadataagent::nova_api_endpoint_type: {get_param: NuageNovaApiEndpoint}
+            nuage::metadataagent::nova_region_name: {get_param: NuageNovaRegionName}
+            tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
+            tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
+            tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
+            tripleo.neutron_compute_plugin_nuage.firewall_rules:
+              '118 neutron vxlan networks':
+                proto: 'udp'
+                dport: 4789
+              '100 metadata agent':
+                dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage

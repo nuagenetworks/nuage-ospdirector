@@ -1,0 +1,5 @@
+resource_registry:
+  # Port assignments for the Controller
+  OS::TripleO::Controller::Net::SoftwareConfig: ../network/config/single-nic-hw-offload/controller.yaml
+  # Port assignments for the ComputeSriov
+  OS::TripleO::ComputeSriov::Net::SoftwareConfig: ../network/config/single-nic-hw-offload/computesriov.yaml

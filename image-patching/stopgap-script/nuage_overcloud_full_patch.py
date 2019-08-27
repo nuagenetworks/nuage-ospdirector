@@ -426,23 +426,20 @@ def check_config(nuage_config):
           " Please enter:\n ['vrs'] --> for VRS deployment\n " \
           "['avrs'] --> for AVRS + VRS deployment\n " \
           "['ovrs'] --> for OVRS deployment" % nuage_config["DeploymentType"]
-    if len(nuage_config["DeploymentType"]) > 1:
-        new_msg = "Multiple " + msg
-        logger.error(new_msg)
-        sys.exit(1)
-    elif "vrs" in nuage_config["DeploymentType"]:
+    if "vrs" in nuage_config["DeploymentType"]:
         logger.info("Overcloud Image will be patched with Nuage VRS rpms")
-    elif "avrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
-        if not nuage_config.get("AVRSRepoNames"):
-            logger.error("Please provide AVRSRepoNames for AVRS deployment")
-            sys.exit(1)
-    elif  "ovrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with OVRS rpms")
-        if not nuage_config.get("MellanoxRepoNames"):
-            logger.error(
-                "Please provide MellanoxRepoNames for OVRS deployment")
-            sys.exit(1)
+    elif "avrs" in nuage_config["DeploymentType"] or "ovrs" in nuage_config["DeploymentType"]:
+        if "avrs" in nuage_config["DeploymentType"]:
+            logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
+            if not nuage_config.get("AVRSRepoNames"):
+                logger.error("Please provide AVRSRepoNames for AVRS deployment")
+                sys.exit(1)
+        if "ovrs" in nuage_config["DeploymentType"]:
+            logger.info("Overcloud Image will be patched with OVRS rpms")
+            if not nuage_config.get("MellanoxRepoNames"):
+                logger.error(
+                    "Please provide MellanoxRepoNames for OVRS deployment")
+                sys.exit(1)
     else:
         logger.error(msg)
         sys.exit(1)
