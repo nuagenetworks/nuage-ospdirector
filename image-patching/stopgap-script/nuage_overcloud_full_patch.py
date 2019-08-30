@@ -290,9 +290,7 @@ yum clean all
 touch /kernel-version
 rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
 yum install --setopt=skip_missing_names_on_install=False -y createrepo
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind kernel-headers-$(awk 'END{print}' /kernel-version) kernel-devel-$(awk 'END{print}' /kernel-version) python-pyelftools* dkms* 6windgate*
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind nuage-openvswitch nuage-metadata-agent
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind virtual-accelerator*
+yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind kernel-headers-$(awk 'END{print}' /kernel-version) kernel-devel-$(awk 'END{print}' /kernel-version) python-pyelftools* dkms* 6windgate* nuage-openvswitch nuage-metadata-agent virtual-accelerator*
 yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
 yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind 6wind-openstack-extensions
 rm -rf /kernel-version
