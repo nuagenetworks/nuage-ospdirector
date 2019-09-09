@@ -6,8 +6,11 @@ ImageName: "overcloud-full.qcow2"
 # DeploymentType for your Deployment
 # type: string
 # required ( Please choose one of them )
-# Eg:  ["ovrs"] or ["avrs"]
-DeploymentType: []
+# Eg:  ["ovrs"] --> OVRS deployment
+#      ["avrs"] --> AVRS + VRS deployment
+#      ["vrs"]  --> VRS deployment
+DeploymentType: ["vrs"]
+
 
 # User name for RHEL Subscription
 # type: string
