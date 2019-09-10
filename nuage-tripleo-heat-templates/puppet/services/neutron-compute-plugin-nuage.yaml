@@ -76,6 +76,24 @@ parameters:
     type: string
     default: ''
 
+  NuageVrsNode:
+    description: This flag is to make sure if the node is VRS or NOT
+    type: boolean 
+    default: true
+
+resources:
+  RoleParametersValue:
+    type: OS::Heat::Value
+    properties:
+      type: json
+      value:
+        map_replace:
+          - map_replace:
+            - VrsNode: NuageVrsNode
+            - values: {get_param: [RoleParameters]}
+          - values:
+              NuageVrsNode: {get_param: NuageVrsNode}
+
 outputs:
   role_data:
     description: Role data for the Neutron Compute Nuage plugin
@@ -104,3 +122,41 @@ outputs:
             dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
+      host_prep_tasks:
+        - name: Check if Nuage is installed or not
+          shell: rpm -qa | grep -q nuage
+          failed_when: false
+          register: nuage_check
+        - name : Installing Packages and Dependencies
+          block:
+          - name: Remove Upstream openvswitch
+            yum:
+              name: openvswitch
+              state: absent
+          - name: Installing Dependencies for Nuage Packages and Nuage Selinux
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - perl-JSON
+                - lldpad
+                - selinux-policy-nuage
+                - nuage-puppet-modules
+
+          - name: Set fact for Compute Node 
+            set_fact:
+              nuage_vrs_node: {get_attr: [RoleParametersValue, value, VrsNode]} 
+
+          - name: Installing Dependencies for Nuage Packages
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - nuage-openvswitch
+                - nuage-metadata-agent
+                - nuage-bgp
+            when:
+              - nuage_vrs_node|bool
+          when: nuage_check.rc == 1 

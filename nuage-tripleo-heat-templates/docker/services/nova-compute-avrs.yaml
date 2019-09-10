@@ -219,55 +219,82 @@ outputs:
             register: sixwind_check
           - name: Install 6wind and AVRS packages
             block:
-            - name: create repo
-              shell: createrepo /6wind/.
-            - name: Setup repo
-              yum_repository:
-                name: nuage_6wind
-                baseurl: file:///6wind
-                enabled: yes
-                gpgcheck: {get_attr: [RoleParametersValue, value, GPG_CHECK]}
-                description: Nuage_6wind
-            - name: install base packages
-              yum:
-                name: "{{ packages }}"
-                state: present
-                disablerepo: '*'
-                enablerepo: nuage_6wind
-              vars:
-                packages:
-                  - selinux-policy-nuage-avrs
-                  - python-pyelftools
-                  - dkms
-            - name: remove dpdk
-              yum:
-                name: dpdk
-                state: absent
-            - name: install 6wind packages
-              yum:
-                name: "6windgate*"
-                state: present
-                disablerepo: '*'
-                enablerepo: nuage_6wind
-            - name: remove nuage-openvswitch
-              yum:
-                name: nuage-openvswitch
-                state: absent
-            - name: install nuage packages
-              yum:
-                name: "{{ packages }}"
-                state: present
-              vars:
-                packages:
-                  - nuage-openvswitch*
-                  - nuage-metadata-agent*
-                  - virtual-accelerator*
-            - name: cleanup repo
-              yum_repository:
-                name: nuage_6wind
-                state: absent
-            - name: remove repodata
-              shell: rm -rf /6wind/repodata
+              - name: Ansible check /6wind/ exists example.
+                stat:
+                  path: /6wind/
+                register: sixwind_dir
+
+              - name: Install from Local Repos
+                block:
+                  - name: create repo
+                    shell: createrepo /6wind/.
+                  - name: Setup repo
+                    yum_repository:
+                      name: nuage_6wind
+                      baseurl: file:///6wind
+                      enabled: yes
+                      gpgcheck: {get_attr: [RoleParametersValue, value, GPG_CHECK]}
+                      description: Nuage_6wind
+                when: sixwind_dir.stat.exists
+
+              - name: remove upstream openvswitch and dpdk
+                yum:
+                  name: "{{ packages }}"
+                  state: absent
+                vars:
+                  packages:
+                    - openvswitch
+                    - dpdk
+
+              - name: Get the kernel version
+                shell: rpm -q kernel | awk '{ print substr($1,8) }' | awk 'END{print}'
+                failed_when: false
+                register: kernel_version
+
+              - name: Printing kernel_version value
+                debug: var=kernel_version.stdout
+
+              - name: install kernel packages
+                yum:
+                  name: "{{ item }}-{{ kernel_version.stdout }}"
+                  state: present
+                with_items:
+                  - kernel-devel
+                  - kernel
+                  - kernel-tools
+
+
+              - name: install base packages
+                yum:
+                  name: "{{ packages }}"
+                  state: present
+                vars:
+                  packages:
+                    - selinux-policy-nuage-avrs
+                    - python-pyelftools
+                    - dkms
+
+              - name: install 6wind and Nuage packages
+                yum:
+                  name: "{{ packages }}"
+                  state: present
+                vars:
+                  packages:
+                    - 6windgate*
+                    - nuage-openvswitch
+                    - nuage-metadata-agent
+                    - virtual-accelerator*
+
+              - name: cleanup repo
+                block:
+                  - name : removing nuage_6wind
+                    yum_repository:
+                      name: nuage_6wind
+                      state: absent
+                  - name: remove repodata
+                    shell: rm -rf /6wind/repodata
+                when: sixwind_dir.stat.exists
+
             when: sixwind_check.rc == 1
 
           - name: adding sockfolder pmd-vhost param

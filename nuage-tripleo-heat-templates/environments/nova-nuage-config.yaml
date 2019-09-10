@@ -7,9 +7,13 @@ parameter_defaults:
   NuageActiveController: '192.168.24.120'
   NuageStandbyController: '0.0.0.0'
   NuageBridgeMTU: '9000'
+
   NovaIPv6: 'True'
   NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
   NuageNovaApiEndpoint: 'internalURL'
   NovaOVSBridge: 'alubr0'
   NovaComputeLibvirtType: 'kvm'
   NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+
+  ComputeAvrsParameters:
+    NuageVrsNode: false
