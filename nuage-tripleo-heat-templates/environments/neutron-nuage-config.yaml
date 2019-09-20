@@ -31,8 +31,7 @@ parameter_defaults:
   NeutronNetworkVLANRanges: ''
   NeutronVniRanges: '1001:2000'
   NovaOVSBridge: 'alubr0'
-  NeutronMetadataProxySharedSecret: 'default'
-  InstanceNameTemplate: 'inst-%08x'
+  NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
   HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
   HorizonCustomizationModule: 'nuage_horizon.customization'
   HorizonVhostExtraParams:

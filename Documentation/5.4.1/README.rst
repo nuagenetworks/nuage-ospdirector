@@ -128,7 +128,7 @@ The integration includes the following steps:
             - nuage-openstack-neutron
             - nuage-openstack-neutronclient
             - nuage-openvswitch (Nuage VRS)
-            - nuage-puppet-modules-5.2.0
+            - nuage-puppet-modules-5.3.0
             - selinux-policy-nuage
         - Mellanox Packages
             - kmod-mlnx-en
@@ -144,7 +144,7 @@ The integration includes the following steps:
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.2.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-5.3.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
 
 .. ..   - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -197,7 +197,7 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.2.0), go to `image-patching <../../image-patching>`_.
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_.
 * For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_.
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_.
@@ -228,7 +228,7 @@ OSC and VRS Packages
         * Nuage-openstack-neutron
         * Nuage-openstack-neutronclient
         * Nuage-openvswitch (VRS)
-        * Nuage-puppet-modules (Latest version 5.2.0)
+        * Nuage-puppet-modules (Latest version 5.3.0)
         * Selinux-policy-nuage
     * Mellanox Packages
         * kmod-mlnx-en
@@ -1143,9 +1143,6 @@ The following parameters are mapped to values in the /etc/nova/nova.conf file on
     NeutronMetadataProxySharedSecret
     Maps to metadata_proxy_shared_secret parameter in [neutron] section
 
-    InstanceNameTemplate
-    Maps to instance_name_template parameter in [DEFAULT] section
-
 
 The following parameters are mapped to values in the /etc/neutron/plugins/ml2/ml2_conf.ini file on the Neutron controller:
 
@@ -1231,6 +1228,12 @@ The following parameters are mapped to values in the /etc/default/openvswitch fi
 
     NuageStandbyController
     Maps to STANDBY_CONTROLLER parameter
+
+    NuageBridgeMTU
+    Maps to BRIDGE_MTU parameter
+
+    VrsExtraConfigs
+    Used to configure extra parameters and values for nuage-openvswitch
 
 
 The following parameters are mapped to values in the /etc/nova/nova.conf file on the Nova Compute:
@@ -1451,7 +1454,6 @@ neutron-nuage-config.yaml
       NeutronVniRanges: '1001:2000'
       NovaOVSBridge: 'alubr0'
       NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
-      InstanceNameTemplate: 'inst-%08x'
       HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
       HorizonCustomizationModule: 'nuage_horizon.customization'
       HorizonVhostExtraParams:
@@ -1529,6 +1531,11 @@ nova-nuage-config.yaml For a KVM Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
+      NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+      # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+      # For example to set "NETWORK_UPLINK_INTF" see below sample:
+      # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+      VrsExtraConfigs: {}
 
 .. ..
 .. ..avrs-environment.yaml for AVRS integration
@@ -1835,3 +1842,12 @@ The workaround is to manually remove the instance_uuid reference:
 .. ..
 .. ..The workaround is to apply this upstream `change https://review.openstack.org/#/c/617215/3/docker/services/nova-ironic.yaml`_ .
 .. ..The upstream bug id for this is `here https://bugzilla.redhat.com/show_bug.cgi?id=1648998`_ .
+
+Known Limitations
+~~~~~~~~~~~~~~~~~
+
+1. Using VrsExtraConfigs, users can configure extra parameters in /etc/default/openvswitch, but below are few limitations
+
+  Using the current approach, there is a chance to configure parameters that are not present in /etc/default/openvswitch by default.
+
+  Also, VrsExtraConfigs can configure ACTIVE_CONTROLLER, STANDBY_CONTROLLER and BRIDGE_MTU, by overwriting the already values initially provided.
