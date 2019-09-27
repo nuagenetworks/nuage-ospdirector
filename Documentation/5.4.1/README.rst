@@ -117,14 +117,14 @@ The integration includes the following steps:
         - nuage-openstack-neutron
         - nuage-openstack-neutronclient
         - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.1.0
+        - nuage-puppet-modules-5.3.0
         - selinux-policy-nuage
         - nuage-topology-collector
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.1.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-5.3.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -173,7 +173,7 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
 * For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
@@ -201,7 +201,7 @@ OSC and VRS Packages
     * Nuage-openstack-neutron
     * Nuage-openstack-neutronclient
     * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.1.0)
+    * nuage-puppet-modules (Latest version 5.3.0)
     * Nuage-topology-collector
     * Selinux-policy-nuage
 
@@ -1545,3 +1545,14 @@ Known Issues
   Workaround: Delete all the ifcfg-tap* configuration files from /etc/sysconfig/network-scripts/ prior to running `systemctl restart network.service`. This needs to be done every time before running `systemctl restart network.service` or `systemctl stop network.service` followed by `systemctl start network.service`.
 
   Recommended Solution: Deploy overcloud nodes using network isolation.
+
+
+Known Limitations
+~~~~~~~~~~~~~~~~~
+
+1. Using VrsExtraConfigs, users can configure extra parameters in /etc/default/openvswitch, but below are few limitations
+
+  Using the current approach, there is a chance to configure parameters that are not present in /etc/default/openvswitch by default.
+
+  Also, VrsExtraConfigs can configure ACTIVE_CONTROLLER, STANDBY_CONTROLLER and BRIDGE_MTU, by overwriting the already values initially provided.
+

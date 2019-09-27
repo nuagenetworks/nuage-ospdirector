@@ -11,13 +11,13 @@ resource_registry:
   OS::TripleO::Docker::NeutronMl2PluginBase: ../puppet/services/neutron-plugin-ml2-nuage.yaml
 
 parameter_defaults:
-  NeutronNuageNetPartitionName: 'Nuage_Partition_13_avrs'
-  NeutronNuageVSDIp: '192.168.24.118:8443'
-  NeutronNuageVSDUsername: 'csproot'
-  NeutronNuageVSDPassword: 'csproot'
-  NeutronNuageVSDOrganization: 'csp'
-  NeutronNuageBaseURIVersion: 'v5_0'
-  NeutronNuageCMSId: 'db6eda96-7d98-40e0-8e81-cc16d2dd5a2d'
+  NeutronNuageNetPartitionName: 'default_name'
+  NeutronNuageVSDIp: '0.0.0.0:0'
+  NeutronNuageVSDUsername: 'username'
+  NeutronNuageVSDPassword: 'password'
+  NeutronNuageVSDOrganization: 'organization'
+  NeutronNuageBaseURIVersion: 'default_uri_version'
+  NeutronNuageCMSId: ''
   UseForwardedFor: true
   NeutronPluginMl2PuppetTags: 'neutron_plugin_ml2,neutron_plugin_nuage'
   NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3'
@@ -29,17 +29,16 @@ parameter_defaults:
   NeutronFlatNetworks: '*'
   NovaOVSBridge: 'alubr0'
   NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
-  InstanceNameTemplate: 'inst-%08x'
   NeutronTunnelIdRanges: ''
   NeutronNetworkVLANRanges: ''
   NeutronVniRanges: '1001:2000'
   HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
   HorizonCustomizationModule: 'nuage_horizon.customization'
   HorizonVhostExtraParams:
+    add_listen: True
     priority: 10
     access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
     directories: [{'allow_override': ['None'], 'path': '/usr/lib/python2.7/site-packages/nuage_horizon', 'require': 'all granted', 'options': ['FollowSymLinks']}]
-    add_listen: True
     aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python2.7/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
   ControllerExtraConfig:
     neutron::config::server_config:
