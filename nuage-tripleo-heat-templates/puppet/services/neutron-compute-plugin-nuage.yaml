@@ -76,6 +76,7 @@ parameters:
     type: string
     default: ''
   VrsExtraConfigs:
+    description: Extra config params and values for nuage-openvswitch
     default: {}
     type: json
 

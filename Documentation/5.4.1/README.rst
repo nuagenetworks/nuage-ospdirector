@@ -978,9 +978,6 @@ The following parameters are mapped to values in the /etc/nova/nova.conf file on
     NeutronMetadataProxySharedSecret
     Maps to metadata_proxy_shared_secret parameter in [neutron] section
 
-    InstanceNameTemplate
-    Maps to instance_name_template parameter in [DEFAULT] section
-
 
 The following parameters are mapped to values in the /etc/neutron/plugins/ml2/ml2_conf.ini file on the Neutron controller:
 
@@ -1066,6 +1063,12 @@ The following parameters are mapped to values in the /etc/default/openvswitch fi
 
     NuageStandbyController
     Maps to STANDBY_CONTROLLER parameter
+
+    NuageBridgeMTU
+    Maps to BRIDGE_MTU parameter
+
+    VrsExtraConfigs
+    Used to configure extra parameters and values for nuage-openvswitch
 
 
 The following parameters are mapped to values in the /etc/nova/nova.conf file on the Nova Compute:
@@ -1231,7 +1234,6 @@ neutron-nuage-config.yaml
       NeutronVniRanges: '1001:2000'
       NovaOVSBridge: 'alubr0'
       NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
-      InstanceNameTemplate: 'inst-%08x'
       HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
       HorizonCustomizationModule: 'nuage_horizon.customization'
       HorizonVhostExtraParams:
@@ -1284,6 +1286,11 @@ nova-nuage-config.yaml For a Virtual Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
+      NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+      # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+      # For example to set "NETWORK_UPLINK_INTF" see below sample:
+      # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+      VrsExtraConfigs: {}
 
 
 nova-nuage-config.yaml For a KVM Setup
@@ -1305,6 +1312,11 @@ nova-nuage-config.yaml For a KVM Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
+      NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+      # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+      # For example to set "NETWORK_UPLINK_INTF" see below sample:
+      # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+      VrsExtraConfigs: {}
 
 
 compute-avrs-environment.yaml for AVRS integration
