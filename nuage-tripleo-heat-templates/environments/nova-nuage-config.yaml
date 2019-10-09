@@ -8,8 +8,12 @@ parameter_defaults:
   NuageStandbyController: '0.0.0.0'
   NuageBridgeMTU: '9000'
   NovaIPv6: 'True'
-  NuageMetadataProxySharedSecret: 'default'
+  NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
   NuageNovaApiEndpoint: 'default_endpoint'
   NovaOVSBridge: 'alubr0'
   NovaComputeLibvirtType: 'kvm'
   NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+  # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+  # For example to set "NETWORK_UPLINK_INTF" see below sample:
+  # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+  VrsExtraConfigs: {}
