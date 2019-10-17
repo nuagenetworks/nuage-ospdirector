@@ -6,30 +6,33 @@ parameter_defaults:
   ComputeAvrsSingleExtraConfig:
     nova::config::nova_config:
       DEFAULT/monkey_patch:
-         value: true
+        value: true
       DEFAULT/monkey_patch_modules:
-         value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+        value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
   ComputeAvrsDualExtraConfig:
     nova::config::nova_config:
       DEFAULT/monkey_patch:
-         value: true
+        value: true
       DEFAULT/monkey_patch_modules:
-         value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+        value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
   ComputeAvrsSingleParameters:
-    KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7"
+    KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+    NovaVcpuPinSet: "2-7"
     FastPathNics: "0000:06:00.1 0000:06:00.2"
     FastPathMask: "1"
     FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+    # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
     FastPathDPVI: "0"
     FastPathOffload: "off"
-    NovaVcpuPinSet: "2-7"
+
   ComputeAvrsDualParameters:
-    KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+    KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+    NovaVcpuPinSet: "2-7,10-15"
     FastPathNics: "0000:06:00.1 0000:06:00.2"
     FastPathMask: "1,9"
     FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+    # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
     FastPathDPVI: "0"
     FastPathOffload: "off"
-    NovaVcpuPinSet: "2-7,10-15"

@@ -20,7 +20,7 @@ parameter_defaults:
   NeutronNuageCMSId: ''
   UseForwardedFor: true
   NeutronPluginMl2PuppetTags: 'neutron_plugin_ml2,neutron_plugin_nuage'
-  NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3'
+  NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3,trunk'
   NeutronDBSyncExtraParams: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --config-file /etc/neutron/plugins/nuage/plugin.ini'
   NeutronTypeDrivers: 'vxlan'
   NeutronNetworkType: 'vxlan'
