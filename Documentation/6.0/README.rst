@@ -11,11 +11,11 @@
 .. ..  =========  =======    =========
 .. ..  Date       Version    Author
 .. ..  =========  =======    =========
-.. ..  09/23/19    6.0.2     Sai Ram - Adding documentation for 6.0.2
-
+.. ..  11/03/19    6.0.3       Sai Ram - Adding documentation for 6.0.3
+.. ..  11/17/19    6.0.3       Sunny Verma - Updating Document
 
 ====================================================================
-Deploying Queens Using OpenStack Platform Director 13 (Tech Preview)
+Deploying Queens Using OpenStack Platform Director 13
 ====================================================================
 
 This section contains the following topics:
@@ -122,14 +122,16 @@ The integration includes the following steps:
         - nuage-openstack-neutron
         - nuage-openstack-neutronclient
         - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.3.0
+        - nuage-puppet-modules-6.2.0
         - selinux-policy-nuage
         - nuage-topology-collector
+        - python-openvswitch-nuage
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.3.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-6.2.0.x86_64.rpm for setting Nuage Openvswitch and Nuage Metadata Agent config files.
+    - The scripts to patch the overcloud-full.qcow2 image can be found at `image-patching/stopgap-script` which uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -150,7 +152,7 @@ The integration includes the following steps:
         - 6wind-openstack-extensions
         - dkms
         - nuage-metadata-agent (6wind version)
-        - nuage-openvswitch (6wind version)
+        - nuage-openvswitch-6wind (6wind version)
         - python-pyelftools
         - selinux-policy-nuage-avrs
         - virtual-accelerator-base
@@ -176,8 +178,8 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_ .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_ dir.
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-6.2.0), go to `image-patching <../../image-patching>`_ .
+* For the scripts to patch the Overcloud qcow image, go to `stopgap-script <../../image-patching/stopgap-script>`_ .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_ .
 
@@ -188,7 +190,7 @@ Before the Deployment Process
 
 .. Note:: Before performing the procedures in this document, read the *Director Installation and Usage* guide for OSPD 13: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage .
 
-Create seperate repositories for the following packages:
+Create single repository for the following packages:
 
     * OSC and VRS: `OSC and VRS Packages`_
     * 6WIND and AVRS ( Only for AVRS Deployment) : `6WIND and AVRS Packages`_
@@ -197,16 +199,17 @@ Create seperate repositories for the following packages:
 OSC and VRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~
 
-    * Nuage-bgp
-    * Nuage-metadata-agent
-    * Nuage-openstack-heat
-    * Nuage-openstack-horizon
-    * Nuage-openstack-neutron
-    * Nuage-openstack-neutronclient
+    * nuage-bgp
+    * nuage-metadata-agent
+    * nuage-openstack-heat
+    * nuage-openstack-horizon
+    * nuage-openstack-neutron
+    * nuage-openstack-neutronclient
     * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.3.0)
-    * Nuage-topology-collector
-    * Selinux-policy-nuage
+    * nuage-puppet-modules (Latest version 6.2.0)
+    * nuage-topology-collector
+    * selinux-policy-nuage
+    * python-openvswitch-nuage
 
 
 6WIND and AVRS Packages
@@ -229,7 +232,7 @@ OSC and VRS Packages
     * 6wind-openstack-extensions
     * dkms
     * nuage-metadata-agent (from el7-6wind)
-    * nuage-openvswitch (from el7-6wind)
+    * nuage-openvswitch-6wind (from el7-6wind)
     * python-pyelftools
     * selinux-policy-nuage-avrs
     * virtual-accelerator-base
@@ -270,7 +273,6 @@ Phase 3: Modify the Overcloud qcow Image (overcloud-full.qcow2) to Include Nuage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_  file.
-
 
 
 Phase 4: Adding Nuage Heat Templates
@@ -423,7 +425,7 @@ This example shows how to create a deployment with one Controller node and two C
 
 **For multi-role AVRS deployment,**: `computeavrssingle` and `computeavrsdual`
 
-:: 
+::
 
     openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrssingle
     openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrssingle" computeavrssingle
@@ -594,9 +596,9 @@ This example shows how to create a deployment with one Controller node and two C
 :Step 8: To deploy the Overcloud, additional parameters and template files are required.
 
     * Include the following parameter values in the heat template neutron-nuage-config.yaml:
-    
+
     ::
-    
+
          NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3,trunk,NuageNetTopology'
          NeutronTypeDrivers: "vlan,vxlan,flat"
          NeutronMechanismDrivers: ['nuage','nuage_sriov','sriovnicswitch']
@@ -604,15 +606,15 @@ This example shows how to create a deployment with one Controller node and two C
          NeutronTunnelIdRanges: "1:1000"
          NeutronNetworkVLANRanges: "physnet1:2:100,physnet2:2:100"
          NeutronVniRanges: "1001:2000"
-    
-    
+
+
     * Add this parameter value in the heat template nova-nuage-config.yaml:
-    
+
     ::
-    
+
         NovaPCIPassthrough: "[{"devname":"eno2","physical_network":"physnet1"},{"devname":"eno3","physical_network":"physnet2"}]"
-    
-    
+
+
     * Include "neutron-sriov.yaml" file in the Overcloud deployment command. See the sample in the `Sample Templates`_ section.
 
 
@@ -729,8 +731,8 @@ Phase 8. Nuage Docker Containers
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for exmaple: Nuage release 6.0.2 please enter following
-    release: 6-0-2
+    # for exmaple: Nuage release 6.0.3 please enter following
+    release: 6-0-3
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -791,10 +793,10 @@ For AVRS, also include the following role and environment files.
 ::
 
     openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
-    
+
     For a virtual deployment, add the --libvirt-type parameter:
     openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
-    
+
     For an AVRS single-role deployment, use:
     openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
@@ -806,10 +808,10 @@ For AVRS, also include the following role and environment files.
 ::
 
     openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
-    
+
     For a virtual deployment, add the --libvirt-type parameter:
     openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
-    
+
     For an AVRS single-role deployment, use:
     openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
@@ -915,7 +917,7 @@ Phase 10: Verify that OpenStack director has been deployed successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "6.0.2-21-nuage"
+        ovs_version: "6.0.3-40-nuage"
 
 
 Phase 11 (Optional) For SR-IOV, manually install and run the topology collector
@@ -1297,6 +1299,7 @@ nova-nuage-config.yaml For a Virtual Setup
       # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
       VrsExtraConfigs: {}
 
+
 nova-nuage-config.yaml For a KVM Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1321,6 +1324,7 @@ nova-nuage-config.yaml For a KVM Setup
       # For example to set "NETWORK_UPLINK_INTF" see below sample:
       # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
       VrsExtraConfigs: {}
+
 
 compute-avrs-environment.yaml for AVRS integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
