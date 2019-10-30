@@ -502,7 +502,7 @@ This example shows how to create a deployment with one Controller node and two C
         FastPathOptions        =====>    FP_OPTIONS
 
 
-    b. For AVRS deployment s requires to configure monkey_patch parameters in `nova.conf` and we use below to configure them.
+    b. For AVRS deployments requires to configure monkey_patch parameters in `nova.conf` and we use below to configure them.
 
     ::
 

@@ -244,17 +244,17 @@
     - OS::TripleO::Services::OVNMetadataAgent
     - OS::TripleO::Services::Ptp
 ###############################################################################
-# Role: AvrsCompute                                                               #
+# Role: ComputeAvrs                                                               #
 ###############################################################################
-- name: AvrsCompute
+- name: ComputeAvrs
   description: |
-    Basic Avrs Compute Node role
+    Basic ComputeAvrs Node role
   CountDefault: 1
   networks:
     - InternalApi
     - Tenant
     - Storage
-  HostnameFormatDefault: '%stackname%-avrscompute-%index%'
+  HostnameFormatDefault: '%stackname%-computeavrs-%index%'
   RoleParametersDefault:
     TunedProfileName: "virtual-host"
   # Deprecated & backward-compatible values (FIXME: Make parameters consistent)

@@ -484,6 +484,8 @@ This example shows how to create a deployment with one Controller node and two C
 
 :Step 5: Modify avrs environment file in /home/stack/nuage-tripleo-heat-templates/environments/.
 
+    **Please notice these are sample templates and parameter values can be customized depending on the use case. Please contact Nuage for the recommended values for these parameters**.
+
     **For single-role AVRS deployment** environment file can found at:  `compute-avrs-environment.yaml <../../nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml>`_ file. See the sample in the `Sample Templates`_ section.
 
     **For multi-role AVRS deployment** environment file can be found at : `compute-avrs-mutlirole-environment.yaml <../../nuage-tripleo-heat-templates/environments/compute-avrs-mutlirole-environment.yaml>`_ file. See the sample in the `Sample Templates`_ section.
@@ -506,7 +508,7 @@ This example shows how to create a deployment with one Controller node and two C
         FastPathOptions        =====>    FP_OPTIONS
 
 
-    b. For AVRS deployment s requires to configure monkey_patch parameters in `nova.conf` and we use below to configure them.
+    b. For AVRS deployments requires to configure monkey_patch parameters in `nova.conf` and we use below to configure them.
 
     ::
 
@@ -521,12 +523,17 @@ This example shows how to create a deployment with one Controller node and two C
 
     ::
 
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on isolcpus=1-7"
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
 
     .. Note:: Above kernel arguments are consumed by the another env file which include in deployment command `/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`
 
     .. Note:: We also can set GpgCheck to "no" in environment files if user want to disable GPG Check while installating packages on AVRS Node deployment.
 
+    d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to the value 0. We already set CPUSET_ENABLE value to 0 in our templates by default so you don't need to set is explicitly.
+
+    ::
+
+        CpuSetEnable        =====>    CPUSET_ENABLE
 
 
 4. **(Optional)** To enable SR-IOV, perform the following instructions:
@@ -1328,26 +1335,28 @@ compute-avrs-environment.yaml for AVRS integration
       OS::TripleO::Services::NovaComputeAvrs: ../docker/services/nova-compute-avrs.yaml
 
     parameter_defaults:
-      # An array of filters used by Nova to filter a node.These filters will be applied in the order they are listed,
-      # so place your most restrictive filters first to make the filtering process more efficient.
-      NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
-      ComputeAvrsParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
-        IsolCpusList: "1-7,9-15"
-        NovaVcpuPinSet: "2-7,10-15"
-        FastPathNics: "0000:06:00.1 0000:06:00.2"
-        FastPathMask: "1,9"
-        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
-        FastPathDPVI: "0"
-        FastPathOffload: "off"
-        GpgCheck: "yes"
       ComputeAvrsExtraConfig:
         nova::config::nova_config:
           DEFAULT/monkey_patch:
             value: true
           DEFAULT/monkey_patch_modules:
             value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+      # An array of filters used by Nova to filter a node.These filters will be applied in the order they are listed,
+      # so place your most restrictive filters first to make the filtering process more efficient.
+      NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+      ComputeAvrsParameters:
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        NovaVcpuPinSet: "2-7,10-15"
+        FastPathNics: "0000:06:00.1 0000:06:00.2"
+        FastPathMask: "1,9"
+        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
+        FastPathDPVI: "0"
+        FastPathOffload: "off"
+        CpuSetEnable: 0
+        GpgCheck: "yes"
+
 
 compute-avrs-multirole-environment.yaml for AVRS integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1372,26 +1381,29 @@ compute-avrs-multirole-environment.yaml for AVRS integration
           DEFAULT/monkey_patch_modules:
              value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
       ComputeAvrsSingleParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
-        IsolCpusList: "1-7"
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        NovaVcpuPinSet: "2-7"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
-        NovaVcpuPinSet: "2-7"
+        CpuSetEnable: 0
         GpgCheck: "yes"
+
       ComputeAvrsDualParameters:
-        KernelArgs: "hugepages=12831 iommu=pt intel_iommu=on"
-        IsolCpusList: "1-7,9-15"
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        NovaVcpuPinSet: "2-7,10-15"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
-        NovaVcpuPinSet: "2-7,10-15"
+        CpuSetEnable: 0
         GpgCheck: "yes"
 
 

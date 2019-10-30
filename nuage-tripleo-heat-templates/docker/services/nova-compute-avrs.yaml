@@ -91,11 +91,19 @@ parameters:
     default: ""
     tags:
       - role_specific
+  CpuSetEnable:
+    type: number
+    default: 0
+    constraints:
+      - allowed_values: [0, 1]
+    tags:
+      - role_specific
   GpgCheck:
     type: string
     default: yes
     tags:
       - role_specific
+
 
 resources:
   RoleParametersValue:
@@ -115,6 +123,7 @@ resources:
               FPNSDK_OPTIONS: FastPathNicDescriptors
               DPVI_MASK: FastPathDPVI
               FP_OPTIONS: FastPathOptions
+              CPUSET_ENABLE: CpuSetEnable
               GPG_CHECK: GpgCheck
             - values: {get_param: [RoleParameters]}
           - values:
@@ -128,6 +137,7 @@ resources:
               FastPathNicDescriptors: {get_param: FastPathNicDescriptors}
               FastPathDPVI: {get_param: FastPathDPVI}
               FastPathOptions: {get_param: FastPathOptions}
+              CpuSetEnable : {get_param: CpuSetEnable}
               GpgCheck: {get_param: GpgCheck}
 
   ContainersCommon:
@@ -296,13 +306,25 @@ outputs:
                 - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
             register: lineinfile_result
             when: item.val != ''
-          - name: Restarting AVRS service
-            service:
-              name: avrs
-              state: restarted
-              enabled: yes
-            # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
-            ignore_errors: yes
+          - name: Set params in cpuset.env file
+            lineinfile:
+              dest: /etc/cpuset.env
+              line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+              regexp: '^: \$[{]{{ item.param }}:='
+              state: present
+              create: yes
+            loop:
+              - { param: 'CPUSET_ENABLE', val: {get_attr: [RoleParametersValue, value, CPUSET_ENABLE]}}
+          - block:
+            - name: Restarting AVRS service
+              service:
+                name: avrs
+                state: restarted
+                enabled: yes
+              # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+              ignore_errors: yes
+            - name: check if virtual-accelerator is active
+              command: systemctl status virtual-accelerator
             when: lineinfile_result.changed
       upgrade_tasks:
         get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]
