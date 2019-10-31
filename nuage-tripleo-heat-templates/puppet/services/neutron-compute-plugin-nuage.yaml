@@ -109,7 +109,7 @@ outputs:
             nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
             nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
             nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
-            nuage::metadataagent::metadata_secret: {get_param: NeutronMetadataProxySharedSecret}
+            nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
             nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
             nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
             nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
