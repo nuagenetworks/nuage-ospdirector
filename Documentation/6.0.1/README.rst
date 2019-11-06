@@ -618,7 +618,7 @@ This example shows how to create a deployment with one Controller node and two C
 :Step 1: Nuage uses the default Linux bridge and Linux bonds.
 
 
-:Step 2: Nuage provides `bond-with-vlan network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlan/>`_ for deploying overcloud controller and computesriov by configuring linux bond with vlans.
+:Step 2: Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ for deploying overcloud controller and computesriov by configuring linux bond with vlans.
 
 
 :Step 3: The network templates provided by Nuage by default supports the below topology and users can modify these network templates to match their topology.
