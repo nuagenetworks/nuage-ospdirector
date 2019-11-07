@@ -352,6 +352,18 @@ outputs:
               when: virtual_accelerator_base_needs_update
             when: (step|int == 1)
           - block:
+            - name: check if nuage-openvswitch is installed
+              command: rpm -q nuage-openvswitch
+              register: nuage_openvswitch_check
+              ignore_errors: True
+            - name: check if nuage-openvswitch-6wind is present in the repository
+              command: repoquery --all nuage-openvswitch-6wind
+              register: nuage_openvswitch_sixwind_output
+            - name: swapping nuage-openvswitch with nuage-openvswitch-6wind
+              command: yum swap -- install nuage-openvswitch-6wind -- remove nuage-openvswitch
+              when: nuage_openvswitch_check.rc == 0 and nuage_openvswitch_sixwind_output.stdout != ''
+            when: (step|int == 2)
+          - block:
             - name: Check if virtual-accelerator-base is updated
               stat:
                 path: /tmp/va_update

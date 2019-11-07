@@ -117,3 +117,15 @@ outputs:
         include tripleo::profile::base::neutron::plugins::ml2
       metadata_settings:
         get_attr: [NeutronMl2Base, role_data, metadata_settings]
+      update_tasks:
+        - block:
+          - name: check if python-openvswitch-nuage is installed
+            command: rpm -q python-openvswitch-nuage
+            register: python_ovs_nuage_check
+            ignore_errors: True
+          - name: Installing python-openvswitch-nuage
+            yum:
+              name: python-openvswitch-nuage
+              state: present
+            when: python_ovs_nuage_check.rc != 0
+          when: (step|int == 2)
