@@ -1,9 +1,9 @@
 FROM registry.access.redhat.com/rhosp13/openstack-nova-compute:<tag>
 
-LABEL description="Nuage nova copmute for AVRS"
+LABEL description="Nuage nova compute for AVRS"
 LABEL version-release=latest
-LABEL summary="Nuage nova copmute for AVRS"
-LABEL io.k8s.display-name="Nuage nova copmute for AVRS"
+LABEL summary="Nuage nova compute for AVRS"
+LABEL io.k8s.display-name="Nuage nova compute for AVRS"
 LABEL com.redhat.component="openstack-nuage-nova-compute"
 LABEL name="<undercloud-ip>:8787/rhosp13/openstack-nova-compute"
 LABEL version=13
