@@ -369,22 +369,21 @@ outputs:
                 path: /tmp/va_update
               register: virtual_accelerator_base_update_file
             - block:
-              - name: Start Virtual Accelerator
-                systemd:
-                  state: started
-                  enabled: yes
-                  daemon_reload: yes
-                  name: virtual-accelerator
-              - name: Restart network service on the AVRS nodes
+              - name: Restarting AVRS service
                 service:
-                  name: network
+                  name: avrs
                   state: restarted
-                async: 2
-                poll: 0
+                  enabled: yes
+                # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+                ignore_errors: yes
+              # avrs.service restarts network.service as well, so we need to wait till
+              # the computeavrs node is reachable from undercloud
               - name: waiting for AVRS nodes to come back after virtual-accelerator restart
                 wait_for_connection:
                   delay: 10
                   timeout: 100
+              - name: check if virtual-accelerator is active
+                command: systemctl status virtual-accelerator
               - name: Remove va_update file if virtual-accelerator-base is updated
                 file:
                   path: /tmp/va_update
