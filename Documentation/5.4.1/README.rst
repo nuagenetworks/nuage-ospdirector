@@ -102,6 +102,11 @@ Red Hat
 Integrating Nuage VSP with OpenStack Platform Director
 -------------------------------------------------------
 
+*  Download the Nuage Source Code
+
+    Nuage Tripleo Heat Templates, Images Patching and all additional scripts are present at: https://github.com/nuagenetworks/nuage-ospdirector/releases .
+    Please download the respective release **Source code (tar.gz or zip)** and extract this on your undercloud under `/home/stack`
+
 The integration includes the following steps:
 
 * Modifying the Overcloud qcow image (for example, overcloud-full.qcow2)
@@ -173,10 +178,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_ .
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_ .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
+* For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_ .
 
 .. Note::  **Please contact Nuage for Nuage Ironic Integration**
 
@@ -267,7 +272,7 @@ These are the OpenStack instructions:
 Phase 3: Modify the Overcloud qcow image (for example, overcloud-full.qcow2) to include Nuage components.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
+The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_  file.
 
 
 Phase 4: Adding Nuage Heat Templates
@@ -275,12 +280,9 @@ Phase 4: Adding Nuage Heat Templates
 
 Copy the nuage-tripleo-heat-templates folder form `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_ to `/home/stack/` directory on undercloud.
 
-.. Note:: As an end-user, it is a best practice to manage the templates using GIT. If you are aware of git workflow, you can run following command to manage your nuage-template change via GIT.
-
     ::
 
         cd /home/stack
-        git clone -b OSPD13 https://github.com/nuagenetworks/nuage-ospdirector nuage-ospdirector ( here nuagenetworks can be replaced with your own fork)
         ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
