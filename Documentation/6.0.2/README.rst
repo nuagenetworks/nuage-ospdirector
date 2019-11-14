@@ -102,6 +102,11 @@ Red Hat
 Integrating Nuage VSP with OpenStack Platform Director
 -------------------------------------------------------
 
+*  Download the Nuage Source Code
+
+    Nuage Tripleo Heat Templates, Images Patching and all additional scripts are present at: https://github.com/nuagenetworks/nuage-ospdirector/releases .
+    Please download the respective release **Source code (tar.gz or zip)** and extract this on your undercloud under `/home/stack`
+
 The integration includes the following steps:
 
 * Modifying the Overcloud qcow image (for example, overcloud-full.qcow2)
@@ -117,14 +122,14 @@ The integration includes the following steps:
         - nuage-openstack-neutron
         - nuage-openstack-neutronclient
         - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.1.0
+        - nuage-puppet-modules-5.3.0
         - selinux-policy-nuage
         - nuage-topology-collector
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.1.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-5.3.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -171,10 +176,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.1.0), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/nuage_overcloud_full_patch.py .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_ .
+* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_ dir.
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/generate-cms-id .
+* For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_ .
 
 .. Important::  Contact Nuage for Nuage Ironic Integration
 
@@ -199,7 +204,7 @@ OSC and VRS Packages
     * Nuage-openstack-neutron
     * Nuage-openstack-neutronclient
     * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.1.0)
+    * nuage-puppet-modules (Latest version 5.3.0)
     * Nuage-topology-collector
     * Selinux-policy-nuage
 
@@ -264,20 +269,18 @@ These are the OpenStack instructions:
 Phase 3: Modify the Overcloud qcow Image (overcloud-full.qcow2) to Include Nuage Components
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the README.md file: https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/image-patching/stopgap-script/README.md .
+The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_  file.
+
 
 
 Phase 4: Adding Nuage Heat Templates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Copy the nuage-tripleo-heat-templates folder from `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_ to `/home/stack/` directory on undercloud.
-
-.. Note:: As an end-user, it is a best practice to manage the templates using GIT. If you are aware of git workflow, you can run following command to manage your nuage-template change via GIT.
+Copy the nuage-tripleo-heat-templates folder form `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_ to `/home/stack/` directory on undercloud.
 
     ::
 
         cd /home/stack
-        git clone -b OSPD13 https://github.com/nuagenetworks/nuage-ospdirector nuage-ospdirector ( here nuagenetworks can be replaced with your own fork)
         ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -1065,6 +1068,12 @@ The following parameters are mapped to values in the /etc/default/openvswitch fi
     NuageStandbyController
     Maps to STANDBY_CONTROLLER parameter
 
+    NuageBridgeMTU
+    Maps to BRIDGE_MTU parameter
+
+    VrsExtraConfigs
+    Used to configure extra parameters and values for nuage-openvswitch
+
 
 The following parameters are mapped to values in the /etc/nova/nova.conf file on the Nova Compute:
 
@@ -1282,7 +1291,11 @@ nova-nuage-config.yaml For a Virtual Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
-
+      NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+      # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+      # For example to set "NETWORK_UPLINK_INTF" see below sample:
+      # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+      VrsExtraConfigs: {}
 
 nova-nuage-config.yaml For a KVM Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1303,7 +1316,11 @@ nova-nuage-config.yaml For a KVM Setup
       NovaIPv6: True
       NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
       NuageNovaApiEndpoint: 'internalURL'
-
+      NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+      # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+      # For example to set "NETWORK_UPLINK_INTF" see below sample:
+      # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+      VrsExtraConfigs: {}
 
 compute-avrs-environment.yaml for AVRS integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1523,3 +1540,11 @@ The workaround is to manually remove the instance_uuid reference:
     Example:
     ironic node-update 9e57d620-3ec5-4b5e-96b1-bf56cce43411 remove instance_uuid
 
+Known Limitations
+~~~~~~~~~~~~~~~~~
+
+1. Using VrsExtraConfigs, users can configure extra parameters in /etc/default/openvswitch, but below are few limitations
+
+  Using the current approach, there is a chance to configure parameters that are not present in /etc/default/openvswitch by default.
+
+  Also, VrsExtraConfigs can configure ACTIVE_CONTROLLER, STANDBY_CONTROLLER and BRIDGE_MTU, by overwriting the already values initially provided.
