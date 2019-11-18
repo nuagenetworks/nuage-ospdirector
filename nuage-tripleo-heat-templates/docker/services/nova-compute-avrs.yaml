@@ -263,13 +263,26 @@ outputs:
               yum:
                 name: nuage-openvswitch
                 state: absent
+            - name: Check which 6wind package needs to get installed
+              shell: repoquery --all nuage-openvswitch-6wind
+              register: nuage_openvswitch_sixwind_output
+            - name: installing nuage-openvswitch-6wind
+              yum:
+                name: nuage-openvswitch-6wind
+                state: present
+              when: nuage_openvswitch_sixwind_output.stdout != ''
+            - name: installing nuage-openvswitch-6wind
+              yum:
+                name: nuage-openvswitch
+                state: present
+              when: nuage_openvswitch_sixwind_output.stdout == ''
+
             - name: install nuage packages
               yum:
                 name: "{{ packages }}"
                 state: present
               vars:
                 packages:
-                  - nuage-openvswitch*
                   - nuage-metadata-agent*
                   - virtual-accelerator*
             - name: cleanup repo

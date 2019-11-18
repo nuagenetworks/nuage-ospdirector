@@ -4,6 +4,7 @@
 
 # This repo should contain following packages:
 # nuage-puppet-modules
+# python-openvswitch-nuage
 # selinux-policy-nuage
 # nuage-bgp
 # nuage-openstack-neutronclient
@@ -13,7 +14,7 @@ baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_5.4.1/nuage_extra
 enabled=1
 gpgcheck=1
 
-# These are some placeholder for some other repos that user want to enable these packages.
+# These are some placeholder for some other repos that user want to enable for these packages.
 # This repo should contain following packages:
 # libvirt
 # perl-JSON
@@ -65,6 +66,7 @@ gpgcheck=1
 # nuage-openvswitch
 # nuage-metadata
 # 6wind packages
+# selinux-policy-nuage-avrs
 # Note: This is only required for AVRS Deployment
 [nuage_avrs]
 name=nuage_osp13_5.4.1.u4_avrs

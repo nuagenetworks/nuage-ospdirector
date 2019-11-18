@@ -1,0 +1,32 @@
+########################################################################################################################
+############## Repositories which user want to enable by default on the overcloud image while patching #################
+########################################################################################################################
+
+# This repo should contain following packages:
+# nuage-puppet-modules
+# python-openvswitch-nuage
+# selinux-policy-nuage
+# selinux-policy-nuage-avrs
+# nuage-bgp
+# nuage-openstack-neutronclient
+# nuage-openvswitch (vrs)
+# nuage-openvswitch-6wind (avrs)
+# nuage-metadata-agent
+# 6wind packages
+[nuage]
+name=nuage_osp13_6.0.3_nuage
+baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_6.0.3/nuage_repo
+enabled=1
+gpgcheck=1
+
+# These are some placeholder for some other repos that user want to enable for these packages.
+# This repo should contain following packages:
+# libvirt
+# perl-JSON
+# lldpad
+# libguestfs-tools etc...
+[extra]
+name=satellite
+baseurl=http://satellite.com/extra_repo
+enabled=1
+gpgcheck=1

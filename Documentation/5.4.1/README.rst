@@ -11,7 +11,7 @@
 .. ..  =========  =======    =========
 .. ..  Date       Version    Author
 .. ..  =========  =======    =========
-.. ..  06/24/19    5.4.1u4     Sunny - Refactoring Nuage Integration Documentation
+.. ..  11/03/19    5.4.1u7   Sai Ram/Sunny Verma
 
 
 ======================================================
@@ -125,11 +125,14 @@ The integration includes the following steps:
         - nuage-puppet-modules-5.3.0
         - selinux-policy-nuage
         - nuage-topology-collector
+        - python-openvswitch-nuage
 
+    - Install python-openvswitch-nuage.
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
 
-    - Use nuage-puppet-modules-5.3.0.x86_64.rpm and the nuage_overcloud_full_patch.py script to patch to the Overcloud qcow image, uninstall Open vSwitch (OVS), and install VRS.
+    - Use nuage-puppet-modules-5.3.0.x86_64.rpm for setting Nuage Openvswitch and Nuage Metadata Agent config files.
+    - The scripts to patch the overcloud-full.qcow2 image can be found at `image-patching/stopgap-script` which uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -154,10 +157,6 @@ The integration includes the following steps:
         - python-pyelftools
         - selinux-policy-nuage-avrs
         - virtual-accelerator-base
-        - virtual-accelerator (Only requried for VA version <= 1.8.3)
-
-.. Note:: The change in what VA packages required to be installed only changed in 1.8.4.m1. With 1.8.4.m1 and newer, only virtual-accelerator-base needs to be installed. Prior to 1.8.4.m1, both virtual-accelerator-base and virtual-accelerator needs to be installed.
-
 
 * Adding Nuage Heat Templates ( `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_  )
 
@@ -179,7 +178,7 @@ Links to Nuage and OpenStack Resources
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_ .
-* For the script to patch the Overcloud qcow image (nuage_overcloud_full_patch.py), go to `nuage_overcloud_full_patch.py <../../image-patching/stopgap-script/nuage_overcloud_full_patch.py>`_ .
+* For the scripts to patch the Overcloud qcow image, go to `stopgap-script <../../image-patching/stopgap-script>`_ .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
 * For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_ .
 
@@ -199,16 +198,17 @@ Create seperate repositories for the following packages:
 OSC and VRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~
 
-    * Nuage-bgp
-    * Nuage-metadata-agent
-    * Nuage-openstack-heat
-    * Nuage-openstack-horizon
-    * Nuage-openstack-neutron
-    * Nuage-openstack-neutronclient
+    * nuage-bgp
+    * nuage-metadata-agent
+    * nuage-openstack-heat
+    * nuage-openstack-horizon
+    * nuage-openstack-neutron
+    * nuage-openstack-neutronclient
     * nuage-openvswitch (VRS)
     * nuage-puppet-modules (Latest version 5.3.0)
-    * Nuage-topology-collector
-    * Selinux-policy-nuage
+    * nuage-topology-collector
+    * selinux-policy-nuage
+    * python-openvswitch-nuage
 
 
 6WIND and AVRS Packages
@@ -275,10 +275,11 @@ Phase 3: Modify the Overcloud qcow image (for example, overcloud-full.qcow2) to 
 The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_  file.
 
 
+
 Phase 4: Adding Nuage Heat Templates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Copy the nuage-tripleo-heat-templates folder form `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_ to `/home/stack/` directory on undercloud.
+Copy the nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector-osp-13.<release>/nuage-tripleo-heat-templates to `/home/stack/` directory on undercloud.
 
     ::
 
