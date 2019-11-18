@@ -117,9 +117,6 @@ The integration includes the following steps:
 
         - nuage-bgp
         - nuage-metadata-agent
-        - nuage-openstack-heat
-        - nuage-openstack-horizon
-        - nuage-openstack-neutron
         - nuage-openstack-neutronclient
         - nuage-openvswitch (Nuage VRS)
         - nuage-puppet-modules-6.2.0
@@ -201,9 +198,6 @@ OSC and VRS Packages
 
     * nuage-bgp
     * nuage-metadata-agent
-    * nuage-openstack-heat
-    * nuage-openstack-horizon
-    * nuage-openstack-neutron
     * nuage-openstack-neutronclient
     * nuage-openvswitch (VRS)
     * nuage-puppet-modules (Latest version 6.2.0)
