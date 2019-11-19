@@ -50,10 +50,7 @@ baseurl=http://<HOST-IP-HOSTING-REPOS>/repo
 enabled=0
 gpgcheck=1
 
-# kmod-mlnx-en
-# mlnx-en-utils
 # mstflint
-# os-net-config
 # Note: This is only required for OVRS Deployment.
 [mlnx]
 name=satellite2

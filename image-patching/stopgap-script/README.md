@@ -63,10 +63,7 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
             python-perf 
         
         [mlnx repo] should have all the packages that are provided by Mellanox.
-            kmod-mlnx-en
-            mlnx-en-utils
             mstflint  
-            os-net-config
         
         [nuage_avrs] should have all the packages provided by Nuage for openvswitch and 6wind rpms.
             nuage-openvswitch 

@@ -52,7 +52,7 @@ NUAGE_PACKAGES = "nuage-puppet-modules selinux-policy-nuage " \
                  "nuage-bgp nuage-openstack-neutronclient"
 NUAGE_DEPENDENCIES = "libvirt perl-JSON lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch nuage-metadata-agent"
-MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint os-net-config"
+MLNX_OFED_PACKAGES = "mstflint"
 KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 VIRT_CUSTOMIZE_ENV = "export LIBGUESTFS_BACKEND=direct;"
@@ -246,7 +246,6 @@ def install_mellanox(mellanox_repos):
 %s
 yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-systemctl disable mlnx-en.d
 %s
 ''' % (enable_repos_cmd, MLNX_OFED_PACKAGES, disable_repos_cmd)
     write_to_file(SCRIPT_NAME, cmds)
