@@ -1,6 +1,6 @@
 heat_template_version: queens
 description: >
-  Software Config to drive os-net-config with 2 bonded nics on a bridge with VLANs attached for the Controller role.
+  Software Config to drive os-net-config to configure multiple interfaces for the Controller role.
 parameters:
   ControlPlaneIp:
     default: ''
@@ -30,12 +30,6 @@ parameters:
     default: ''
     description: IP address/subnet on the management network
     type: string
-  BondInterfaceOvsOptions:
-    default: bond_mode=active-backup
-    description: 'The ovs_options or bonding_options string for the bond
-      interface. Set things like lacp=active and/or bond_mode=balance-slb
-      for OVS bonds or like mode=4 for Linux bonds using this option.'
-    type: string
   StorageNetworkVlanID:
     default: 30
     description: Vlan ID for the storage network traffic.
@@ -60,16 +54,16 @@ parameters:
     default: 60
     description: Vlan ID for the management network traffic.
     type: number
+  ControlPlaneSubnetCidr: # Override this via parameter_defaults
+    default: '24'
+    description: The subnet CIDR of the control plane network.
+    type: string
   ControlPlaneDefaultRoute: # Override this via parameter_defaults
     description: The default route of the control plane network.
     type: string
   ExternalInterfaceDefaultRoute:
     default: '10.0.0.1'
     description: default route for the external network
-    type: string
-  ControlPlaneSubnetCidr: # Override this via parameter_defaults
-    default: '24'
-    description: The subnet CIDR of the control plane network.
     type: string
   DnsServers: # Override this via parameter_defaults
     default: []
@@ -93,6 +87,8 @@ resources:
               - type: interface
                 name: nic1
                 use_dhcp: false
+                dns_servers:
+                  get_param: DnsServers
                 addresses:
                 - ip_netmask:
                     list_join:
@@ -103,47 +99,38 @@ resources:
                 - ip_netmask: 169.254.169.254/32
                   next_hop:
                     get_param: EC2MetadataIp
-              - type: linux_bond
-                name: bond1
-                dns_servers:
-                  get_param: DnsServers
-                bonding_options: 'mode=active-backup'
-                members:
-                - type: interface
-                  name: nic2
-                  primary: true
-                - type: interface
-                  name: nic3
+              - type: interface
+                name: nic2
+                use_dhcp: false
               - type: vlan
-                device: bond1
+                device: nic2
                 vlan_id:
                   get_param: StorageNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: StorageIpSubnet
               - type: vlan
-                device: bond1
+                device: nic2
                 vlan_id:
                   get_param: StorageMgmtNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: StorageMgmtIpSubnet
               - type: vlan
-                device: bond1
+                device: nic2
                 vlan_id:
                   get_param: InternalApiNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: InternalApiIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: TenantNetworkVlanID
+              - type: interface
+                name: nic3
+                use_dhcp: false
                 addresses:
                 - ip_netmask:
                     get_param: TenantIpSubnet
               - type: vlan
-                device: bond1
+                device: nic2
                 vlan_id:
                   get_param: ExternalNetworkVlanID
                 addresses:

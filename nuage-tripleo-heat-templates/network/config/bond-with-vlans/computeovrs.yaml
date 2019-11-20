@@ -1,6 +1,6 @@
 heat_template_version: queens
 description: >
-  Software Config to drive os-net-config with 2 bonded nics on a bridge with VLANs attached for the Controller role.
+  Software Config to drive os-net-config with 2 bonded nics on a bridge with VLANs attached for the ComputeSriov role.
 parameters:
   ControlPlaneIp:
     default: ''
@@ -78,6 +78,12 @@ parameters:
   EC2MetadataIp: # Override this via parameter_defaults
     description: The IP address of the EC2 metadata server.
     type: string
+  MellanoxTenantPort1:
+    description: Mellanox Tenant Port1
+    type: string
+  MellanoxTenantPort2:
+    description: Mellanox Tenant Port2
+    type: string
 resources:
   OsNetConfigImpl:
     type: OS::Heat::SoftwareConfig
@@ -103,56 +109,66 @@ resources:
                 - ip_netmask: 169.254.169.254/32
                   next_hop:
                     get_param: EC2MetadataIp
+                - default: true
+                  next_hop:
+                    get_param: ControlPlaneDefaultRoute
+              # Linux bond for Offload VRS Compute nodes
               - type: linux_bond
-                name: bond1
+                name: infra-bond
                 dns_servers:
                   get_param: DnsServers
-                bonding_options: 'mode=active-backup'
+                bonding_options:
+                  get_param: BondInterfaceOvsOptions
                 members:
                 - type: interface
-                  name: nic2
-                  primary: true
+                  name:
+                    get_param: nic2
                 - type: interface
-                  name: nic3
+                  name:
+                    get_param: nic3
               - type: vlan
-                device: bond1
+                device: infra-bond
                 vlan_id:
                   get_param: StorageNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: StorageIpSubnet
               - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: StorageMgmtNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: StorageMgmtIpSubnet
-              - type: vlan
-                device: bond1
+                device: infra-bond
                 vlan_id:
                   get_param: InternalApiNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: InternalApiIpSubnet
+              - type: linux_bond
+                name: tenant-bond
+                dns_servers:
+                  get_param: DnsServers
+                bonding_options:
+                  get_param: BondInterfaceOvsOptions
+                members:
+                - type: sriov_pf
+                  name:
+                    get_param: MellanoxTenantPort1
+                  link_mode: switchdev
+                  numvfs: 8
+                  promisc: true
+                  use_dhcp: false
+                  primary: true
+                - type: sriov_pf
+                  name:
+                    get_param: MellanoxTenantPort2
+                  link_mode: switchdev
+                  numvfs: 8
+                  promisc: true
+                  use_dhcp: false
               - type: vlan
-                device: bond1
+                device: tenant-bond
                 vlan_id:
                   get_param: TenantNetworkVlanID
                 addresses:
                 - ip_netmask:
                     get_param: TenantIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: ExternalNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: ExternalIpSubnet
-                routes:
-                - default: true
-                  next_hop:
-                    get_param: ExternalInterfaceDefaultRoute
 outputs:
   OS::stack_id:
     description: The OsNetConfigImpl resource.

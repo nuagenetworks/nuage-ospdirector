@@ -11,3 +11,5 @@ resource_registry:
   OS::TripleO::ComputeAvrsSingle::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeavrssingle.yaml
   # Port assignments for the ComputeAvrsDual2
   OS::TripleO::ComputeAvrsDual::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeavrsdual.yaml
+  # Port assignments for the ComputeOvrs
+  OS::TripleO::ComputeOvrs::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeovrs.yaml

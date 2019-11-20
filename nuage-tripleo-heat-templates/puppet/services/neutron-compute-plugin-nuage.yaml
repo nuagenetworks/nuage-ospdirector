@@ -75,6 +75,11 @@ parameters:
     description: Support for non-default MTU configured on each Compute node
     type: string
     default: ''
+  OvsHwOffload:
+    default: false
+    description: |
+      Enable OVS Hardware Offload.
+    type: boolean
   VrsExtraConfigs:
     description: Extra config params and values for nuage-openvswitch
     default: {}
@@ -91,9 +96,11 @@ resources:
       value:
         map_replace:
           - map_replace:
-            - nuage::vrs::vrs_extra_configs: VrsExtraConfigs
+            - nuage::vrs::enable_hw_offload: OvsHwOffload
+              nuage::vrs::vrs_extra_configs: VrsExtraConfigs
             - values: {get_param: [RoleParameters]}
           - values:
+              OvsHwOffload: {get_param: OvsHwOffload}
               VrsExtraConfigs: {get_param: VrsExtraConfigs}
 
 outputs:
