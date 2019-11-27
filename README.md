@@ -16,19 +16,29 @@ For deploying any 5.0 Nuage release until 5.4.1U6, please download tar.gz from t
 
 Below is the documentation directory structure to follow.
  
-   * For OSP Director 13 with + Nuage release 5.4.1.U4 - U6 : Documentation/5.4.1/README.rst
+   * For OSP Director 13 with + Nuage release 5.4.1.U4 to U6 : [Documentation/5.4.1/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/5.4.1/README.rst)
         
-   * For OSP Director 13 with + Nuage release 5.4.1.U1 to 5.4.1.U3: Documentation/5.4.1/README_U1_to_U3.rst
+   * For OSP Director 13 with + Nuage release 5.4.1.U1 to 5.4.1.U3: [Documentation/5.4.1/README_U1_to_U3.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/5.4.1/README_U1_to_U3.rst)
     
-   * For OSP Director 13 with + Nuage release before 5.4.1: Documentation/BEFORE_5.4.1/README.rst  
+   * For OSP Director 13 with + Nuage release before 5.4.1: [Documentation/BEFORE_5.4.1/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/BEFORE_5.4.1/README.rst)  
 
 For deploying any 6.0 Nuage release until 6.0.2,  please download tar.gz from this [release](https://github.com/nuagenetworks/nuage-ospdirector/releases/tag/osp-13.602.1) for above mentioned nuage artifacts and documentation.     
 
 Below is the documentation directory structure to follow.
 
 
-   * For OSP Director 13 with + Nuage release 6.0.1: Documentation/6.0.1/README.rst
+   * For OSP Director 13 with + Nuage release 6.0.1: [Documentation/6.0.1/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/6.0.1/README.rst)
     
-   * For OSP Director 13 with + Nuage release 6.0.2: Documentation/6.0.2/README.rst
+   * For OSP Director 13 with + Nuage release 6.0.2: [Documentation/6.0.2/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/6.0.2/README.rst)
 
  
+**IMPORTANT NOTE**:
+If you are a git user please follow the following command to clone specific nuage release instead of downloading **tar.gz**. For exmaple:
+
+Nuage release: 5.4.1U6
+
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b osp-13.541U6.1
+
+Nuage release: 6.0.2
+
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b osp-13.602.1
