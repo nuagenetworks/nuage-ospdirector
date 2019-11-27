@@ -224,7 +224,7 @@ outputs:
               state: stopped
               enabled: no
           - name: Check if 6wind is installed
-            shell: rpm -qa | grep -q 6wind
+            shell: rpm -qa | grep -q virtual-accelerator-base
             failed_when: false
             register: sixwind_check
           - name: Install 6wind and AVRS packages
