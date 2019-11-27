@@ -1339,7 +1339,7 @@ compute-avrs-environment.yaml for AVRS integration
       # so place your most restrictive filters first to make the filtering process more efficient.
       NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
       ComputeAvrsParameters:
-        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
         NovaVcpuPinSet: "2-7,10-15"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
@@ -1387,7 +1387,7 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         GpgCheck: "yes"
 
       ComputeAvrsDualParameters:
-        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
         NovaVcpuPinSet: "2-7,10-15"
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
