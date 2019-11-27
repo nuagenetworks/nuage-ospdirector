@@ -133,15 +133,8 @@ The integration includes the following steps:
                 - nuage-metadata-agent (Nuage OVRS)
                 - nuage-openvswitch (Nuage OVRS)
             - Mellanox Packages
-                - kmod-mlnx-en
-                - mlnx-en-utils
                 - mstflint
-                - os-net-config
-            - Red Hat Packages
-                - kernel
-                - kernel-tools
-                - kernel-tools-libs
-                - python-perf
+
 
     - Uninstall Open vSwitch (OVS).
     - Install VRS (nuage-openvswitch).
@@ -232,15 +225,7 @@ OSC and VRS Packages
             * Nuage-metadata-agent (Nuage OVRS)
             * Nuage-openvswitch (Nuage OVRS)
         * Mellanox Packages
-            * kmod-mlnx-en
-            * mlnx-en-utils
             * mstflint
-            * os-net-config
-        * Red Hat Packages
-            * kernel
-            * kernel-tools
-            * kernel-tools-libs
-            * python-perf
 
 6WIND and AVRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~
