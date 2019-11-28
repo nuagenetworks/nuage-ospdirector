@@ -150,9 +150,9 @@ outputs:
               state: present
             when: python_ovs_nuage_check.rc != 0 and python_openvswitch_nuage_output.stdout != ''
           - name: Check if nuage-bgp is installed
-              shell: rpm -qa | grep -q nuage-bgp
-              failed_when: false
-              register: nuage_bgp_check
+            shell: rpm -qa | grep -q nuage-bgp
+            failed_when: false
+            register: nuage_bgp_check
           - name: Check and update nuage-bgp package
             block:
               - name: check if nuage-bgp is updating
