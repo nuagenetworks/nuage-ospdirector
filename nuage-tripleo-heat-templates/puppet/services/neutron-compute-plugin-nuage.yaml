@@ -133,3 +133,40 @@ outputs:
                 dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
+      update_tasks:
+        - block:
+          - name: check if python-openvswitch-nuage is installed
+            command: rpm -q python-openvswitch-nuage
+            register: python_ovs_nuage_check
+            ignore_errors: True
+          - name: check if python-openvswitch-nuage is present in the repo
+            command: repoquery --all python-openvswitch-nuage
+            register: python_openvswitch_nuage_output
+          - name: Installing python-openvswitch-nuage
+            yum:
+              name: python-openvswitch-nuage
+              state: present
+            when: python_ovs_nuage_check.rc != 0 and python_openvswitch_nuage_output.stdout != ''
+          - name: Check if nuage-bgp is installed
+            shell: rpm -qa | grep -q nuage-bgp
+            failed_when: false
+            register: nuage_bgp_check
+          - name: Check and update nuage-bgp package
+            block:
+            - name: check if nuage-bgp is updating
+              shell: yum check-update nuage-bgp
+              register: nuage_bgp_update_check
+              failed_when: nuage_bgp_update_check.rc not in [0, 100]
+              changed_when: nuage_bgp_update_check.rc == 100
+            - name: Updating nuage-bgp package
+              block:
+                - name: Update nuage-bgp with noscripts flag
+                  shell: yum --setopt=tsflags=noscripts install nuage-bgp -y
+                - name: Reload daemon and restart nuage-bgp
+                  systemd:
+                    state: restarted
+                    daemon_reload: yes
+                    name: nuage-bgp
+              when: nuage_bgp_update_check.rc == 100
+            when: nuage_bgp_check.rc == 0
+          when:  (step|int == 2)

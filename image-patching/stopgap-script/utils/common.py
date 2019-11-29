@@ -196,7 +196,7 @@ subscription-manager unregister
 def install_nuage_ovs_packages():
     cmd = '''
 #### Install Nuage Python OpenvSwitch
-yum install %s -y
+yum install --setopt=skip_missing_names_on_install=False -y %s
 ''' % ( NUAGE_PYTHON_OVS)
     write_to_file(SCRIPT_NAME, cmd)
 
