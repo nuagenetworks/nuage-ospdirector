@@ -107,7 +107,6 @@ def install_mellanox():
 #### Installing Mellanox OFED and os-net-config Packages
 yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-systemctl disable mlnx-en.d
 ''' % (constants.MLNX_OFED_PACKAGES)
     return cmds
 
@@ -210,6 +209,8 @@ def check_config_6_0(nuage_config):
         logger.info("Overcloud Image will be patched with Nuage VRS rpms")
     elif "avrs" in nuage_config["DeploymentType"]:
         logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
+    elif "ovrs" in nuage_config["DeploymentType"]:
+        logger.info("Overcloud Image will be patched with Nuage OVRS rpms")
     else:
         logger.error(msg)
         sys.exit(1)
