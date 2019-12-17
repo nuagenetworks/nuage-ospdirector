@@ -13,6 +13,7 @@
 # nuage-openvswitch-6wind (avrs)
 # nuage-metadata-agent
 # 6wind packages
+# mstflint (To enable ovrs)
 [nuage]
 name=nuage_osp13_6.0.3_nuage
 baseurl=http://<HOST-IP-HOSTING-REPOS>/nuage_osp13_6.0.3/nuage_repo

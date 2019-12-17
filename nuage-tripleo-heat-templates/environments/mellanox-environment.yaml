@@ -1,0 +1,19 @@
+resource_registry:
+  OS::TripleO::ComputeOvrs::NodeUserData: ../firstboot/mellanox_fw_update.yaml
+
+parameter_defaults:
+  ################
+  # Nic's params #
+  ################
+  MellanoxTenantPort1: "ens15f0"
+  MellanoxTenantPort2: "ens15f1"
+
+  ########################
+  # FIRST Boot FW config #
+  ########################
+
+  BIN_DIR_URL: "http://192.168.24.1/FW_16_25_0310/"
+  NUM_OF_VFS: 64
+  SRIOV_EN: True
+  ESWITCH_IPV4_TTL_MODIFY_ENABLE: True
+  PRIO_TAG_REQUIRED_EN: True

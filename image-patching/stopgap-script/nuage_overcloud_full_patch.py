@@ -92,8 +92,8 @@ def install_nuage_packages():
 yum install --setopt=skip_missing_names_on_install=False -y %s
 yum install --setopt=skip_missing_names_on_install=False -y %s
 yum install --setopt=skip_missing_names_on_install=False -y %s
-''' % (NUAGE_DEPENDENCIES, NUAGE_VRS_PACKAGE,
-       NUAGE_PACKAGES)
+''' % (constants.NUAGE_DEPENDENCIES, constants.NUAGE_VRS_PACKAGE,
+       constants.NUAGE_PACKAGES)
     return cmds
 
 #####
@@ -107,8 +107,7 @@ def install_mellanox():
 #### Installing Mellanox OFED and os-net-config Packages
 yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-systemctl disable mlnx-en.d
-''' % (MLNX_OFED_PACKAGES)
+''' % (constants.MLNX_OFED_PACKAGES)
     return cmds
 
 
@@ -123,7 +122,7 @@ def update_kernel():
 #### Installing Kernel Hot Fix Packages
 yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-''' % (KERNEL_PACKAGES)
+''' % (constants.KERNEL_PACKAGES)
     return cmds
 
 
@@ -133,7 +132,6 @@ yum install --setopt=skip_missing_names_on_install=False -y %s
 
 @repos_decorator
 def download_avrs_packages():
-    nuage_avrs_pkg = constants.NUAGE_AVRS_PACKAGE
 
     cmds = '''
 #### Downloading Nuage Avrs and 6wind Packages
@@ -148,7 +146,7 @@ yum install --setopt=skip_missing_names_on_install=False --downloadonly --downlo
 yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind 6wind-openstack-extensions
 rm -rf /kernel-version
 yum clean all
-''' %(nuage_avrs_pkg)
+''' %(constants.NUAGE_AVRS_PACKAGE)
     return cmds
 
 
@@ -211,6 +209,8 @@ def check_config_6_0(nuage_config):
         logger.info("Overcloud Image will be patched with Nuage VRS rpms")
     elif "avrs" in nuage_config["DeploymentType"]:
         logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
+    elif "ovrs" in nuage_config["DeploymentType"]:
+        logger.info("Overcloud Image will be patched with Nuage OVRS rpms")
     else:
         logger.error(msg)
         sys.exit(1)
@@ -240,6 +240,7 @@ def check_config(nuage_config):
     if nuage_config["NuageMajorVersion"] == "5.0":
         check_config_5_0(nuage_config)
         constants.NUAGE_AVRS_PACKAGE = "nuage-openvswitch"
+        constants.MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint os-net-config"
     else:
         check_config_6_0(nuage_config)
 
