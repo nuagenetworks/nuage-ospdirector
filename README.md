@@ -12,4 +12,6 @@ The repository includes:
 
 4. image-patching: overcloud-full.qcow2 image patching resources
 
-5. Wiki document: The details of integration, architecture and deployment steps can be found under this [wiki](https://github.com/nuagenetworks/nuage-ospdirector/wiki)
+Please always deploy from a Release tag, e.g. osp-13.603.1 for OSPD13 with Nuage 6.0.3.
+
+If, for engineering purposes, you are interested in the latest dev version of a given branch, select HEAD of branch, e.g. OSPD13.
