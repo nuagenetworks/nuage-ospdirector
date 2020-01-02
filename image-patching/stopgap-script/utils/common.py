@@ -208,7 +208,8 @@ yum install --setopt=skip_missing_names_on_install=False -y %s
 def uninstall_packages():
     cmd = '''
 #### Removing Upstream OpenvSwitch
-yum remove openvswitch -y
+ovs_package_name=$(rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}')
+yum remove -y $ovs_package_name
 '''
     write_to_file(SCRIPT_NAME, cmd)
 
