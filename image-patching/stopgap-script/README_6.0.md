@@ -24,7 +24,10 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
 
   * ImageName(required) is the name of the qcow2 image (for example, overcloud-full.qcow2)
   * NuageMajorVersion(required) is the Nuage Major Version and valid options are either '5.0' or '6.0'. Please enter '6.0'
-  * DeploymentType(required) is for user to specify which deployment is it. Please choose from "vrs" or "avrs"
+  * DeploymentType(required) is for user to specify which deployment is it. Please choose from "vrs" or "ovrs" or "avrs"   
+    a. For any combination of VRS and SRIOV deployments, please use deployment type as "vrs"   
+    b. For any combination of AVRS, VRS and SRIOV deployments, please use deployment type as "avrs"   
+    c. For OVRS deployments, please use deployment type as "ovrs"   
   * RhelUserName(optional) is the user name for the RedHat Enterprise Linux subscription.
   * RhelPassword(optional) is the password for the RedHat Enterprise Linux subscription
   * RhelPool(optional) is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
@@ -41,19 +44,20 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
     **we are providing RepoFile exmaple `nuage_6.0_ospd13.repo.sample`**
 
     **RepoFile can contain only single Nuage repo with required Nuage packages and can also have extra repos with non Nuage packages:**
+    Note: Currently, supported deployments are "vrs + avrs" or "ovrs". It is not necessary to have "ovrs" related packages for "avrs" deployments and vice versa.
 
         [nuage] repo should have following Nuage packages
             nuage-puppet-modules
             python-openvswitch-nuage
             selinux-policy-nuage
-            selinux-policy-nuage-avrs
+            selinux-policy-nuage-avrs (avrs)
             nuage-bgp
             nuage-openstack-neutronclient
             nuage-openvswitch (vrs)
             nuage-openvswitch-6wind (avrs)
             nuage-metadata-agent
-            6wind packages
-            mstflint
+            6wind packages (avrs)
+            mstflint (ovrs)
 
         [extra] repo should have all the packages that we install as part of dependency packages:
            libvirt

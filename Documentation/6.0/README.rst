@@ -119,7 +119,8 @@ The integration includes the following steps:
             - nuage-openstack-neutronclient
             - nuage-puppet-modules-6.2.0
             - selinux-policy-nuage
-            - nuage-topology-collector
+            - nuage-topology-collector (Nuage SRIOV)
+            - python-openvswitch-nuage
 
         - Nuage VRS Packages
             - nuage-metadata-agent (Nuage VRS)
@@ -205,19 +206,21 @@ OSC and VRS Packages
 ~~~~~~~~~~~~~~~~~~~~~~
 
     * Nuage Base Packages
-        * Nuage-bgp
-        * Nuage-openstack-neutronclient
+        * nuage-bgp
+        * nuage-openstack-neutronclient
         * nuage-puppet-modules (Latest version 6.2.0)
-        * Selinux-policy-nuage
+        * selinux-policy-nuage
+        * nuage-topology-collector (Nuage SRIOV)
+        * python-openvswitch-nuage
 
     * Nuage VRS Packages
-        * Nuage-metadata-agent (Nuage VRS)
-        * Nuage-openvswitch (Nuage VRS)
+        * nuage-metadata-agent (Nuage VRS)
+        * nuage-openvswitch (Nuage VRS)
 
     * VRS Offload Packages
         * Nuage OVRS Packages
-            * Nuage-metadata-agent (Nuage OVRS)
-            * Nuage-openvswitch (Nuage OVRS)
+            * nuage-metadata-agent (Nuage OVRS)
+            * nuage-openvswitch (Nuage OVRS)
         * Mellanox Packages
             * mstflint
 
