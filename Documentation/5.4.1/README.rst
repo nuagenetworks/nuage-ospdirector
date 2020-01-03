@@ -549,12 +549,13 @@ This example shows how to create a deployment with one Controller node and two C
     openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles/ -o /home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml Controller Compute ComputeSriov
 
 
-:Step 4: If deploying OpenStack Neutron SR-IOV in your overcloud, include the ``/usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-sriov.yaml`` environment file so the director can prepare the images. When following **Phase 8 Step 4** please include below environment. The following snippet is an example on how to include this environment file:
+:Step 4: If deploying OpenStack Neutron SR-IOV in your overcloud, include ``/home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml`` and ``/usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-sriov.yaml`` environment file so the director can prepare the images. When following **Phase 8 Step 4** please include below environment. The following snippet is an example on how to include this environment file:
 
 ::
 
     openstack overcloud container image prepare \
     ...
+    -r /home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml
     -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-sriov.yaml \
     ...
 
