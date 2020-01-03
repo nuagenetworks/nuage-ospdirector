@@ -1,0 +1,7 @@
+- project:
+    check:
+      jobs:
+        - os-ospd-ansible-13-vrs
+    gate:
+      jobs:
+        - os-ospd-ansible-13-vrs
