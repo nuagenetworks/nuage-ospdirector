@@ -1523,12 +1523,12 @@ Include this file in the ``openstack overcloud deploy`` command when you deploy 
       # Number of VFs that needs to be configured for a physical interface
       NeutronSriovNumVFs: "eno2:5,eno3:7"
       ComputeSriovParameters:
-	    KernelArgs: "iommu=pt intel_iommu=on"
-	    TunedProfileName: ""
-	    NovaPCIPassthrough:
-	      - devname: "eno2"
-	        physical_network: "physnet1"
-	      - devname: "eno3"
+        KernelArgs: "iommu=pt intel_iommu=on"
+        TunedProfileName: ""
+        NovaPCIPassthrough:
+          - devname: "eno2"
+            physical_network: "physnet1"
+          - devname: "eno3"
             physical_network: "physnet2"
 
 
@@ -1609,7 +1609,7 @@ compute-avrs-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -1645,7 +1645,7 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -1658,7 +1658,7 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
