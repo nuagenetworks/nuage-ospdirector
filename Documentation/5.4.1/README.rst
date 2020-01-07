@@ -1340,7 +1340,7 @@ compute-avrs-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -1376,7 +1376,7 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -1389,7 +1389,7 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
-        FastPathOptions: "--mod-opt=fp-vswitch:--flows=200000 --max-nfct=40000 --mod-opt=fp-vswitch:--search-comp=0"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000 --mod-opt=fp-vswitch:--search-comp=0"
         # Please note "--mod-opt=fp-vswitch:--search-comp=0" is not need for VA >= 1.9.3
         FastPathDPVI: "0"
         FastPathOffload: "off"
