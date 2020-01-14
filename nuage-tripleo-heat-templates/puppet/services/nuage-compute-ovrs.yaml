@@ -1,0 +1,79 @@
+heat_template_version: queens
+
+description: >
+  Tasks that need to run on ComputeOvrs nodes
+parameters:
+  ServiceData:
+    default: {}
+    description: Dictionary packing service data
+    type: json
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.  This
+                 mapping overrides those in ServiceNetMapDefaults.
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  RoleName:
+    default: ''
+    description: Role name on which the service is applied
+    type: string
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+
+outputs:
+  role_data:
+    description: Role data for ComputeOvrs nodes
+    value:
+      service_name: nuage_compute_ovrs
+      host_prep_tasks:
+        - name: Check if nuage-openvswitch-ovrs is installed
+          shell: rpm -q nuage-openvswitch-ovrs
+          failed_when: false
+          register: nuage_ovrs_check
+        - name: Install nuage-openvswitch-ovrs
+          block:
+          - name: remove nuage-openvswitch
+            yum:
+              name: nuage-openvswitch
+              state: absent
+          - name: create ovrs repo
+            shell: createrepo /ovrs/.
+          - name: Setup repo
+            yum_repository:
+              name: nuage_ovrs
+              baseurl: file:///ovrs
+              enabled: yes
+              gpgcheck: yes
+              description: Nuage_Ovrs
+          - name: install nuage ovrs packages
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - nuage-openvswitch-ovrs
+                - nuage-metadata-agent
+          - name: Restart nuage openvswitch
+            service:
+              name: openvswitch
+              state: restarted
+              enabled: yes
+          - name: cleanup repo
+            yum_repository:
+              name: nuage_ovrs
+              state: absent
+          - name: remove repodata
+            shell: rm -rf /ovrs/repodata
+          when: nuage_ovrs_check.rc != 0
+      upgrade_tasks: {}
+      update_tasks: {}

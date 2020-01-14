@@ -1,26 +1,23 @@
 # !/usr/bin/python
 # Copyright 2019 NOKIA
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
 #
 #         http://www.apache.org/licenses/LICENSE-2.0
 #
 #    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+#    distributed under the License is distributed on an
+#    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+#    either express or implied. See the License for the specific
+#    language governing permissions and limitations under the License.
 
 import argparse
-import subprocess
+import yaml
 import sys
 import logging
-import os
-import yaml
-import utils.constants
-from utils.constants import *
+import utils.constants as constants
 from utils.common import *
 
 '''
@@ -36,7 +33,7 @@ This script takes in following input parameters:
                      ["vrs"]  --> VRS deployment
  VRSRepoNames      : Name for the repo hosting the Nuage O/VRS RPMs 
  AVRSRepoNames     : Name for the repo hosting the Nuage AVRS RPMs
- MellanoxRepoNames : Name for the repo hosting the Mellanox RPMs
+ OvrsRepoNames : Name for the repo hosting the Mellanox RPMs
  KernelRepoNames   : Name for the repo hosting the Kernel RPMs
  RpmPublicKey      : RPM GPG Key 
  logFile           : Log file name
@@ -50,7 +47,7 @@ The following sequence is executed by the script
  6. Unsubscribe from RHEL
 '''
 
-logger = logging.getLogger(LOG_FILE_NAME)
+logger = logging.getLogger(constants.LOG_FILE_NAME)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -63,20 +60,22 @@ logger.addHandler(consoleHandler)
 # NuageMajorVersion "5.0" and skip it for "6.0"
 #####
 
+
 def repos_decorator(func):
     def repos_wrapper(version, reponames):
         install_cmds = func()
         if version == "5.0":
             enable_repos_cmd = "yum-config-manager --enable"
             for repo in reponames:
-                enable_repos_cmd += " %s" % (repo)
+                enable_repos_cmd += " %s" % repo
             disable_repos_cmd = enable_repos_cmd.replace("enable",
-                                                             "disable")
-            full_cmds = enable_repos_cmd + install_cmds + disable_repos_cmd
+                                                         "disable")
+            full_cmds = enable_repos_cmd + install_cmds + \
+                        disable_repos_cmd
         else:
             full_cmds = install_cmds
-        write_to_file(SCRIPT_NAME, full_cmds)
-        write_to_file(SCRIPT_NAME, '\n')
+        write_to_file(constants.SCRIPT_NAME, full_cmds)
+        write_to_file(constants.SCRIPT_NAME, '\n')
     return repos_wrapper
 
 
@@ -92,6 +91,7 @@ def install_nuage_packages():
 yum install --setopt=skip_missing_names_on_install=False -y %s
 yum install --setopt=skip_missing_names_on_install=False -y %s
 yum install --setopt=skip_missing_names_on_install=False -y %s
+yum clean all
 ''' % (constants.NUAGE_DEPENDENCIES, constants.NUAGE_VRS_PACKAGE,
        constants.NUAGE_PACKAGES)
     return cmds
@@ -100,14 +100,15 @@ yum install --setopt=skip_missing_names_on_install=False -y %s
 # Function to install Mellanox packages that are required
 #####
 
+
 @repos_decorator
 def install_mellanox():
 
     cmds = '''
 #### Installing Mellanox OFED and os-net-config Packages
-yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-''' % (constants.MLNX_OFED_PACKAGES)
+yum clean all
+''' % constants.MLNX_OFED_PACKAGES
     return cmds
 
 
@@ -120,14 +121,14 @@ def update_kernel():
 
     cmds = '''
 #### Installing Kernel Hot Fix Packages
-yum clean all
 yum install --setopt=skip_missing_names_on_install=False -y %s
-''' % (constants.KERNEL_PACKAGES)
+yum clean all
+''' % constants.KERNEL_PACKAGES
     return cmds
 
 
 #####
-# Function to install Nuage AVRS packages that are required
+# Function to download Nuage AVRS packages that are required
 #####
 
 @repos_decorator
@@ -136,54 +137,74 @@ def download_avrs_packages():
     cmds = '''
 #### Downloading Nuage Avrs and 6wind Packages
 mkdir -p /6wind
-rm -rf /var/cache/yum/Nuage
-yum clean all
 touch /kernel-version
 rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
-yum install --setopt=skip_missing_names_on_install=False -y createrepo
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind kernel-headers-$(awk 'END{print}' /kernel-version) kernel-devel-$(awk 'END{print}' /kernel-version) python-pyelftools* dkms* 6windgate* %s nuage-metadata-agent virtual-accelerator*
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
-yum install --setopt=skip_missing_names_on_install=False --downloadonly --downloaddir=/6wind 6wind-openstack-extensions
+yum install --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind \
+kernel-headers-$(awk 'END{print}' /kernel-version) \
+kernel-devel-$(awk 'END{print}' /kernel-version) python-pyelftools* \
+dkms* 6windgate* %s nuage-metadata-agent virtual-accelerator*
+yum install --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
+yum install --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind 6wind-openstack-extensions
 rm -rf /kernel-version
 yum clean all
-''' %(constants.NUAGE_AVRS_PACKAGE)
+''' % constants.NUAGE_AVRS_PACKAGE
     return cmds
 
 
 #####
-# Function to check the required configs for 5.0
+# Function to download Nuage OVRS package
 #####
 
-def check_config_5_0(nuage_config):
-    msg = "DeploymentType config option %s is not correct or supported " \
-          " Please enter:\n ['vrs'] --> for VRS deployment\n " \
-          "['avrs'] --> for AVRS + VRS deployment\n " \
-          "['ovrs'] --> for OVRS deployment" % nuage_config["DeploymentType"]
-    if len(nuage_config["DeploymentType"]) > 1:
-        new_msg = "Multiple " + msg
-        logger.error(new_msg)
-        sys.exit(1)
-    elif "vrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage VRS rpms")
+
+@repos_decorator
+def download_ovrs_package():
+    cmds = '''
+#### Downloading Nuage Ovrs Package
+mkdir -p /ovrs
+yum install --setopt=skip_missing_names_on_install=False \
+ --downloadonly  --downloaddir=/ovrs nuage-openvswitch-ovrs \
+nuage-metadata-agent
+yum clean all
+'''
+    return cmds
+
+
+#####
+# Function to check the repo names are provided for 5.0
+#####
+
+
+def check_reponames(nuage_config):
+    if "vrs" in nuage_config["DeploymentType"]:
         if not nuage_config.get("VRSRepoNames"):
-            logger.error("Please provide AVRSRepoNames for AVRS deployment")
+            logger.error("Please provide AVRSRepoNames "
+                         "for AVRS deployment")
             sys.exit(1)
     elif "avrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
         if not nuage_config.get("VRSRepoNames"):
-            logger.error("Please provide VRSRepoNames for AVRS deployment")
+            logger.error("Please provide VRSRepoNames "
+                         "for AVRS deployment")
             sys.exit(1)
         if not nuage_config.get("AVRSRepoNames"):
-            logger.error("Please provide AVRSRepoNames for AVRS deployment")
+            logger.error("Please provide AVRSRepoNames "
+                         "for AVRS deployment")
             sys.exit(1)
     elif "ovrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with OVRS rpms")
-        if not nuage_config.get("MellanoxRepoNames"):
+        if not nuage_config.get("OvrsRepoNames"):
             logger.error(
-                "Please provide MellanoxRepoNames for OVRS deployment")
+                "Please provide OvrsRepoNames for OVRS deployment")
             sys.exit(1)
     else:
-        logger.error(msg)
+        logger.error("DeploymentType config option %s is not correct "
+                     "or supported "
+                     " Please enter:\n ['vrs'] --> for VRS "
+                     "deployment\n "
+                     "['avrs'] --> for AVRS + VRS deployment\n "
+                     "['ovrs'] --> for OVRS deployment"
+                     % nuage_config["DeploymentType"])
         sys.exit(1)
 
     if nuage_config.get("KernelHF"):
@@ -194,34 +215,32 @@ def check_config_5_0(nuage_config):
 
 
 #####
-# Function to check the required configs for 6.0
+# Function to check if deployment types provided are valid
 #####
 
-def check_config_6_0(nuage_config):
-    msg = "DeploymentType config option %s is not correct or supported " \
+def check_deployment_type(nuage_config):
+    msg = "DeploymentType config option %s is not correct " \
+          "or supported " \
           " Please enter:\n ['vrs'] --> for VRS deployment\n " \
-          "['avrs'] --> for AVRS + VRS deployment\n " % nuage_config["DeploymentType"]
-    if len(nuage_config["DeploymentType"]) > 1:
-        new_msg = "Multiple " + msg
-        logger.error(new_msg)
-        sys.exit(1)
-    elif "vrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage VRS rpms")
-    elif "avrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage VRS & AVRS rpms")
-    elif "ovrs" in nuage_config["DeploymentType"]:
-        logger.info("Overcloud Image will be patched with Nuage OVRS rpms")
+          "['avrs'] --> for AVRS + VRS deployment\n " \
+          "['ovrs'] --> for OVRS deployment" % \
+          nuage_config["DeploymentType"]
+    if(all(deployment_type in constants.VALID_DEPLOYMENT_TYPES
+           for deployment_type in nuage_config["DeploymentType"])):
+        logger.info("Overcloud Image will be patched with Nuage %s "
+                    "rpms" % nuage_config["DeploymentType"])
     else:
         logger.error(msg)
         sys.exit(1)
+
 
 def check_config(nuage_config):
     logger.info("Verifying pre-requisite packages for script")
     libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
     if 'not installed' in libguestfs:
-        logger.info("Please install libguestfs-tools-c package for the script to run")
+        logger.info("Please install libguestfs-tools-c package "
+                    "for the script to run")
         sys.exit(1)
-
 
     if not nuage_config["NuageMajorVersion"] in ["5.0", "6.0"]:
         logger.error("NuageMajorVersion %s is not valid"
@@ -237,12 +256,13 @@ def check_config(nuage_config):
                      "in your config file. \n" % missing_config)
         sys.exit(1)
     file_exists(nuage_config["ImageName"])
+
+    check_deployment_type(nuage_config)
     if nuage_config["NuageMajorVersion"] == "5.0":
-        check_config_5_0(nuage_config)
+        check_reponames(nuage_config)
         constants.NUAGE_AVRS_PACKAGE = "nuage-openvswitch"
-        constants.MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils mstflint os-net-config"
-    else:
-        check_config_6_0(nuage_config)
+        constants.MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils " \
+                                       "mstflint os-net-config"
 
 ####
 # Image Patching
@@ -258,19 +278,22 @@ def image_patching(nuage_config):
         importing_gpgkeys(nuage_config["ImageName"],
                           nuage_config["RpmPublicKey"])
 
-
     if nuage_config.get("RhelUserName") and nuage_config.get(
             "RhelPassword") and nuage_config.get("RhelPool"):
-        if nuage_config.get("ProxyHostname") and nuage_config.get("ProxyPort"):
+        if nuage_config.get("ProxyHostname") and \
+                nuage_config.get("ProxyPort"):
             rhel_subscription(
-                nuage_config["RhelUserName"], nuage_config["RhelPassword"],
-                nuage_config["RhelPool"], nuage_config["ProxyHostname"],
+                nuage_config["RhelUserName"],
+                nuage_config["RhelPassword"],
+                nuage_config["RhelPool"],
+                nuage_config["ProxyHostname"],
                 nuage_config["ProxyPort"])
         else:
             rhel_subscription(
-                nuage_config["RhelUserName"], nuage_config["RhelPassword"],
+                nuage_config["RhelUserName"],
+                nuage_config["RhelPassword"],
                 nuage_config["RhelPool"])
-    install_nuage_ovs_packages()
+    install_nuage_python_ovs_packages()
     uninstall_packages()
 
     logger.info("Copying RepoFile to the overcloud image")
@@ -281,8 +304,10 @@ def image_patching(nuage_config):
             "KernelRepoNames"])
 
     if "ovrs" in nuage_config["DeploymentType"]:
+        download_ovrs_package(nuage_config["NuageMajorVersion"],
+                              nuage_config["OvrsRepoNames"])
         install_mellanox(nuage_config["NuageMajorVersion"],
-                         nuage_config["MellanoxRepoNames"])
+                         nuage_config["OvrsRepoNames"])
 
     if "avrs" in nuage_config["DeploymentType"]:
         download_avrs_packages(nuage_config["NuageMajorVersion"],
@@ -299,22 +324,21 @@ def image_patching(nuage_config):
 
     virt_customize_run(
         ' %s -a %s --memsize %s --selinux-relabel' % (
-            SCRIPT_NAME, nuage_config["ImageName"],
-            VIRT_CUSTOMIZE_MEMSIZE))
+            constants.SCRIPT_NAME, nuage_config["ImageName"],
+            constants.VIRT_CUSTOMIZE_MEMSIZE))
 
     logger.info("Reset the Machine ID")
-    cmds_run([VIRT_CUSTOMIZE_ENV + "virt-sysprep --operation machine-id -a %s" % nuage_config["ImageName"]])
+    cmds_run([constants.VIRT_CUSTOMIZE_ENV + "virt-sysprep --operation "
+                                             "machine-id -a %s" %
+              nuage_config["ImageName"]])
     logger.info("Done")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--nuage-config",
-        dest="nuage_config",
-        type=str,
-        required=True,
-        help="path to nuage_patching_config.yaml")
+    parser.add_argument("--nuage-config", dest="nuage_config",
+                        required=True,
+                        help="path to nuage_patching_config.yaml")
     args = parser.parse_args()
 
     with open(args.nuage_config) as nuage_config:
@@ -322,10 +346,12 @@ def main():
             nuage_config = yaml.load(nuage_config)
         except yaml.YAMLError as exc:
             logger.error(
-                'Error parsing file {filename}: {exc}. Please fix and try '
-                'again with correct yaml file.'.format(filename=args.nuage_config, exc=exc))
+                'Error parsing file {filename}: {exc}. \n'
+                'Please fix and try again with correct yaml file.'
+                .format(filename=args.nuage_config, exc=exc))
             sys.exit(1)
-    logger.info("nuage_overcloud_full_patch.py was run with following config options %s " % nuage_config)
+    logger.info("nuage_overcloud_full_patch.py was "
+                "run with following config options %s " % nuage_config)
     check_config(nuage_config)
     image_patching(nuage_config)
 

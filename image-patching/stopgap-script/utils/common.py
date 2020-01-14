@@ -1,24 +1,23 @@
 # !/usr/bin/python
 # Copyright 2019 NOKIA
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
 #
 #         http://www.apache.org/licenses/LICENSE-2.0
 #
 #    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+#    distributed under the License is distributed on an
+#    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+#    either express or implied. See the License for the specific
+#    language governing permissions and limitations under the License.
 
 import subprocess
 import sys
 import logging
 import os
 import constants
-from constants import *
 
 
 logger = logging.getLogger(constants.LOG_FILE_NAME)
@@ -59,15 +58,20 @@ def cmds_run(cmds):
 
 def virt_customize(command):
     return cmds_run(
-        [VIRT_CUSTOMIZE_ENV + 'virt-customize --run-command %s' % command])
+        [constants.VIRT_CUSTOMIZE_ENV + 'virt-customize '
+                                        '--run-command %s' %
+         command])
 
 
 def virt_customize_run(command):
-    return cmds_run([VIRT_CUSTOMIZE_ENV + 'virt-customize --run %s' % command])
+    return cmds_run([constants.VIRT_CUSTOMIZE_ENV + 'virt-customize '
+                                                    '--run %s' %
+                     command])
 
 
 def virt_copy(command):
-    return cmds_run([VIRT_CUSTOMIZE_ENV + 'virt-copy-in -a %s' % command])
+    return cmds_run([constants.VIRT_CUSTOMIZE_ENV + 'virt-copy-in '
+                                                    '-a %s' % command])
 
 
 #####
@@ -116,21 +120,25 @@ def importing_gpgkeys(image, gpgkeys):
     cmd = '''
 #### Importing GPG keys
 '''
-    write_to_file(SCRIPT_NAME, cmd)
+    write_to_file(constants.SCRIPT_NAME, cmd)
     for gpgkey in gpgkeys:
-        file_exists = os.path.isfile(gpgkey)
+        file_exist = os.path.isfile(gpgkey)
         file_name = os.path.basename(gpgkey)
-        if file_exists:
-            virt_copy('%s %s %s' % (image, gpgkey, GPGKEYS_PATH))
+        if file_exist:
+            virt_copy('%s %s %s' % (image, gpgkey,
+                                    constants.GPGKEYS_PATH))
             rpm_import = '''
 rpm --import %s%s
-''' % (GPGKEYS_PATH, file_name)
-            write_to_file(SCRIPT_NAME, rpm_import)
+''' % (constants.GPGKEYS_PATH, file_name)
+            write_to_file(constants.SCRIPT_NAME, rpm_import)
 
         else:
-            logger.error("Nuage package signing key is not present in %s ,"
-                         "Installation cannot proceed.  Please place the "
-                         "signing key in the correct location and retry" %
+            logger.error("Nuage package signing key is not present "
+                         "in %s ,"
+                         "Installation cannot proceed.  Please place "
+                         "the "
+                         "signing key in the correct location and"
+                         " retry" %
                          gpgkey)
 
             sys.exit(1)
@@ -163,8 +171,10 @@ def rhel_subscription(username,
                       proxy_port=None):
     subscription_command = ''
     if proxy_hostname is not None:
-        subscription_command = "subscription-manager config --server.proxy_hostname=%s  --server.proxy_port=%s\n" % (
-            proxy_hostname, proxy_port)
+        subscription_command = "subscription-manager config " \
+                               "--server.proxy_hostname=%s  " \
+                               "--server.proxy_port=%s\n" % (
+                                proxy_hostname, proxy_port)
 
     enable_pool = '''
 subscription-manager register --username='%s' --password='%s'
@@ -173,7 +183,7 @@ subscription-manager repos --enable=rhel-7-server-optional-rpms
 subscription-manager repos --enable=rhel-7-server-rpms
 ''' % (username, password, pool)
     cmds = subscription_command + enable_pool
-    write_to_file(SCRIPT_NAME, cmds)
+    write_to_file(constants.SCRIPT_NAME, cmds)
 
 
 #####
@@ -186,19 +196,20 @@ def rhel_remove_subscription():
 #### Removing RHEL Subscription
 subscription-manager unregister
 '''
-    write_to_file(SCRIPT_NAME, cmd)
+    write_to_file(constants.SCRIPT_NAME, cmd)
 
 #####
 # Function to install packages nuage python ovs
 #####
 
 
-def install_nuage_ovs_packages():
+def install_nuage_python_ovs_packages():
     cmd = '''
 #### Install Nuage Python OpenvSwitch
 yum install --setopt=skip_missing_names_on_install=False -y %s
-''' % ( NUAGE_PYTHON_OVS)
-    write_to_file(SCRIPT_NAME, cmd)
+yum clean all
+''' % constants.NUAGE_PYTHON_OVS
+    write_to_file(constants.SCRIPT_NAME, cmd)
 
 #####
 # Function to remove packages that are not needed
@@ -208,52 +219,9 @@ yum install --setopt=skip_missing_names_on_install=False -y %s
 def uninstall_packages():
     cmd = '''
 #### Removing Upstream OpenvSwitch
-ovs_package_name=$(rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}')
+ovs_package_name=$(rpm -qa | awk -F- \
+'/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}')
 yum remove -y $ovs_package_name
+yum clean all
 '''
-    write_to_file(SCRIPT_NAME, cmd)
-
-
-
-#####
-# Importing Gpgkeys to Overcloud image
-#####
-
-
-def importing_gpgkeys(image, gpgkeys):
-    cmd = '''
-#### Importing GPG keys
-'''
-    write_to_file(SCRIPT_NAME, cmd)
-    for gpgkey in gpgkeys:
-        file_exists = os.path.isfile(gpgkey)
-        file_name = os.path.basename(gpgkey)
-        if file_exists:
-            virt_copy('%s %s %s' % (image, gpgkey, GPGKEYS_PATH))
-            rpm_import = '''
-rpm --import %s%s
-''' % (GPGKEYS_PATH, file_name)
-            write_to_file(SCRIPT_NAME, rpm_import)
-
-        else:
-            logger.error("Nuage package signing key is not present in %s ,"
-                         "Installation cannot proceed.  Please place the "
-                         "signing key in the correct location and retry" %
-                         gpgkey)
-
-            sys.exit(1)
-
-
-####
-# Copying repo file to overcloud image
-####
-
-
-def copy_repo_file(image, repofile):
-    if os.path.isfile(repofile):
-        virt_copy('%s %s /etc/yum.repos.d/' % (image, repofile))
-    else:
-        logger.error("Repo file doesn't exists at %s"
-                     "Please provide the correct path of RepoFile" %
-                     repofile)
-        sys.exit(1)
+    write_to_file(constants.SCRIPT_NAME, cmd)

@@ -57,11 +57,11 @@ VRSRepoNames: []
 # Eg:  ["avrs_repo_name1", "avrs_repo_name2"]
 AVRSRepoNames: []
 
-# Name for the repo hosting the Mellanox and os-net-config RPMs
+# Name for the repo hosting the nuage-ovrs, mellanox and os-net-config RPMs
 # type: list
 # required only when DeploymentType: ["ovrs"] and NuageMajorVersion: "5.0"
-# Eg:  ["mlnx_repo_name1", "mlnx_repo_name2"]
-MellanoxRepoNames: []
+# Eg:  ["ovrs_repo_name", "mlnx_repo_name"]
+OvrsRepoNames: []
 
 # Name for the repo hosting the Kernel RPMs
 # type: list
