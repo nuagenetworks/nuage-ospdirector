@@ -1,4 +1,6 @@
 # A Heat environment file that enables OVS Hardware Offload in the overcloud.
+resource_registry:
+  OS::TripleO::Services::NuageComputeOvrs: ../puppet/services/nuage-compute-ovrs.yaml
 
 parameter_defaults:
 

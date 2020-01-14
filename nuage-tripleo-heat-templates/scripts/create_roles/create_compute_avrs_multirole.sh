@@ -21,10 +21,10 @@ echo "creating ${roles[*]} Role"
 
 mkdir -p ../../roles
 for role in "${roles[@]}"; do
-    sudo openstack overcloud roles generate --roles-path ../../roles -o ../../roles/${role}.yaml Compute
-    sudo sed -i -e "s/ Compute/ ${role}/g" ../../roles/${role}.yaml
-    sudo sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-${role,,}-%index%'/g" ../../roles/${role}.yaml
-    sudo sed -i -e "s/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g"   ../../roles/${role}.yaml
+    openstack overcloud roles generate --roles-path ../../roles -o ../../roles/${role}.yaml Compute
+    sed -i -e "s/ Compute/ ${role}/g" ../../roles/${role}.yaml
+    sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-${role,,}-%index%'/g" ../../roles/${role}.yaml
+    sed -i -e "s/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g"   ../../roles/${role}.yaml
     FILE=../../roles/${role}.yaml
     if [ -f "$FILE" ]; then
         echo "$FILE has been created"
