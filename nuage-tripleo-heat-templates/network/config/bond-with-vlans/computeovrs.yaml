@@ -121,11 +121,9 @@ resources:
                   get_param: BondInterfaceOvsOptions
                 members:
                 - type: interface
-                  name:
-                    get_param: nic2
+                  name: nic2
                 - type: interface
-                  name:
-                    get_param: nic3
+                  name: nic3
               - type: vlan
                 device: infra-bond
                 vlan_id:
