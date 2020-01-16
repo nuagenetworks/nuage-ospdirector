@@ -111,5 +111,5 @@ Upgrade Workflow
 3. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud
 
 
-4. Run the image patching using the latest Nuage packages to update the Overcloud image. Follow these instructions: https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/image-patching/stopgap-script/README.md
+4. Run the image patching using the latest Nuage packages to update the Overcloud image. Follow these instructions: `README.md <../../image-patching/README.md>`_
 

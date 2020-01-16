@@ -9,10 +9,10 @@ yum install libguestfs-tools python-yaml -y
 
 # Steps:
 
-Copy the stopgap-script folder from undercloud-director path /home/stack/nuage-ospdirector-osp-13.<release>/image-patching/ onto the hypervisor machine that is accessible to the nuage-rpms repo.
+Copy the  folder image-patching from /home/stack/nuage-ospdirector/image-patching/ onto the hypervisor machine that is accessible to the nuage-rpms repo.
 
 ```
-cd stopgap-script/
+cd nuage_image_patching_scripts
 ```
 
 Copy the `overcloud-full.qcow2` from undercloud-director /home/stack/images/ to this location and make a backup of overcloud-full.qcow2

@@ -129,7 +129,7 @@ The integration includes the following steps:
     - Install VRS (nuage-openvswitch).
 
     - Use nuage-puppet-modules-5.3.0.x86_64.rpm for setting Nuage Openvswitch and Nuage Metadata Agent config files.
-    - The scripts to patch the overcloud-full.qcow2 image can be found at `image-patching/stopgap-script` which uninstall Open vSwitch (OVS), and install VRS.
+    - The scripts to patch the overcloud-full.qcow2 image can be found at `image-patching/nuage_image_patching_scripts` which uninstall Open vSwitch (OVS), and install VRS.
 
     - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
 
@@ -175,10 +175,10 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `image-patching <../../image-patching>`_ .
-* For the scripts to patch the Overcloud qcow image, go to `stopgap-script <../../image-patching/stopgap-script>`_ .
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_ .
+* For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_ .
 * For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to `generate-cms-id <../../generate-cms-id>`_ .
+* For the files and script to generate the CMS ID, go to `generate-cms-id <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_ .
 
 .. Important::  Contact Nuage for Nuage Ironic Integration
 
@@ -267,7 +267,7 @@ These are the OpenStack instructions:
 Phase 3: Modify the Overcloud qcow Image (overcloud-full.qcow2) to Include Nuage Components
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/stopgap-script/README.md>`_  file.
+The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/README.md>`_  file.
 
 
 
@@ -321,7 +321,7 @@ Phase 5: Generate a CMS ID for the OpenStack installation
 
 The Cloud Management System (CMS) ID needs to be generated to configure your OpenStack installation with the VSD installation.
 
-Go to /home/stack/nuage-ospdirector/generate-cms-id for the files and script to generate the CMS ID, and follow the instructions in README.md.
+Go to `generate-cms-id <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_  for the files and script to generate the CMS ID, and follow the instructions in README.md.
 
 The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
 
