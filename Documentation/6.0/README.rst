@@ -52,7 +52,7 @@ VSP requirements:
    * Manual Horizon and Heat integration for Nuage Extensions are required because these modules are not part of the packaged integration.
 
 
-RHEL 7.5/7.6 is supported with OSP 13.
+RHEL 7.7 is supported with OSP 13.
 
 Recommended Topologies
 -----------------------
