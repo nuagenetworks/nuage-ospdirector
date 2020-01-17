@@ -86,6 +86,10 @@ parameters:
     type: json
     tags:
       - role_specific
+  NuageGpgKeys:
+    type: comma_delimited_list
+    default: []
+    description: Nuage GPG keys
 
 resources:
 
@@ -133,6 +137,45 @@ outputs:
                 dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
+      host_prep_tasks:
+        - name: Check if nuage base packages are installed or not
+          shell: rpm -q selinux-policy-nuage nuage-puppet-modules nuage-bgp python-openvswitch-nuage
+          failed_when: false
+          register: nuage_base_check
+        - name : Installing nuage base packages
+          block:
+          - name: set nuage_gpg_keys fact
+            set_fact:
+              nuage_gpg_keys: {get_param: NuageGpgKeys}
+          - name: Adding nuage_gpg_keys on overcloud node
+            rpm_key:
+              state: present
+              key: "{{ item }}"
+            with_items:
+              - "{{ nuage_gpg_keys }}"
+            when:
+              - nuage_gpg_keys != []
+          - debug:
+              msg: "No NuageGpgKeys Environment variable is set for this deployment"
+            when:
+              - nuage_gpg_keys == []
+          - name: Remove upstream openvswitch
+            yum:
+              name: openvswitch
+              state: absent
+          - name: Installing nuage packages dependencies and base packages
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - perl-JSON
+                - lldpad
+                - selinux-policy-nuage
+                - nuage-puppet-modules
+                - nuage-bgp
+                - python-openvswitch-nuage
+          when: nuage_base_check != 0
       update_tasks:
         - block:
           - name: check if python-openvswitch-nuage is installed
@@ -170,3 +213,4 @@ outputs:
               when: nuage_bgp_update_check.rc == 100
             when: nuage_bgp_check.rc == 0
           when:  (step|int == 2)
+

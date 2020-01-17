@@ -82,6 +82,11 @@ parameters:
     type: boolean
     default: false
 
+  NuageGpgKeys:
+    type: comma_delimited_list
+    default: []
+    description: Nuage GPG keys
+
 resources:
 
   NeutronMl2Base:
@@ -117,13 +122,51 @@ outputs:
         include tripleo::profile::base::neutron::plugins::ml2
       metadata_settings:
         get_attr: [NeutronMl2Base, role_data, metadata_settings]
+      host_prep_tasks:
+        - name: Check if Nuage is installed or not
+          shell: rpm -q nuage-openstack-neutronclient selinux-policy-nuage
+          register: nuage_check
+          failed_when: false
+        - name : Installing Nuage Packages and Dependencies
+          block:
+          # Only install when nuage is not installed already.
+          - name: set nuage_gpg_keys fact
+            set_fact:
+              nuage_gpg_keys: {get_param: NuageGpgKeys }
+          - name: Adding nuage_gpg_keys on overcloud node
+            rpm_key:
+              state: present
+              key: "{{ item }}"
+            with_items:
+              - "{{ nuage_gpg_keys }}"
+            when:
+              - nuage_gpg_keys != []
+          - debug:
+              msg: "No NuageGpgKeys Environment variable is set for this deployment"
+            when: 
+              - nuage_gpg_keys == []
+          - name: Install Nuage Neutron Client on overcloud controller node
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - selinux-policy-nuage
+                - nuage-openstack-neutronclient
+          when: nuage_check.rc != 0
       update_tasks:
         - block:
-          - name: get the nuage_previous_version
-            command: docker exec -u root neutron_api sh -c "rpm -qa nuage-openstack-neutron"
-            register: nuage_previous_version
-          - name: Create the file with nuage_previous version
-            copy: content="{{ nuage_previous_version.stdout }}" dest=/tmp/nuage_previous_version
+          - name: check if nuage_previous_version file is present
+            stat:
+              path: /tmp/nuage_previous_version
+            register: nuage_previous_version_file
+          - block:
+            - name: get the nuage_previous_version
+              command: docker exec -u root neutron_api sh -c "rpm -qa nuage-openstack-neutron"
+              register: nuage_previous_version
+            - name: Create the file with nuage_previous version
+              copy: content="{{ nuage_previous_version.stdout }}" dest=/tmp/nuage_previous_version
+            when: not nuage_previous_version_file.stat.exists
           - name: Is nuage openvswitch going to be updated
             shell: yum check-update nuage-openvswitch
             register: nuage_openvswitch_update_check
