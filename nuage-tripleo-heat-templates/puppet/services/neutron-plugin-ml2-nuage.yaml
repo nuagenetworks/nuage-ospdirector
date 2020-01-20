@@ -119,11 +119,17 @@ outputs:
         get_attr: [NeutronMl2Base, role_data, metadata_settings]
       update_tasks:
         - block:
-          - name: get the nuage_previous_version
-            command: docker exec -u root neutron_api sh -c "rpm -qa nuage-openstack-neutron"
-            register: nuage_previous_version
-          - name: Create the file with nuage_previous version
-            copy: content="{{ nuage_previous_version.stdout }}" dest=/tmp/nuage_previous_version
+          - name: check if nuage_previous_version file is present
+            stat:
+              path: /tmp/nuage_previous_version
+            register: nuage_previous_version_file
+          - block:
+            - name: get the nuage_previous_version
+              command: docker exec -u root neutron_api sh -c "rpm -qa nuage-openstack-neutron"
+              register: nuage_previous_version
+            - name: Create the file with nuage_previous version
+              copy: content="{{ nuage_previous_version.stdout }}" dest=/tmp/nuage_previous_version
+            when: not nuage_previous_version_file.stat.exists
           - name: Is nuage openvswitch going to be updated
             shell: yum check-update nuage-openvswitch
             register: nuage_openvswitch_update_check
@@ -178,11 +184,11 @@ outputs:
               path: /tmp/nuage_openvswitch_update
             register: nuage_openvswitch_update_file
           - block:
-            - name: Restart nuage openvswitch
+            - name: Restart nuage openvswitch after package update
               service:
                 name: openvswitch
                 state: restarted
-            - name: Remove nuage_openvswitch file if virtual-accelerator-base is updated
+            - name: Remove nuage_openvswitch file after package update
               file:
                 path: /tmp/nuage_openvswitch_update
                 state: absent
@@ -218,9 +224,9 @@ outputs:
                 [['5.3','nuage_upgrade_to_5.3.py'], ['5.4','nuage_upgrade_to_5_4_1.py'], ['6.0','nuage_upgrade_to_6_0.py']]
             - name: Restarting neutron server container
               command: docker restart neutron_api
-            - name: Remove nuage_previous_version file
-              file:
-                path: /tmp/nuage_previous_version
-                state: absent
             when: previous_version_output != update_version_output
+          - name: Remove nuage_previous_version file
+            file:
+              path: /tmp/nuage_previous_version
+              state: absent
           when: (step|int == 1) and (is_bootstrap_node|bool)
