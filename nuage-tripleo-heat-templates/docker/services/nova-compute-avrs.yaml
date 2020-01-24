@@ -140,32 +140,6 @@ resources:
               CpuSetEnable : {get_param: CpuSetEnable}
               GpgCheck: {get_param: GpgCheck}
 
-  ContainersCommon:
-    type: /usr/share/openstack-tripleo-heat-templates/docker/services/containers-common.yaml
-
-  MySQLClient:
-    type: /usr/share/openstack-tripleo-heat-templates/puppet/services/database/mysql-client.yaml
-
-  NovaComputeCommon:
-    type: /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute-common.yaml
-    properties:
-      EndpointMap: {get_param: EndpointMap}
-      ServiceData: {get_param: ServiceData}
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      RoleName: {get_param: RoleName}
-      RoleParameters: {get_param: RoleParameters}
-
-  NovaComputeAvrsBase:
-    type: /usr/share/openstack-tripleo-heat-templates/puppet/services/nova-compute.yaml
-    properties:
-      EndpointMap: {get_param: EndpointMap}
-      ServiceData: {get_param: ServiceData}
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      RoleName: {get_param: RoleName}
-      RoleParameters: {get_param: RoleParameters}
-
   NovaComputeAvrsDockerBase:
     type: /usr/share/openstack-tripleo-heat-templates/docker/services/nova-compute.yaml
     properties:
@@ -178,43 +152,19 @@ resources:
       RoleName: {get_param: RoleName}
       RoleParameters: {get_param: RoleParameters}
 
-  NovaLogging:
-    type: OS::TripleO::Services::Logging::NovaCommon
-    properties:
-      DockerNovaImage: {get_param: DockerNovaComputeAvrsImage}
-      NovaServiceName: 'compute'
-
-conditions:
-  enable_instance_ha: {equals: [{get_param: EnableInstanceHA}, true]}
-
 outputs:
   role_data:
     description: Role data for the Nova Compute service.
     value:
-      service_name: {get_attr: [NovaComputeAvrsBase, role_data, service_name]}
-      cellv2_discovery: true
-      config_settings:
-        map_merge:
-          - get_attr: [NovaComputeAvrsBase, role_data, config_settings]
-          - get_attr: [NovaLogging, config_settings]
-      logging_source: {get_attr: [NovaComputeAvrsBase, role_data, logging_source]}
-      logging_groups: {get_attr: [NovaComputeAvrsBase, role_data, logging_groups]}
-      service_config_settings: {get_attr: [NovaComputeAvrsBase, role_data, service_config_settings]}
-      puppet_config:
-        config_volume: nova_libvirt
-        puppet_tags: nova_config,nova_paste_api_ini
-        step_config:
-          list_join:
-            - "\n"
-            - - {get_attr: [NovaComputeAvrsBase, role_data, step_config]}
-              - {get_attr: [MySQLClient, role_data, step_config]}
-        config_image: {get_param: DockerNovaLibvirtAvrsConfigImage}
-      kolla_config:
-        get_attr: [NovaComputeAvrsDockerBase, role_data, kolla_config]
-      docker_config_scripts:
-        get_attr: [NovaComputeCommon, docker_config_scripts]
-      docker_config:
-        get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]
+      service_name: {get_attr: [NovaComputeAvrsDockerBase, role_data, service_name]}
+      config_settings: {get_attr: [NovaComputeAvrsDockerBase, role_data, config_settings]}
+      logging_source: {get_attr: [NovaComputeAvrsDockerBase, role_data, logging_source]}
+      logging_groups: {get_attr: [NovaComputeAvrsDockerBase, role_data, logging_groups]}
+      service_config_settings: {get_attr: [NovaComputeAvrsDockerBase, role_data, service_config_settings]}
+      puppet_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, puppet_config]}
+      kolla_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, kolla_config]}
+      docker_config_scripts: {get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config_scripts]}
+      docker_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]}
       host_prep_tasks:
         list_concat:
         - {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
@@ -307,16 +257,16 @@ outputs:
               state: present
               create: yes
             loop:
-                - { param: 'FP_MASK', val: {get_attr: [RoleParametersValue, value, FP_MASK]}}
-                - { param: 'FP_PORTS', val: {get_attr: [RoleParametersValue, value, FP_PORTS]}}
-                - { param: 'CORE_PORT_MAPPING', val: {get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING]}}
-                - { param: 'FP_MEMORY', val: {get_attr: [RoleParametersValue, value, FP_MEMORY]}}
-                - { param: 'VM_MEMORY', val: {get_attr: [RoleParametersValue, value, VM_MEMORY]}}
-                - { param: 'NB_MBUF', val: {get_attr: [RoleParametersValue, value, NB_MBUF]}}
-                - { param: 'FP_OFFLOAD', val: {get_attr: [RoleParametersValue, value, FP_OFFLOAD]}}
-                - { param: 'FPNSDK_OPTIONS', val: {get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS]}}
-                - { param: 'DPVI_MASK', val: {get_attr: [RoleParametersValue, value, DPVI_MASK]}}
-                - { param: 'FP_OPTIONS', val: {get_attr: [RoleParametersValue, value, FP_OPTIONS]}}
+                - { param: 'FP_MASK', val: { get_attr: [RoleParametersValue, value, FP_MASK] }}
+                - { param: 'FP_PORTS', val: { get_attr: [RoleParametersValue, value, FP_PORTS] }}
+                - { param: 'CORE_PORT_MAPPING', val: { get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING] }}
+                - { param: 'FP_MEMORY', val: { get_attr: [RoleParametersValue, value, FP_MEMORY] }}
+                - { param: 'VM_MEMORY', val: { get_attr: [RoleParametersValue, value, VM_MEMORY] }}
+                - { param: 'NB_MBUF', val: { get_attr: [RoleParametersValue, value, NB_MBUF] }}
+                - { param: 'FP_OFFLOAD', val: { get_attr: [RoleParametersValue, value, FP_OFFLOAD] }}
+                - { param: 'FPNSDK_OPTIONS', val: { get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS] }}
+                - { param: 'DPVI_MASK', val: { get_attr: [RoleParametersValue, value, DPVI_MASK] }}
+                - { param: 'FP_OPTIONS', val: { get_attr: [RoleParametersValue, value, FP_OPTIONS] }}
             register: lineinfile_result
             when: item.val != ''
           - name: Set params in cpuset.env file
@@ -327,7 +277,7 @@ outputs:
               state: present
               create: yes
             loop:
-              - { param: 'CPUSET_ENABLE', val: {get_attr: [RoleParametersValue, value, CPUSET_ENABLE]}}
+              - { param: 'CPUSET_ENABLE', val: { get_attr: [RoleParametersValue, value, CPUSET_ENABLE] }}
           - block:
             - name: Restarting AVRS service
               service:
@@ -339,8 +289,7 @@ outputs:
             - name: check if virtual-accelerator is active
               command: systemctl status virtual-accelerator
             when: lineinfile_result.changed
-      upgrade_tasks:
-        get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]
+      upgrade_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]}
       update_tasks:
         list_concat:
         - {get_attr: [NovaComputeAvrsDockerBase, role_data, update_tasks]}
@@ -403,5 +352,4 @@ outputs:
                   state: absent
               when: virtual_accelerator_base_update_file.stat.exists
             when: (step|int == 4)
-      fast_forward_upgrade_tasks:
-        get_attr: [NovaComputeAvrsDockerBase, role_data, fast_forward_upgrade_tasks]
+      fast_forward_upgrade_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, fast_forward_upgrade_tasks]}
