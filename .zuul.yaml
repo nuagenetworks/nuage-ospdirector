@@ -1,7 +1,16 @@
 - project:
     check:
       jobs:
-        - os-ospd-ansible-13-vrs
+        - ospd-dir-13-vrs
     gate:
       jobs:
-        - os-ospd-ansible-13-vrs
+        - ospd-dir-13-vrs
+
+- job:
+    name: ospd-dir-13-vrs
+    branches: .*
+    parent: os-ospd-ansible-13-vrs
+    description: |
+      Integrated gate job for OSPD 13 using a virtual undercloud and overcloud.
+    nodeset: openstack-single-node-rhel7
+    irrelevant-files: (.+\.rst)|(.+\.md)
