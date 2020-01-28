@@ -28,6 +28,7 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
     a. For any combination of VRS and SRIOV deployments, please use deployment type as "vrs"   
     b. For any combination of AVRS, VRS and SRIOV deployments, please use deployment type as "avrs"   
     c. For OVRS deployments, please use deployment type as "ovrs"   
+    d. For any combination of AVRS, OVRS, VRS and SRIOV, please use deployment type as ["avrs", "ovrs"]
   * RhelUserName(optional) is the user name for the RedHat Enterprise Linux subscription.
   * RhelPassword(optional) is the password for the RedHat Enterprise Linux subscription
   * RhelPool(optional) is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
