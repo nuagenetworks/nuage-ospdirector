@@ -23,6 +23,7 @@ openstack overcloud roles generate --roles-path ../../roles -o ../../roles/Compu
 sed -i -e 's/ Compute/ ComputeAvrs/g' ../../roles/ComputeAvrs.yaml
 sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-computeavrs-%index%'/g" ../../roles/ComputeAvrs.yaml
 sed -i -e 's/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g'   ../../roles/ComputeAvrs.yaml
+sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/ComputeAvrs.yaml
 
 FILE=../../roles/ComputeAvrs.yaml
 if [ -f "$FILE" ]; then

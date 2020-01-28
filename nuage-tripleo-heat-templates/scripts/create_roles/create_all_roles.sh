@@ -23,6 +23,7 @@ openstack overcloud roles generate --roles-path ../../roles -o ../../roles/Compu
 sed -i -e 's/ Compute/ ComputeAvrs/g' ../../roles/ComputeAvrs.yaml
 sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-computeavrs-%index%'/g" ../../roles/ComputeAvrs.yaml
 sed -i -e 's/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g'   ../../roles/ComputeAvrs.yaml
+sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/ComputeAvrs.yaml
 
 FILE=../../roles/ComputeAvrs.yaml
 if [ -f "$FILE" ]; then
@@ -45,6 +46,7 @@ for role in "${roles[@]}"; do
     sed -i -e "s/ Compute/ ${role}/g" ../../roles/${role}.yaml
     sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-${role,,}-%index%'/g" ../../roles/${role}.yaml
     sed -i -e "s/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g"   ../../roles/${role}.yaml
+    sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/${role}.yaml
     FILE=../../roles/${role}.yaml
     if [ -f "$FILE" ]; then
         echo "$FILE has been created"
@@ -64,6 +66,7 @@ openstack overcloud roles generate --roles-path ../../roles -o ../../roles/Compu
 sed -i -e 's/ ComputeSriov/ ComputeOvrs/g' ../../roles/ComputeOvrs.yaml
 sed -i -e 's/ Compute SR-IOV/ ComputeOvrs/g' ../../roles/ComputeOvrs.yaml
 sed -i -e "s/HostnameFormatDefault: '%stackname%-computesriov-%index%'/HostnameFormatDefault: '%stackname%-computeovrs-%index%'/g" ../../roles/ComputeOvrs.yaml
+sed -i -e '/- OS::TripleO::Services::ComputeNeutronCorePlugin/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::NeutronSriovHostConfig/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::NeutronSriovAgent/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::Ntp/a \    - OS::TripleO::Services::NuageComputeOvrs'    ../../roles/ComputeOvrs.yaml
