@@ -159,10 +159,19 @@ outputs:
               msg: "No NuageGpgKeys Environment variable is set for this deployment"
             when:
               - nuage_gpg_keys == []
+          - name: Install python openvswitch nuage
+            yum:
+              name: python-openvswitch-nuage
+              state: present
+          - name: Get upstream openvswitch name
+            register: ovs_pkg_name
+            shell:
+              rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
           - name: Remove upstream openvswitch
             yum:
-              name: openvswitch
+              name: "{{ ovs_pkg_name.stdout }}"
               state: absent
+            when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
           - name: Installing nuage packages dependencies and base packages
             yum:
               name: "{{ packages }}"
@@ -174,7 +183,6 @@ outputs:
                 - selinux-policy-nuage
                 - nuage-puppet-modules
                 - nuage-bgp
-                - python-openvswitch-nuage
           when: nuage_base_check != 0
       update_tasks:
         - block:

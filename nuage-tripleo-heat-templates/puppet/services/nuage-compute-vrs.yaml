@@ -46,7 +46,8 @@ outputs:
   role_data:
     description: Role data for the Nuage Compute VRS
     value:
-      service_name: nuage_compute_vrs
+      service_name:
+        get_attr: [NeutronComputePluginNuage, role_data, service_name]
       config_settings:
         get_attr: [NeutronComputePluginNuage, role_data, config_settings]
       step_config:

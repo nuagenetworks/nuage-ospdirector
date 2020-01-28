@@ -141,6 +141,7 @@ resources:
     properties:
       EnableInstanceHA: {get_param: EnableInstanceHA}
       DockerNovaComputeImage: {get_param: DockerNovaComputeAvrsImage}
+      DockerNovaLibvirtConfigImage: {get_param: DockerNovaLibvirtAvrsConfigImage}
       EndpointMap: {get_param: EndpointMap}
       ServiceData: {get_param: ServiceData}
       ServiceNetMap: {get_param: ServiceNetMap}
