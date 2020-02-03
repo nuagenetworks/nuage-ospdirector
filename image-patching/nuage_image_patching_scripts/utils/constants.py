@@ -10,6 +10,9 @@ KERNEL_PACKAGES = "kernel kernel-tools kernel-tools-libs python-perf"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"
 VIRT_CUSTOMIZE_ENV = "export LIBGUESTFS_BACKEND=direct;"
 SCRIPT_NAME = 'patching_script.sh'
-GPGKEYS_PATH = '/tmp/'
+TEMPORARY_PATH = '/tmp/'
 LOG_FILE_NAME='nuage_image_patching.log'
 VALID_DEPLOYMENT_TYPES=['vrs', 'avrs', 'ovrs']
+RHEL_SUB_PORTAL = "portal"
+RHEL_SUB_SATELLITE = "satellite"
+RHEL_SUB_DISABLED = "disabled"

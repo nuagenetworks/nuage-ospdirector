@@ -31,15 +31,24 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
   * RhelUserName(optional) is the user name for the RedHat Enterprise Linux subscription.
   * RhelPassword(optional) is the password for the RedHat Enterprise Linux subscription
   * RhelPool(optional) is the RedHat Enterprise Linux pool to which the base packages are subscribed. instructions to get this can be found [here](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud) in the 2nd point.
+  * RhelSatUrl(optional) is the url for the RedHat Satellite server.
+  * RhelSatOrg(optional) is the organisation for the RedHat Satellite server.
+  * RhelSatActKey(optional) is the activation key for the RedHat Satellite server. 
+  
+        Note: 
+            If nuage packages are available using the activation key parameter RepoFile becomes optional.
+
   * RpmPublicKey(optional) is where you pass all the file path of the GPG key that you wish to add to your overcloud images before deploying the following packages.
 
         Note:
             Any Nuage package signing keys are delivered with other Nuage artifacts.  See "nuage-package-signing-keys-*.tar.gz".
             Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py" patching script directory.
-  * RepoFile(required) is the name of the repository hosting the RPMs required for patching.
-
-        Note:
+  * RepoFile(required,optional for RedHat Satellite) is the name of the repository hosting the RPMs required for patching.
+   
+        Note (1): 
            Make sure to place repo file in the same folder as "nuage_overcloud_full_patch.py" patching script directory.
+        Note (2):  
+            If nuage packages are available using the activation key of a RedHat Satellite server, "RepoFile" becomes optional.
 
     **we are providing RepoFile exmaple `nuage_6.0_ospd13.repo.sample`**
 
@@ -234,6 +243,64 @@ This script takes in `nuage_patching_config.yaml` as input parameters:  Please c
         logFileName: "nuage_image_patching.log"
 
     c. Run: python nuage_overcloud_full_patch.py --nuage-config nuage_patching_config.yaml
+
+###### 3. Red Hat Satellite Deployment
+
+3.1 Using local repos for nuage packages and Red Hat Satellite for dependent packages:
+
+    a. The Red Hat Satellite activation key is configured 
+        with Red Hat OpenStack Platform subscription enabled
+
+    b. I have configured four different repos like following in my nuage_ospd13.repo:
+        
+        [nuage]
+        name=nuage_osp13_6.0_nuage
+        baseurl=http://1.2.3.4/nuage_osp13_6.0.3/nuage_repo
+        enabled=1
+        gpgcheck=1
+
+        [extra]
+        name=satellite
+        baseurl=http://1.2.3.4/extra_repo
+        enabled=1
+        gpgcheck=1
+    
+    c. Configure nuage_patching_config.yaml like:
+
+        ImageName: "overcloud-full.qcow2"
+        NuageMajorVersion: "6.0"
+        DeploymentType: ["ovrs"]
+        RhelSatUrl: 'https://satellite.example.com'
+        RhelSatOrg: 'example_organization'
+        RhelSatActKey: 'example_key'
+        RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
+        RepoFile: './nuage_ospd13.repo'
+        VRSRepoNames: ['nuage_vrs']
+        logFileName: "nuage_image_patching.log"
+    
+    d. Run: python nuage_overcloud_full_patch.py --nuage-config nuage_patching_config.yaml
+
+3.2 Using Red Hat Satellite for nuage packages and dependent packages:
+
+    a. The Red Hat Satellite activation key is configured 
+        - with Red Hat OpenStack Platform subscription enabled
+        - with a Nuage product containing the nuage packages
+          and the Nuage product subscription enabled
+
+    c. Configure nuage_patching_config.yaml like:
+
+        ImageName: "overcloud-full.qcow2"
+        NuageMajorVersion: "6.0"
+        DeploymentType: ["ovrs"]
+        RhelSatUrl: 'https://satellite.example.com'
+        RhelSatOrg: 'example_organization'
+        RhelSatActKey: 'example_key'
+        RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
+        logFileName: "nuage_image_patching.log"
+    
+    d. Run: python nuage_overcloud_full_patch.py --nuage-config nuage_patching_config.yaml
+
+
 
 
 If image patching fails for some reason then remove the partially patched overcloud-full.qcow2 and create a copy of it from backup image before retrying image patching again.

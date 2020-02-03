@@ -33,6 +33,21 @@ RhelPassword: ''
 # optional
 RhelPool: ''
 
+# URL for RHEL Satellite Server
+# type: string
+# optional
+RhelSatUrl: ''
+
+# Organization for RHEL Satellite Subscription
+# type: string
+# optional
+RhelSatOrg: ''
+
+# Activation key for RHEL Satellite Subscription
+# type: string
+# optional
+RhelSatActKey: ''
+
 # RPM GPG Key
 # type: list
 # optional

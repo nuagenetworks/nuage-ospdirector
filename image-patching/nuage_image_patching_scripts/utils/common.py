@@ -126,10 +126,10 @@ def importing_gpgkeys(image, gpgkeys):
         file_name = os.path.basename(gpgkey)
         if file_exist:
             virt_copy('%s %s %s' % (image, gpgkey,
-                                    constants.GPGKEYS_PATH))
+                                    constants.TEMPORARY_PATH))
             rpm_import = '''
 rpm --import %s%s
-''' % (constants.GPGKEYS_PATH, file_name)
+''' % (constants.TEMPORARY_PATH, file_name)
             write_to_file(constants.SCRIPT_NAME, rpm_import)
 
         else:
@@ -164,26 +164,45 @@ def copy_repo_file(image, repofile):
 #####
 
 
-def rhel_subscription(username,
-                      password,
-                      pool,
-                      proxy_hostname=None,
-                      proxy_port=None):
+def rhel_subscription(username, password, pool, satellite_url, satellite_org,
+                      satellite_key, proxy_hostname, proxy_port,
+                      rhel_sub_type):
     subscription_command = ''
-    if proxy_hostname is not None:
-        subscription_command = "subscription-manager config " \
-                               "--server.proxy_hostname=%s  " \
-                               "--server.proxy_port=%s\n" % (
-                                proxy_hostname, proxy_port)
-
-    enable_pool = '''
-subscription-manager register --username='%s' --password='%s'
-subscription-manager attach --pool='%s'
-subscription-manager repos --enable=rhel-7-server-optional-rpms
-subscription-manager repos --enable=rhel-7-server-rpms
-''' % (username, password, pool)
-    cmds = subscription_command + enable_pool
-    write_to_file(constants.SCRIPT_NAME, cmds)
+    if proxy_hostname and proxy_port:
+        subscription_command += (
+                "subscription-manager config"
+                " --server.proxy_hostname=%s "
+                " --server.proxy_port=%s\n"
+                % (proxy_hostname, proxy_port)
+        )
+    # this does not allow multiple runs of the patching script
+    if rhel_sub_type == constants.RHEL_SUB_SATELLITE:
+        subscription_command += (
+            "hostname nuage-patching\n"
+            "sudo curl -k %(0)s/pub/katello-ca-consumer-latest.noarch.rpm -o "
+            "%(1)skatello-ca-consumer-latest.noarch.rpm\n"
+            "sudo rpm -Uvh %(1)skatello-ca-consumer-latest.noarch.rpm\n"
+            "rm -rf %(1)skatello-ca-consumer-latest.noarch.rpm\n"
+            % {'0': satellite_url, '1': constants.TEMPORARY_PATH}
+        )
+        subscription_command += (
+            "subscription-manager register"
+            " --org='%s' --activationkey='%s'\n" %
+            (satellite_org, satellite_key)
+        )
+    else:
+        subscription_command += (
+            "subscription-manager register"
+            " --username='%s' --password='%s'\n" % (username, password)
+        )
+        subscription_command += (
+            "subscription-manager attach --pool='%s'\n" % pool
+        )
+    subscription_command += (
+        "subscription-manager repos --enable=rhel-7-server-optional-rpms\n"
+        "subscription-manager repos --enable=rhel-7-server-rpms\n"
+    )
+    write_to_file(constants.SCRIPT_NAME, subscription_command)
 
 
 #####
@@ -191,11 +210,17 @@ subscription-manager repos --enable=rhel-7-server-rpms
 #####
 
 
-def rhel_remove_subscription():
+def rhel_remove_subscription(rhel_sub_type=None):
     cmd = '''
 #### Removing RHEL Subscription
 subscription-manager unregister
 '''
+    if rhel_sub_type == constants.RHEL_SUB_SATELLITE:
+        cmd += (
+            "rpm -qa"
+            "| grep katello-ca-consumer"
+            "| xargs sudo rpm -e"
+        )
     write_to_file(constants.SCRIPT_NAME, cmd)
 
 #####

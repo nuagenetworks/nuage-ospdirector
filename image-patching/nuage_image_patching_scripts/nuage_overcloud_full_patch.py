@@ -27,21 +27,24 @@ This script takes in following input parameters:
  RhelUserName      : User name for the RHEL subscription
  RhelPassword      : Password for the RHEL subscription
  RhelPool          : RHEL Pool to subscribe
+ RhelSatUrl        : RHEL Satellite url
+ RhelSatOrg        : RHEL Satellite organisation
+ RhelSatActKey     : RHEL Satellite activation key
  RepoFile          : Name for the file repo hosting the Nuage RPMs
  DeploymentType    : ["ovrs"] --> OVRS deployment
                      ["avrs"] --> AVRS + VRS deployment
                      ["vrs"]  --> VRS deployment
- VRSRepoNames      : Name for the repo hosting the Nuage O/VRS RPMs 
+ VRSRepoNames      : Name for the repo hosting the Nuage O/VRS RPMs
  AVRSRepoNames     : Name for the repo hosting the Nuage AVRS RPMs
  OvrsRepoNames : Name for the repo hosting the Mellanox RPMs
  KernelRepoNames   : Name for the repo hosting the Kernel RPMs
- RpmPublicKey      : RPM GPG Key 
+ RpmPublicKey      : RPM GPG Key
  logFile           : Log file name
 The following sequence is executed by the script
  1. Subscribe to RHEL and the pool
  2. Uninstall OVS
  3. Download AVRS packages to the image if AVRS is enabled
- 4. Install NeutronClient, Nuage-BGP, Selinux Policy Nuage, 
+ 4. Install NeutronClient, Nuage-BGP, Selinux Policy Nuage,
     Nuage Puppet Module, Redhat HF and Mellanox packages.
  5. Install O/VRS, Nuage Metadata Agent
  6. Unsubscribe from RHEL
@@ -54,6 +57,8 @@ formatter = logging.Formatter(
 consoleHandler = logging.StreamHandler(sys.stdout)
 consoleHandler.setFormatter(formatter)
 logger.addHandler(consoleHandler)
+rhel_subs_type = ''
+
 
 #####
 # Decorator function to enable and disable repos for
@@ -234,7 +239,39 @@ def check_deployment_type(nuage_config):
         sys.exit(1)
 
 
+def check_rhel_subscription_type(nuage_config):
+    """
+    Check which type of red hat subscription to use
+    """
+    key_set_satellite = ["RhelSatUrl", "RhelSatOrg", "RhelSatActKey"]
+    key_set_portal = ["RhelPassword", "RhelUserName", "RhelPool"]
+
+    if all(nuage_config.get(key) for key in
+            key_set_satellite):  # RH satellite
+        if nuage_config["NuageMajorVersion"] == "5.0":
+            logger.error(
+                'Red Hat subscription with Red Hat Satellite Server is not supported in 5.x')
+            sys.exit(1)
+        else:
+            return constants.RHEL_SUB_SATELLITE
+    elif all(nuage_config.get(key) for key in
+             key_set_portal):  # RH portal
+        return constants.RHEL_SUB_PORTAL
+    elif all(not nuage_config.get(key) for key in
+             key_set_portal + key_set_satellite):  # RH disabled
+        return constants.RHEL_SUB_DISABLED
+    else:  # RH incomplete configuration
+        logger.error(
+            'INCOMPLETE Red Hat subscription configuration detected: \n'
+            '   - For Red Hat Portal please specify: '
+            '[RhelPassword, RhelUserName, RhelPool] \n'
+            '   - For Red Hat Satellite please specify: '
+            '[RhelUrl, RhelSatOrg, RhelSatActKey]')
+        sys.exit(1)
+
+
 def check_config(nuage_config):
+    global rhel_subs_type
     logger.info("Verifying pre-requisite packages for script")
     libguestfs = cmds_run(['rpm -q libguestfs-tools-c'])
     if 'not installed' in libguestfs:
@@ -242,27 +279,35 @@ def check_config(nuage_config):
                     "for the script to run")
         sys.exit(1)
 
+    rhel_subs_type = check_rhel_subscription_type(nuage_config)
+
     if not nuage_config["NuageMajorVersion"] in ["5.0", "6.0"]:
         logger.error("NuageMajorVersion %s is not valid"
                      "Available options are either '5.0 or '6.0' "
                      % nuage_config["NuageMajorVersion"])
         sys.exit(1)
-    missing_config = []
-    for key in ["ImageName", "RepoFile"]:
-        if not (nuage_config.get(key)):
-            missing_config.append(key)
-    if missing_config:
+
+    if not nuage_config.get("ImageName"):
         logger.error("Please provide missing config %s value "
-                     "in your config file. \n" % missing_config)
+                     "in your config file. \n" % "ImageName")
         sys.exit(1)
+
+    if not nuage_config.get(
+            "RepoFile") and not rhel_subs_type == constants.RHEL_SUB_SATELLITE:
+        logger.error("Please provide missing config %s value "
+                     "in your config file. \n" % "RepoFile")
+        sys.exit(1)
+
     file_exists(nuage_config["ImageName"])
 
     check_deployment_type(nuage_config)
+
     if nuage_config["NuageMajorVersion"] == "5.0":
         check_reponames(nuage_config)
         constants.NUAGE_AVRS_PACKAGE = "nuage-openvswitch"
         constants.MLNX_OFED_PACKAGES = "kmod-mlnx-en mlnx-en-utils " \
                                        "mstflint os-net-config"
+
 
 ####
 # Image Patching
@@ -270,7 +315,7 @@ def check_config(nuage_config):
 
 
 def image_patching(nuage_config):
-
+    global rhel_subs_type
     start_script()
 
     if nuage_config.get("RpmPublicKey"):
@@ -278,26 +323,27 @@ def image_patching(nuage_config):
         importing_gpgkeys(nuage_config["ImageName"],
                           nuage_config["RpmPublicKey"])
 
-    if nuage_config.get("RhelUserName") and nuage_config.get(
-            "RhelPassword") and nuage_config.get("RhelPool"):
-        if nuage_config.get("ProxyHostname") and \
-                nuage_config.get("ProxyPort"):
-            rhel_subscription(
-                nuage_config["RhelUserName"],
-                nuage_config["RhelPassword"],
-                nuage_config["RhelPool"],
-                nuage_config["ProxyHostname"],
-                nuage_config["ProxyPort"])
-        else:
-            rhel_subscription(
-                nuage_config["RhelUserName"],
-                nuage_config["RhelPassword"],
-                nuage_config["RhelPool"])
+    if (rhel_subs_type == constants.RHEL_SUB_PORTAL
+            or rhel_subs_type == constants.RHEL_SUB_SATELLITE):
+        rhel_subscription(username=nuage_config.get("RhelUserName"),
+                          password=nuage_config.get("RhelPassword"),
+                          pool=nuage_config.get("RhelPool"),
+                          satellite_url=nuage_config.get("RhelSatUrl"),
+                          satellite_org=nuage_config.get("RhelSatOrg"),
+                          satellite_key=nuage_config.get("RhelSatActKey"),
+                          proxy_hostname=nuage_config.get("ProxyHostname"),
+                          proxy_port=nuage_config.get("ProxyPort"),
+                          rhel_sub_type=rhel_subs_type)
     install_nuage_python_ovs_packages()
     uninstall_packages()
 
-    logger.info("Copying RepoFile to the overcloud image")
-    copy_repo_file(nuage_config["ImageName"], nuage_config["RepoFile"])
+    if nuage_config.get("RepoFile"):
+        # If: RH satellite
+        #   - Add nuage packages to the RH satellite
+        #   - Use RepoFile for nuage packages, RH satellite for RH packages
+        # Else: check_config checks if file is missing
+        logger.info("Copying RepoFile to the overcloud image")
+        copy_repo_file(nuage_config["ImageName"], nuage_config["RepoFile"])
 
     if nuage_config['KernelHF']:
         update_kernel(nuage_config["NuageMajorVersion"], nuage_config[
@@ -316,9 +362,9 @@ def image_patching(nuage_config):
     install_nuage_packages(nuage_config["NuageMajorVersion"],
                            nuage_config["VRSRepoNames"])
 
-    if nuage_config.get("RhelUserName") and nuage_config.get(
-            "RhelPassword") and nuage_config.get("RhelPool"):
-        rhel_remove_subscription()
+    if (rhel_subs_type == constants.RHEL_SUB_PORTAL
+            or rhel_subs_type == constants.RHEL_SUB_SATELLITE):
+        rhel_remove_subscription(rhel_sub_type=rhel_subs_type)
 
     logger.info("Running the patching script on Overcloud image")
 

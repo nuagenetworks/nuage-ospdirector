@@ -28,12 +28,12 @@ Below is the documentation directory structure to follow.
 
 
    * For OSP Director 13 with + Nuage release 6.0.1: [Documentation/6.0.1/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/6.0.1/README.rst)
-    
+
    * For OSP Director 13 with + Nuage release 6.0.2: [Documentation/6.0.2/README.rst](https://github.com/nuagenetworks/nuage-ospdirector/blob/osp-13.541U6.1/Documentation/6.0.2/README.rst)
 
- 
+
 **IMPORTANT NOTE**:
-If you are a git user please follow the following command to clone specific nuage release instead of downloading **tar.gz**. For exmaple:
+If you are a git user please follow the following command to clone a specific nuage release instead of downloading **tar.gz**. For example:
 
 Nuage release: 5.4.1U6
 
