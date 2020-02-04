@@ -13,4 +13,4 @@
     description: |
       Integrated gate job for OSPD 13 using a virtual undercloud and overcloud.
     nodeset: openstack-single-node-rhel7
-    irrelevant-files: (.+\.rst)|(.+\.md)
+    irrelevant-files: (.+\.rst)|(.+\.md)|(.+\.cfg)|(.+\.spec)|(.+setup\.py)|(.+LICENSE)
