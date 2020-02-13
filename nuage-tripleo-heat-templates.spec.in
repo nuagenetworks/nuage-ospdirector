@@ -1,0 +1,42 @@
+Name:           nuage-tripleo-heat-templates
+Summary:        Heat templates for Nuage integration with TripleO
+# version will be edited by jenkins build script
+Version:        @VERSION@
+Release:        %{release}%{dist}
+License:        ASL 2.0
+Group:          System Environment/Base
+URL:            https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/README.md
+Source:         nuage-tripleo-heat-templates.tar.gz
+
+BuildArch:      noarch
+BuildRequires:  python2-devel
+BuildRequires:  python-setuptools
+
+Requires:       PyYAML
+Requires:       openstack-tripleo-heat-templates
+
+%description
+Nuage OpenStack TripleO Heat Templates is a collection of templates and tools for
+building Heat Templates to do deployments of OpenStack with Nuage integration.
+
+%prep
+%setup -q -n nuage-tripleo-heat-templates
+
+%install
+install -d -m 755 %{buildroot}/%{_datadir}/%{name}
+cp -ar docker %{buildroot}/%{_datadir}/%{name}
+cp -ar environments %{buildroot}/%{_datadir}/%{name}
+cp -ar firstboot %{buildroot}/%{_datadir}/%{name}
+cp -ar network %{buildroot}/%{_datadir}/%{name}
+cp -ar puppet %{buildroot}/%{_datadir}/%{name}
+cp -ar roles %{buildroot}/%{_datadir}/%{name}
+cp -ar scripts %{buildroot}/%{_datadir}/%{name}
+cp -ar templates %{buildroot}/%{_datadir}/%{name}
+cp -ar LICENSE %{buildroot}/%{_datadir}/%{name}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%doc LICENSE
+%{_datadir}/%{name}
