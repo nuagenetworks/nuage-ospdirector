@@ -178,12 +178,12 @@ yum clean all
 
 
 def check_reponames(nuage_config):
-    if "vrs" in nuage_config["DeploymentType"]:
+    if nuage_config["DeploymentType"] == ["vrs"]:
         if not nuage_config.get("VRSRepoNames"):
-            logger.error("Please provide AVRSRepoNames "
-                         "for AVRS deployment")
+            logger.error("Please provide VRSRepoNames "
+                         "for VRS deployment")
             sys.exit(1)
-    elif "avrs" in nuage_config["DeploymentType"]:
+    elif nuage_config["DeploymentType"] == ["avrs"]:
         if not nuage_config.get("VRSRepoNames"):
             logger.error("Please provide VRSRepoNames "
                          "for AVRS deployment")
@@ -192,16 +192,16 @@ def check_reponames(nuage_config):
             logger.error("Please provide AVRSRepoNames "
                          "for AVRS deployment")
             sys.exit(1)
-    elif "ovrs" in nuage_config["DeploymentType"]:
+    elif nuage_config["DeploymentType"] == ["ovrs"]:
         if not nuage_config.get("OvrsRepoNames"):
             logger.error(
                 "Please provide OvrsRepoNames for OVRS deployment")
             sys.exit(1)
     else:
         logger.error("DeploymentType config option %s is not correct "
-                     "or supported "
-                     " Please enter:\n ['vrs'] --> for VRS "
-                     "deployment\n "
+                     "or supported \n"
+                     " Please enter one of the following:\n "
+                     "['vrs'] --> for VRS deployment\n "
                      "['avrs'] --> for AVRS + VRS deployment\n "
                      "['ovrs'] --> for OVRS deployment"
                      % nuage_config["DeploymentType"])
