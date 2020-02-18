@@ -1,5 +1,5 @@
 container_images:
 {%- for image in nuage_config.nuage_images %}
-- imagename: registry.connect.redhat.com/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-{{ image }}-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+- imagename: {{ nuage_config['registry_url'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-{{ image }}-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
   push_destination: {{ nuage_config['local_registry'] }}
 {%- endfor %}

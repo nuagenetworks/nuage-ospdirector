@@ -1,5 +1,8 @@
 # OpenStack version number
 version: 13
+# Registry used for pulling Nuage container images
+# Currently supported values are [registry.connect.redhat.com]
+registry_url: registry.connect.redhat.com
 # Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
 # for exmaple: Nuage release 6.0.5 please enter following
 release: 6-0-5
