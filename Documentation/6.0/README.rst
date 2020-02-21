@@ -133,14 +133,17 @@ Phase 2: Download Nuage Source Code
 
 In this phase:
 
-* Get the Nuage Tripleo Heat Templates, image patching files, and the other additional scripts at https://github.com/nuagenetworks/nuage-ospdirector/releases
-* Download the **Source code (tar.gz or zip)** for your release and extract it to your Undercloud in the `/home/stack` directory.
-* Rename `nuage-ospdirector-osp-13.<release>` to `nuage-ospdirector`.
-* Create a symbolic link of nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector/nuage-tripleo-heat-templates to `/home/stack/` directory on the Undercloud.
+.. .. * Get the Nuage Tripleo Heat Templates, image patching files, and the other additional scripts at https://github.com/nuagenetworks/nuage-ospdirector/releases
+.. .. * Download the **Source code (tar.gz or zip)** for your release and extract it to your Undercloud in the `/home/stack` directory.
+.. .. * Rename `nuage-ospdirector-osp-13.<release>` to `nuage-ospdirector`.
+.. ..* Create a symbolic link of nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector/nuage-tripleo-heat-templates to `/home/stack/` directory on the Undercloud.
+
+* Get the Nuage Tripleo Heat Templates, image patching files, and the other additional scripts by running below commands on undercloud director
 
 ::
 
     cd /home/stack
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.605.beta1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
