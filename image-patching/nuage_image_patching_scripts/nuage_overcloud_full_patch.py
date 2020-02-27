@@ -151,8 +151,6 @@ kernel-devel-$(awk 'END{print}' /kernel-version) python-pyelftools* \
 dkms* 6windgate* %s nuage-metadata-agent virtual-accelerator*
 yum install --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
-yum install --setopt=skip_missing_names_on_install=False \
---downloadonly --downloaddir=/6wind 6wind-openstack-extensions
 rm -rf /kernel-version
 yum clean all
 ''' % constants.NUAGE_AVRS_PACKAGE
@@ -396,6 +394,12 @@ def main():
                 'Please fix and try again with correct yaml file.'
                 .format(filename=args.nuage_config, exc=exc))
             sys.exit(1)
+
+    if nuage_config.get("logFileName"):
+        handler = logging.FileHandler(nuage_config["logFileName"])
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
     logger.info("nuage_overcloud_full_patch.py was "
                 "run with following config options %s " % nuage_config)
     check_config(nuage_config)
