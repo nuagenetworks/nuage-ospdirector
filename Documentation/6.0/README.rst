@@ -96,15 +96,19 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
 .. .. In this part of the workflow, you install the required Nuage packages, and run the script to patch the the overcloud-full.qcow2 image.
 
-* Phase 4.4: Create the Dataplane Roles and Update the Node Profiles
+* Phase 4.4: No Patching Approach
 
 .. .. <overview>
 
-* Phase 4.5: Generate a CMS ID for the OpenStack Deployment
+* Phase 4.5: Create the Dataplane Roles and Update the Node Profiles
 
 .. .. <overview>
 
-* Phase 4.6: Customize the Environment Files
+* Phase 4.6: Generate a CMS ID for the OpenStack Deployment
+
+.. .. <overview>
+
+* Phase 4.7: Customize the Environment Files
 
 .. ..  Nuage provides Heat templates and environment files to configure Neutron on the Controller and nuage-openvswitch and nuage-metadata-agent on Compute nodes. Nuage also provides Heat templates and environment files to configure Virtual-Accelerator on ComputeAvrs nodes for AVRS Integration.
 .. ..  In this part of the workflow, the configuration files are populated with the required parameters using the Heat templates. The parameters to set and the Sample Environment Files to use are specified in the workflow.
@@ -344,12 +348,36 @@ For Nuage VSP integrations, download all the required components and create a yu
 Phase 4.3: Modify the Overcloud Image
 ++++++++++++++++++++++++++++++++++++++++
 
+.. Note:: For users who have Red Hat Satellite Server access, Nuage Integration has support for No Patching. Users who are interested can skip this phase and follow instructions from phase 4.4
+
 In this phase, you modify the overcloud-full.qcow2 image with the required Nuage packages.
 
 The steps for modifying the Overcloud qcow image (overcloud-full.qcow2) are in the `README.md <../../image-patching/README_6.0.md>`_  file.
 
 
-Phase 4.4: Create the Dataplane Roles and Update the Node Profiles
+Phase 4.4: No Patching Approach
++++++++++++++++++++++++++++++++
+
+The No Patching feature will install all the required nuage packages on overcloud nodes during the overcloud deployment, instead of patching the overcloud image.
+
+Follow the below instructions:
+
+1. This feature requires:
+
+    A. Red Hat Satellite Server with an activation_key that has both redhat and nuage repos enabled by default.
+    B. Http(s) server hosting required Nuage GPGKeys.
+
+2. Set NuageGpgKeys to the location where Nuage GPGKeys are hosted inside nuage-tripleo-heat-temaplates/environment/nova-nuage-config.yaml
+
+    ::
+
+        For example: If you have Nuage GPGKeys Nuage-RPM-GPG-Key1 Nuage-RPM-GPG-Key2 hosted in 1.2.3.4 http server, then set NuageGpgKeys as shown below
+        NuageGpgKeys: ['http://1.2.3.4/Nuage-RPM-GPG-Key1', 'http://1.2.3.4/Nuage-RPM-GPG-Key2']
+
+ 3. Follow the instructions from Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/advanced_overcloud_customization/sect-registering_the_overcloud#example_2_registering_to_a_red_hat_satellite_6_server>`_
+
+
+Phase 4.5: Create the Dataplane Roles and Update the Node Profiles
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you add the Nuage Heat templates and dataplane roles for the Nuage integration. A role is a personality assigned to a node, where a specific set of operations is allowed.
@@ -435,7 +463,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 .. Note:: It is not mandatory to provide node info for all the roles shown in the example. You can specify the node information only for the required roles.
 
 
-Phase 4.5: Generate a CMS ID for the OpenStack Deployment
+Phase 4.6: Generate a CMS ID for the OpenStack Deployment
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The Cloud Management System (CMS) ID is used to identify a specific Compute or Controller node.
@@ -449,7 +477,7 @@ In this phase, you generate the CMS ID used to configure your OpenStack deployme
 2. Add the CMS ID to the /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml template file for the ``NeutronNuageCMSId`` parameter.
 
 
-Phase 4.6: Customize the Environment Files
+Phase 4.7: Customize the Environment Files
 +++++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you create and customize environment files and assign roles (profiles) to the Compute and Controller nodes.

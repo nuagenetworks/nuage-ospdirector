@@ -2,7 +2,6 @@ heat_template_version: queens
 
 description: >
   OpenStack Neutron Compute Nuage plugin
-
 parameters:
   ServiceData:
     default: {}
@@ -86,6 +85,10 @@ parameters:
     type: json
     tags:
       - role_specific
+  NuageGpgKeys:
+    type: comma_delimited_list
+    default: []
+    description: Nuage GPG keys
 
 resources:
 
@@ -133,6 +136,53 @@ outputs:
                 dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
+      host_prep_tasks:
+        - name: Check if nuage base packages are installed or not
+          shell: rpm -q selinux-policy-nuage nuage-puppet-modules nuage-bgp python-openvswitch-nuage
+          failed_when: false
+          register: nuage_base_check
+        - name : Installing nuage base packages
+          block:
+          - name: set nuage_gpg_keys fact
+            set_fact:
+              nuage_gpg_keys: {get_param: NuageGpgKeys}
+          - name: Adding nuage_gpg_keys on overcloud node
+            rpm_key:
+              state: present
+              key: "{{ item }}"
+            with_items:
+              - "{{ nuage_gpg_keys }}"
+            when:
+              - nuage_gpg_keys != []
+          - debug:
+              msg: "No NuageGpgKeys Environment variable is set for this deployment"
+            when:
+              - nuage_gpg_keys == []
+          - name: Install python openvswitch nuage
+            yum:
+              name: python-openvswitch-nuage
+              state: present
+          - name: Get upstream openvswitch name
+            register: ovs_pkg_name
+            shell:
+              rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
+          - name: Remove upstream openvswitch
+            yum:
+              name: "{{ ovs_pkg_name.stdout }}"
+              state: absent
+            when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
+          - name: Installing nuage packages dependencies and base packages
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - perl-JSON
+                - lldpad
+                - selinux-policy-nuage
+                - nuage-puppet-modules
+                - nuage-bgp
+          when: nuage_base_check != 0
       update_tasks:
         - block:
           - name: check if python-openvswitch-nuage is installed

@@ -25,6 +25,7 @@ for role in "${roles[@]}"; do
     sed -i -e "s/ Compute/ ${role}/g" ../../roles/${role}.yaml
     sed -i -e "s/HostnameFormatDefault: '%stackname%-compute-%index%'/HostnameFormatDefault: '%stackname%-${role,,}-%index%'/g" ../../roles/${role}.yaml
     sed -i -e "s/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g"   ../../roles/${role}.yaml
+    sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/${role}.yaml
     FILE=../../roles/${role}.yaml
     if [ -f "$FILE" ]; then
         echo "$FILE has been created"

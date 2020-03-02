@@ -23,6 +23,7 @@ openstack overcloud roles generate --roles-path ../../roles -o ../../roles/Compu
 sed -i -e 's/ ComputeSriov/ ComputeOvrs/g' ../../roles/ComputeOvrs.yaml
 sed -i -e 's/ Compute SR-IOV/ ComputeOvrs/g' ../../roles/ComputeOvrs.yaml
 sed -i -e "s/HostnameFormatDefault: '%stackname%-computesriov-%index%'/HostnameFormatDefault: '%stackname%-computeovrs-%index%'/g" ../../roles/ComputeOvrs.yaml
+sed -i -e '/- OS::TripleO::Services::ComputeNeutronCorePlugin/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::NeutronSriovHostConfig/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::NeutronSriovAgent/d'   ../../roles/ComputeOvrs.yaml
 sed -i -e '/- OS::TripleO::Services::Ntp/a \    - OS::TripleO::Services::NuageComputeOvrs'    ../../roles/ComputeOvrs.yaml

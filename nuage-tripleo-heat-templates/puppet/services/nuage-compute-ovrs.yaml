@@ -30,50 +30,77 @@ parameters:
                  via parameter_defaults in the resource registry.
     type: json
 
+resources:
+
+  NeutronComputePluginNuage:
+    type: neutron-compute-plugin-nuage.yaml
+    properties:
+      ServiceData: {get_param: ServiceData}
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      EndpointMap: {get_param: EndpointMap}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+
+
 outputs:
   role_data:
     description: Role data for ComputeOvrs nodes
     value:
-      service_name: nuage_compute_ovrs
+      service_name:
+        get_attr: [NeutronComputePluginNuage, role_data, service_name]
+      config_settings:
+        get_attr: [NeutronComputePluginNuage, role_data, config_settings]
+      step_config:
+        get_attr: [NeutronComputePluginNuage, role_data, step_config]
       host_prep_tasks:
-        - name: Check if nuage-openvswitch-ovrs is installed
-          shell: rpm -q nuage-openvswitch-ovrs
-          failed_when: false
-          register: nuage_ovrs_check
-        - name: Install nuage-openvswitch-ovrs
-          block:
-          - name: remove nuage-openvswitch
-            yum:
-              name: nuage-openvswitch
-              state: absent
-          - name: create ovrs repo
-            shell: createrepo /ovrs/.
-          - name: Setup repo
-            yum_repository:
-              name: nuage_ovrs
-              baseurl: file:///ovrs
-              enabled: yes
-              gpgcheck: yes
-              description: Nuage_Ovrs
-          - name: install nuage ovrs packages
-            yum:
-              name: "{{ packages }}"
-              state: present
-            vars:
-              packages:
-                - nuage-openvswitch-ovrs
-                - nuage-metadata-agent
-          - name: Restart nuage openvswitch
-            service:
-              name: openvswitch
-              state: restarted
-              enabled: yes
-          - name: cleanup repo
-            yum_repository:
-              name: nuage_ovrs
-              state: absent
-          - name: remove repodata
-            shell: rm -rf /ovrs/repodata
-          when: nuage_ovrs_check.rc != 0
+        list_concat:
+        - {get_attr: [NeutronComputePluginNuage, role_data, host_prep_tasks]}
+        - - name: Check if nuage-openvswitch-ovrs is installed
+            shell: rpm -q nuage-openvswitch-ovrs
+            failed_when: false
+            register: nuage_ovrs_check
+          - name: Install nuage-openvswitch-ovrs
+            block:
+            - name: remove nuage-openvswitch
+              yum:
+                name: nuage-openvswitch
+                state: absent
+            - name: Ansible check /ovrs/ exists
+              stat:
+                path: /ovrs/
+              register: ovrs_dir
+            - name: Enable ovrs repo on ovrs-compute node
+              block:
+              - name: create ovrs repo
+                shell: createrepo /ovrs/.
+              - name: Setup repo
+                yum_repository:
+                  name: nuage_ovrs
+                  baseurl: file:///ovrs
+                  enabled: yes
+                  gpgcheck: yes
+                  description: Nuage_Ovrs
+              when: ovrs_dir.stat.exists
+            - name: install nuage ovrs packages
+              yum:
+                name: "{{ packages }}"
+                state: present
+              vars:
+                packages:
+                  - nuage-openvswitch-ovrs
+                  - nuage-metadata-agent
+            - name: Restart nuage openvswitch
+              service:
+                name: openvswitch
+                state: restarted
+                enabled: yes
+            - name: cleanup repo
+              yum_repository:
+                name: nuage_ovrs
+                state: absent
+            - name: remove repodata
+              shell: rm -rf /ovrs/repodata
+            when: nuage_ovrs_check.rc != 0
       upgrade_tasks: {}
       update_tasks: {}

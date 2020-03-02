@@ -1,7 +1,7 @@
 # Heat environment file which can be used to enable
 # Nuage backend on the compute, configured via puppet
 resource_registry:
-  OS::TripleO::Services::ComputeNeutronCorePlugin: ../puppet/services/neutron-compute-plugin-nuage.yaml
+  OS::TripleO::Services::ComputeNeutronCorePlugin: ../puppet/services/nuage-compute-vrs.yaml
 
 parameter_defaults:
   NuageActiveController: '192.168.24.120'
@@ -17,3 +17,4 @@ parameter_defaults:
   # For example to set "NETWORK_UPLINK_INTF" see below sample:
   # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
   VrsExtraConfigs: {}
+  NuageGpgKeys: []
