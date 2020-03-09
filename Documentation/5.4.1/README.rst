@@ -730,8 +730,8 @@ Phase 8. Nuage Docker Containers
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for exmaple: Nuage release 5.4.1u4 please enter following
-    release: 5-4-1-u4
+    # for exmaple: Nuage release 5.4.1u9 please enter following
+    release: 5-4-1-u9
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
