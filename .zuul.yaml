@@ -1,16 +1,28 @@
 - project:
     check:
       jobs:
-        - ospd-dir-13-vrs
+        - nuage-ospd-deployment-13-vrs
+        - nuage-ospd-tempest-13-vrs
     gate:
       jobs:
-        - ospd-dir-13-vrs
+        - nuage-ospd-deployment-13-vrs
+        - nuage-ospd-tempest-13-vrs
 
 - job:
-    name: ospd-dir-13-vrs
+    name: nuage-ospd-deployment-13-vrs
     branches: .*
-    parent: os-ospd-ansible-13-vrs
+    parent: ospd-deployment-13-vrs
+    provides: nuage-ospd-deployment-13-vrs
     description: |
       Integrated gate job for OSPD 13 using a virtual undercloud and overcloud.
     nodeset: openstack-single-node-rhel7
     irrelevant-files: (.+\.rst)|(.+\.md)|(.+\.cfg)|(.+\.spec)|(.+setup\.py)|(.+LICENSE)|(.+PNG)|(.+png)|(.+JPEG)|(.+jpeg)
+
+- job:
+    name: nuage-ospd-tempest-13-vrs
+    parent: ospd-tempest-13-vrs
+    dependencies: nuage-ospd-deployment-13-vrs
+    requires: nuage-ospd-deployment-13-vrs
+    branches: .*
+    irrelevant-files: (.+\.rst)|(.+\.md)|(.+\.cfg)|(.+\.spec)|(.+setup\.py)|(.+LICENSE)|(.+PNG)|(.+png)|(.+JPEG)|(.+jpeg)
+
