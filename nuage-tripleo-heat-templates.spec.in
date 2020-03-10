@@ -8,7 +8,6 @@ Group:          System Environment/Base
 URL:            https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD13/README.md
 Source:         nuage-tripleo-heat-templates.tar.gz
 
-BuildArch:      noarch
 BuildRequires:  python2-devel
 BuildRequires:  python-setuptools
 
