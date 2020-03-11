@@ -223,6 +223,15 @@ outputs:
                 yum:
                   name: "6windgate*"
                   state: present
+              - name: Check if nuage-openvswitch (vrs) is installed
+                shell: rpm -q nuage-openvswitch
+                register: nuage_openvswitch_check
+                ignore_errors: True
+              - name: Uninstall nuage-openvswitch (vrs) if installed
+                yum:
+                  name: nuage-openvswitch
+                  state: absent
+                when: nuage_openvswitch_check.rc == 0
               - name: Check which 6wind package needs to get installed
                 shell: repoquery --all nuage-openvswitch-6wind
                 register: nuage_openvswitch_sixwind_output
