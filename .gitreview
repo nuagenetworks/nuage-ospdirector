@@ -1,0 +1,5 @@
+[gerrit]
+host=gerrit.an.nuagenetworks.net
+port=29418
+project=nuagenetworks/nuage-ospdirector.git
+defaultbranch=OSPD16
