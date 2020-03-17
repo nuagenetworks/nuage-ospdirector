@@ -163,6 +163,8 @@ outputs:
       kolla_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, kolla_config]}
       docker_config_scripts: {get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config_scripts]}
       docker_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]}
+      workflow_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, workflow_tasks]}
+      deploy_steps_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, deploy_steps_tasks]}
       host_prep_tasks:
         list_concat:
         - {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
