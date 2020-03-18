@@ -1,714 +1,214 @@
-.. _queens-80-ospd:
-
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
-.. NOTES do not render correctly in the GitHub Preview, BUT they do in the HTML output, so do not worry!
+========================================================================
+Integrating Nuage VSP 5.4 with Red Hat OpenStack Platform Director 13
+========================================================================
 
-
-.. .. Date, Version and Author
-.. .. ==========================
-.. ..
-.. ..  =========  =======    =========
-.. ..  Date       Version    Author
-.. ..  =========  =======    =========
-.. ..  11/03/19    5.4.1u7   Sai Ram/Sunny Verma
-
-
-====================================================================
-Deploying Queens Using OpenStack Platform Director 13
-====================================================================
-
-This section contains the following topics:
+This document has the following topics:
 
 .. contents::
    :local:
    :depth: 3
 
+This document describes how the Nuage VSP integrates with Red Hat OpenStack Platform Director (OSPD).
+The Nuage OpenStack plugins allow users to deploy flexible network configurations, including routers, subnets, and security groups along with other Nuage OpenStack extensions such as VSD-managed routers and subnets, which are shared between OpenStack and other cloud management systems.
+For more information about the Nuage OpenStack ML2 driver, see the "Nuage Neutron ML2 Driver Guide."
 
-OpenStack Platform Director
-------------------------------
-
-The Red Hat OpenStack Platform director is a toolset for installing and managing an OpenStack environment. It is based primarily on the OpenStack TripleO project. It uses an OpenStack deployment, referred to as the Undercloud, to deploy an OpenStack cluster, referred to as an Overcloud.
-
-The OpenStack Platform director (also referred to as OpenStack director) is an image-based installer. It uses a single image (for example, overcloud-full.qcow2) that is deployed on the Controller and Compute nodes belonging to the OpenStack cluster (Overcloud). This image contains all the packages needed during the deployment. The deployment creates only the configuration files and databases required by the different services and starts the services in the correct order. During a deployment, no new software is installed.
-
-For integration of OpenStack Platform director with the Nuage plugin, use the command-line based template option.
-
-OpenStack director uses Heat to orchestrate the deployment of an OpenStack environment. The actual deployment is done through Heat templates and Puppet. Users provide any custom input in templates using the ``openstack overcloud deploy`` command. When this command is run, all the templates are parsed to create the Hiera database, and then a set of puppet manifests, also referred to as TripleO Heat templates, are run to complete the deployment. The Puppet code in turn uses the Puppet modules developed to deploy different services of OpenStack (such as puppet-nova, puppet-neutron, and puppet-cinder).
-
-The OpenStack Platform director architecture allows partners to create custom templates. Partners create new templates to expose parameters specific to their modules.  These templates can then be passed through the ``openstack overcloud deploy`` command during the deployment. Changes to the Puppet manifests are required to handle the new values in the Hiera database and to act on them to deploy the partner software.
+This document has information about the requirements and recommended network topologies to deploy Red Hat OSP Director with Nuage VSP.
+It describes the deployment workflow that includes downloading the required packages, setting up the Undercloud and Overcloud, and creating and configuring environment files and Heat templates for the deployment. It also provides sample environment files that you can modify for your deployment.
 
 
-Requirements
--------------
+Red Hat OpenStack Platform Director
+-----------------------------------
 
-For Overcloud, networking, Undercloud, and repository requirements, see the Red Hat upstream documentation:
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/ .
+The Red Hat OpenStack Platform Director (OSPD) is a toolset for installing and managing an OpenStack environment. It is based primarily on the OpenStack TripleO project. It uses an OpenStack deployment, referred to as the Undercloud, to deploy an OpenStack cluster, referred to as an Overcloud.
 
-VSP requirements:
+The OpenStack Platform Director is an image-based installer. It uses a single image (for example, overcloud-full.qcow2) that is deployed on the Controller and Compute nodes belonging to the OpenStack cluster (Overcloud). This image contains all the packages needed during the deployment. The deployment creates only the configuration files and databases required by the different services and starts the services in the correct order. During a deployment, no new software is installed.
 
-   * VSD and VSC are set up before running OpenStack Platform director.
-   * Your network includes redundant VSDs.
-   * Manual Horizon and Heat integration for Nuage Extensions are required because these modules are not part of the packaged integration.
+For integration of OpenStack Platform Director with the Nuage VSP, use the command-line based deployment option.
+
+OpenStack Platform Director uses Heat to orchestrate the deployment of an OpenStack environment. The actual deployment is done through Heat templates and Puppet. Users provide any custom input in templates using the ``openstack overcloud deploy`` command. When this command is run, all the templates are parsed to create the Hiera database, and then a set of Puppet manifests, also referred to as TripleO Heat templates, are run to complete the deployment. The Puppet code in turn uses the Puppet modules developed to deploy different services of OpenStack (such as puppet-nova, puppet-neutron, and puppet-cinder).
+
+The OpenStack Platform Director architecture allows partners to create custom templates. Partners create new templates to expose parameters specific to their modules.  These templates can then be passed through the ``openstack overcloud deploy`` command during the deployment. Changes to the Puppet manifests are required to handle the new values in the Hiera database and to act on them to deploy the partner software.
 
 
-RHEL 7.5/7.6 is supported with OSP 13.
+Requirements and Best Practices
+---------------------------------
+
+For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD] and Virtualized Services Controller [VSC]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD and VSC) should already be deployed.
+
+For Red Hat OpenStack Platform Director 13 requirements and best practices, see the Red Hat upstream documentation:
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/
+
 
 Recommended Topologies
 -----------------------
 
-We recommend deploying this topology:
+The deployment topology and networking segmentation varies depending on the OpenStack end-to-end requirements and underlay topology. A typical OpenStack setup with Nuage integration has the following topology:
 
-   * Cluster deployment with redundant controllers
+.. figure:: ./sw1045.png
 
+Workflow Overview of the Nuage VSP Integration with OpenStack Platform Director
+--------------------------------------------------------------------------------
 
-The cluster in your Layer 3 (L3) network should have the following components:
+The workflow to integrate Nuage VSP with OpenStack Platform Director includes these phases:
 
+.. figure:: ./sw1046.png
 
-.. _infrastructure_required:
+* **Phase 0: Install the VSP Core Components**
 
-.. figure:: ../../graphics/infrastructure_required.PNG
+  Before installing OSPD on the Undercloud, install and configure VSD and VSC. See `Recommended Topologies`_ for a typical OpenStack setup with Nuage integration.
 
-These networks are used:
+  Depending on your deployment, you may also install and configure WBX as a leaf/spine switch for Data Center and Enterprise networks deployments. See the WBX documentation for more details.
 
-   * The External network provides Internet access to the VMs using the br-ext mechanisms and floating IP (FIP) addresses and/or Port Address Translation (PAT). It is secured using ACLs on the VSG.
-   * The Management network is used for FIP traffic and Internet access for all VMs.
-   * The Public API network is used for the public API, API management by administrators, and OpenStack Platform cluster management traffic.
-   * The Tenant subnet is used for VXLAN tunnels between the OpenStack Platform Compute nodes, OpenStack controller, VSC, and VSG.
+* **Phase 1: Install Red Hat OpenStack Platform Director**
 
+  In this phase, you install Director on the Undercloud system by following the process in the Red Hat documentation.
 
-The cluster requires the following:
+* **Phase 2: Download Nuage Source Code**
 
-   * A VSD node can be installed as a VM or a bare metal server.
-   * For high availability of the VSD nodes, use a load balancer across the VSD nodes for the REST API.
-   * The VSC is always installed as a VM.
+  In this phase,  you get the following files on Director for the Nuage Overcloud deployment:
 
+  - Nuage Tripleo Heat templates
+  - Image patching files
+  - Additional scripts
 
-Best Practices
----------------
+* **Phase 3: Prepare the Containers**
 
-Nuage VSD and VSC
+  In this phase, you prepare the Red Hat OpenStack and Nuage OpenStack containers for the integration.
 
-    * Add an endpoint on the provisioned network for verification and testing (when connecting to isolated networks).
-    * The Layer 3 network has redundant VSDs.
+  - **Phase 3.1: Configure the Containers Image Source and Pull the Red Hat OpenStack Containers**
 
+    Follow the Red Hat documentation to complete these tasks.
 
-Red Hat
+  - **Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog**
 
-    * During the certification process, the network should have an odd number of controllers so that the majority of the nodes are up if a node goes down.
-    * Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/ for more Red Hat best practices.
+    The Nuage OpenStack containers are available from the Red Hat Partner Container catalog. The container names change from release to release.
 
+* **Phase 4: Prepare the Overcloud**
 
-Integrating Nuage VSP with OpenStack Platform Director
--------------------------------------------------------
+  In this phase, you follow procedures in this document and in the Red Hat documentation to do the basic configuration of the Overcloud.
 
-*  Download the Nuage Source Code
+  - **Phase 4.1: Register and Inspect the Bare Metal Nodes**
 
-    Nuage Tripleo Heat Templates, Images Patching and all additional scripts are present at: https://github.com/nuagenetworks/nuage-ospdirector/releases .
-    Please download the respective release **Source code (tar.gz or zip)** and extract this on your undercloud under `/home/stack`
+    Follow the procedures in the Red Hat documentation for registering and inspecting the hardware nodes in the "Configuring a Basic Overcloud using the CLI Tools" section and check the node status.
 
-The integration includes the following steps:
+  - **Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository**
 
-* Modifying the Overcloud qcow image (for example, overcloud-full.qcow2)
+    In this phase, you download the Nuage RPMs and create a repository for them.
 
-    - The Nuage VRS and metadata agent configuration files need to be created and populated with the required parameters. To do this, add the puppet module (nuage-puppet-modules) to the Overcloud image with the other required Nuage RPMs.
+  - **Phase 4.3: Modify the Overcloud Image**
 
-    - The typical OpenStack director deployment scenario assumes that all the packages are installed on the overcloud-full image. The Overcloud qcow image (for example, overcloud-full.qcow2) needs to be patched with the following RPMs:
+    To install the required Nuage packages, you run the script to patch the the Overcloud image.
 
-        - nuage-bgp
-        - nuage-metadata-agent
-        - nuage-openstack-neutronclient
-        - nuage-openvswitch (Nuage VRS)
-        - nuage-puppet-modules-5.3.0
-        - selinux-policy-nuage
-        - nuage-topology-collector
-        - python-openvswitch-nuage
+  - **Phase 4.4: Create the Dataplane Roles and Update the Node Profiles**
 
-    - Install python-openvswitch-nuage.
-    - Uninstall Open vSwitch (OVS).
-    - Install VRS (nuage-openvswitch).
+    In this phase, you add the Nuage Heat templates and dataplane roles for the Nuage integration.
+    Roles define which actions users can perform. For more information about the supported roles, go to `Phase 4: Prepare the Overcloud`_
 
-    - Use nuage-puppet-modules-5.3.0.x86_64.rpm for setting Nuage Openvswitch and Nuage Metadata Agent config files.
-    - The scripts to patch the overcloud-full.qcow2 image can be found at `image-patching/nuage_image_patching_scripts` which uninstall Open vSwitch (OVS), and install VRS.
+  - **Phase 4.5: Generate a CMS ID for the OpenStack Deployment**
 
-    - For AVRS integration, the overcloud-full image is also patched with following 6WIND and Nuage AVRS RPMs:
+    The Cloud Management System (CMS) ID is created to identify a specific Compute or Controller node.
 
-        - 6windgate-dpdk
-        - 6windgate-dpdk-pmd-mellanox-rdma-core
-        - 6windgate-dpdk-pmd-virtio-host
-        - 6windgate-fp
-        - 6windgate-fpn-sdk-dpdk
-        - 6windgate-fp-ovs
-        - 6windgate-linux-fp-sync
-        - 6windgate-linux-fp-sync-fptun
-        - 6windgate-linux-fp-sync-ovs
-        - 6windgate-linux-fp-sync-vrf
-        - 6windgate-product-base
-        - 6windgate-tools-common-libs-daemonctl
-        - 6windgate-tools-common-libs-libconsole
-        - 6windgate-tools-common-libs-pyroute2
-        - 6wind-openstack-extensions
-        - dkms
-        - nuage-metadata-agent (6wind version)
-        - nuage-openvswitch (6wind version)
-        - python-pyelftools
-        - selinux-policy-nuage-avrs
-        - virtual-accelerator-base
+  - **Phase 4.6: Customize the Environment Files**
 
-* Adding Nuage Heat Templates ( `nuage-tripleo-heat-templates <../../nuage-tripleo-heat-templates>`_  )
+    In this phase, you modify the environment files for your deployment and assign roles (profiles) to the Compute and Controller nodes.
+    The files are populated with the required parameters.
+    Nuage provides Heat templates and environment files to configure Neutron on the Controller node and RPMs (such as nuage-openvswitch and nuage-metadata-agent) on Compute nodes.
 
-    - Nuage provides Heat templates and environment files to configure Neutron on the Controller and nuage-openvswitch and nuage-metadata-agent on Compute nodes.
-    - Nuage also provides Heat templates and environment files to configure Virtual-Accelerator on ComputeAvrs nodes for AVRS Integration
+* **Phase 5: Deploy Overcloud**
 
-* Updating the TripleO Heat templates (also referred to as the puppet manifests)
-
-    - Some of the parameters in ``neutron.conf`` and ``nova.conf`` need to be configured in the Heat templates. The Nuage VRS and metadata agent also need to be configured. The values for these parameters depend on the Nuage VSP configuration.
-      Use ``neutron-nuage-config.yaml`` and ``nova-nuage-config.yaml`` environment files to configure these values.
-    - See the `Sample Templates`_ section for some probable values of the parameters in the ``neutron-nuage-config.yaml`` and ``nova-nuage-config.yaml`` files.
-    - For AVRS integration, some of the parameters in ``fast-path.env`` needs to be configured in the Heat templates. Use ``compute-avrs-environment.yaml`` environment file to configure these values.
-    - For AVRS integration, see the `Sample Templates`_ section for some probable values of the parameters in the ``compute-avrs-environment.yaml`` file and we also need to create a new AVRS role similar to the upstream Compute role.
-    - (Optional) For AVRS intergration, we can also create Multiple roles which allow to pass different sets of configuration on those AVRS Compute Node. See a sample enviroment file `here <../../nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml>`_
+  In this phase, you use the ``openstack overcloud deploy`` command with different options to deploy the various use cases.
 
 
-Links to Nuage and OpenStack Resources
----------------------------------------
+Deployment Workflow
+---------------------
 
-* For the Heat templates used by OpenStack director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates .
-* For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_ .
-* For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_ .
-* For the Nuage and Puppet modules, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet .
-* For the files and script to generate the CMS ID, go to `generate-cms-id <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_ .
+Phase 0: Install the VSP Core Components
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. Important::  Contact Nuage for Nuage Ironic Integration
+To install VSD and VSC, see the *VSP Install Guide* and the  *VSP User Guide* for the deployment requirements and procedures.
 
-Before the Deployment Process
-------------------------------
+To install WBX, see the WBX documentation.
 
-.. Note:: Before performing the procedures in this document, read the *Director Installation and Usage* guide for OSPD 13: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage .
+Phase 1: Install Red Hat OpenStack Platform Director
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create seperate repositories for the following packages:
+To prepare for the Nuage VSP integration, install Director on the Undercloud system by following the steps in the Red Hat documentation:
 
-    * OSC and VRS: `OSC and VRS Packages`_
-    * 6WIND and AVRS ( Only for AVRS Deployment) : `6WIND and AVRS Packages`_
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud
 
+Then make sure the required images for the RHEL 7.6 deployment are available:
 
-OSC and VRS Packages
-~~~~~~~~~~~~~~~~~~~~~~
-
-    * nuage-bgp
-    * nuage-metadata-agent
-    * nuage-openstack-neutronclient
-    * nuage-openvswitch (VRS)
-    * nuage-puppet-modules (Latest version 5.3.0)
-    * nuage-topology-collector
-    * selinux-policy-nuage
-    * python-openvswitch-nuage
-
-
-6WIND and AVRS Packages
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    * 6windgate-dpdk
-    * 6windgate-dpdk-pmd-mellanox-rdma-core
-    * 6windgate-dpdk-pmd-virtio-host
-    * 6windgate-fp
-    * 6windgate-fpn-sdk-dpdk
-    * 6windgate-fp-ovs
-    * 6windgate-linux-fp-sync
-    * 6windgate-linux-fp-sync-fptun
-    * 6windgate-linux-fp-sync-ovs
-    * 6windgate-linux-fp-sync-vrf
-    * 6windgate-product-base
-    * 6windgate-tools-common-libs-daemonctl
-    * 6windgate-tools-common-libs-libconsole
-    * 6windgate-tools-common-libs-pyroute2
-    * 6wind-openstack-extensions
-    * dkms
-    * nuage-metadata-agent (from el7-6wind)
-    * nuage-openvswitch (from el7-6wind)
-    * python-pyelftools
-    * selinux-policy-nuage-avrs
-    * virtual-accelerator-base
-    * virtual-accelerator (Only requried for VA version <= 1.8.3)
-
-
-Deployment Process
--------------------
-
-Phase 1: Install OpenStack Director on the Undercloud System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Follow the steps in https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud .
-
-When obtaining images for the Overcloud nodes, replace the upstream Overcloud image with one modified to include Nuage components from Step 2 in this workflow.
-
-If you want to use a remote registry for the Overcloud container images, you need to add the iptables rule on Director (Undercloud Machine) with the Undercloud IP address or interface with external connectivity for NAT. In the below example, the Undercloud IP address is 192.168.24.1 and the external interface name is eth0:
+1. After the Undercloud is installed, make sure that you have openstack-tripleo-heat-templates-8.3.1-54.el7ost package.
 
 ::
 
-    sudo iptables -A POSTROUTING -t nat -s 192.168.24.1/24 -j MASQUERADE
-    (or)
-    sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    yum swap openstack-tripleo-heat-templates openstack-tripleo-heat-templates-8.3.1-54.el7ost
 
 
-Phase 2: Configure the Basic Overcloud
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Follow the upstream OpenStack documentation *up to the step where* the ``openstack overcloud deploy`` command is run using the CLI or starting the Overcloud deployment (starting the Overcloud creation) in the UI.
-
-These are the OpenStack instructions:
-
-    * Configuring the container registry details: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/configuring-a-container-image-source
-    * Using the CLI: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_cli_tools
-    * Using the UI: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_ui_tools
-
-
-
-Phase 3: Modify the Overcloud qcow Image (overcloud-full.qcow2) to Include Nuage Components
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The steps for modifying overcloud-full.qcow2 are provided in the `README.md <../../image-patching/README.md>`_  file.
-
-
-
-Phase 4: Adding Nuage Heat Templates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Copy the nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector-osp-13.<release>/nuage-tripleo-heat-templates to `/home/stack/` directory on undercloud.
-
-    ::
-
-        cd /home/stack
-        ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
-
-
-Copy the roles from `/usr/share/openstack-tripleo-heat-templates/roles` to `/home/stack/nuage-tripleo-heat-templates/roles`
-
-    ::
-
-        cp /usr/share/openstack-tripleo-heat-templates/roles/* /home/stack/nuage-tripleo-heat-templates/roles/
-
-
-**For AVRS integration, perform the following steps**:
-
-User can have Single or Mutli-Roles for AVRS nodes.
-
-    **For a single-role AVRS deployment**, use the `create_compute_avrs_role.sh <../../nuage-tripleo-heat-templates/scripts/create_roles/create_compute_avrs_role.sh>`_ to create a role file called ``compute-avrs-role.yaml``.
-
-    Run using
-
-    ::
-
-         cd /home/stack/nuage-tripleo-heat-templates/scripts/create_roles
-
-        ./create_compute_avrs_role.sh
-
-
-     Above command will create a new ``ComputeAvrs``  role for your deployment, and compare it with the sample `compute-avrs-role-sample.yaml <../../nuage-tripleo-heat-templates/templates/compute-avrs-role-sample.yaml>`_ .
-    **For a mutli-role AVRS deployment**, we have automated `script <../../nuage-tripleo-heat-templates/scripts/create_roles/create_compute_avrs_multirole.sh>`_ to create ComputeAvrsSingle and ComputeAvrsDual role. You can edit these files with your requirements to create new roles.
-    For more information about using roles refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/director_installation_and_usage/index#sect-Generate_Architecture_Specific_Roles
-
-    ::
-
-        cd /home/stack/nuage-tripleo-heat-templates/scripts/create_roles
-        ./create_compute_avrs_multirole.sh
-
-
-
-
-Phase 5: Generate a CMS ID for the OpenStack installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The Cloud Management System (CMS) ID needs to be generated to configure your OpenStack installation with the VSD installation.
-
-Go to `generate-cms-id <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_  for the files and script to generate the CMS ID, and follow the instructions in README.md.
-
-The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
-
-Add the CMS ID to the /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml template file for the ``NeutronNuageCMSId`` parameter.
-
-
-Phase 6: Check the Ironic node status to ensure that the Ironic nodes have been successfully created
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Run the following commands.
-
-1. Run the following command. The results should show the *Provisioning State* status as *available* and the *Maintenance* status as *False*.
+2. Download following images for the RHEL 7.6 Overcloud qcow2 file:
 
 ::
 
-    openstack baremetal node list
+    yum install rhosp-director-images-13.0-20190627.1.el7ost rhosp-director-images-ipa-13.0-20190627.1.el7ost
 
 
-2. If profiles are being set for a specific placement in the deployment, run the following command. The results should show the *Provisioning State* status as *available* and the *Current Profile* status as *control* or *compute*.
+
+
+
+
+
+Phase 2: Download Nuage Source Code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this phase, get the Nuage Tripleo Heat Templates, image patching files, and the other scripts by using the following commands on the Undercloud:
 
 ::
 
-    openstack overcloud profiles list
+    cd /home/stack
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release-tag>
+    ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
+
+    Example:
+
+    cd /home/stack
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.541U9.1
+    ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
-Phase 7: Create the Heat Templates
+
+Phase 3: Prepare the Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Go to `/home/stack/nuage-tripleo-heat-templates/environments/` on the Undercloud machine.
+In this phase, you prepare the Red Hat OpenStack and Nuage containers for the integration.
 
-2. Create these templates, and add the values for the VSD IP, CMS ID, and other parameters in the following files. Go to the `Parameters in the Heat Templates`_ section for details about the parameters in the templates.
 
-    * neutron-nuage-config.yaml - Add the generated ``cms_id`` to the ``NeutronNuageCMSId`` parameter.
-    * nova-nuage-config.yaml
+Phase 3.1: Configure the Container Image Source and Pull the Red Hat OpenStack Containers
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-3. Create the environment file ``node-info.yaml`` under ``/home/stack/templates/`` to specify the count and flavor for ``Controller`` and ``Compute`` roles.
+This release is supported only on RHEL 7.6. Go to https://github.com/nuagenetworks/nuage-ospdirector/wiki/RHEL-7.6-container-list for the and list of Overcloud container images based on RHEL 7.6.
 
-Assign Controller and Compute nodes with their respective profiles:
 
-::
+Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    openstack baremetal node set --property capabilities='profile:control,boot_option:local' <node-uuid>
-    openstack baremetal node set --property capabilities='profile:compute,boot_option:local' <node-uuid>
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 5.4.1 U9 with 13.0-2 as an example (this version may change):
 
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-5-4-1-u9:13.0-2
 
-The syntax for ``node-info.yaml`` is:
+For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
-::
+The Nuage containers are now available in the Red Hat Partner Container Catalog. To get the Nuage containers, follow these instructions to connect to a registry remotely:
 
-    parameter_defaults:
-      Overcloud<Role Name from the roles file>Flavor: <flavor name>
-      <Role Name from the roles file>Count: <number of nodes for this role>
+1. On the Undercloud, use the following instructions to get Nuage images from a Red Hat container registry using registry service account tokens.
 
-
-
-This example shows how to create a deployment with one Controller node and two Compute nodes.
-
-::
-
-    parameter_defaults:
-      OvercloudControllerFlavor: control
-      ControllerCount: 1
-      OvercloudComputeFlavor: compute
-      ComputeCount: 2
-
-
-
-**For AVRS integration, follow these steps**:
-
-:Step 1: Create a new compute-avrs-role.yaml file to deploy AVRS Compute nodes. The command used to create this file is:
-
-**For single-role AVRS deployment,**: `ComputeAvrs`
-
-::
-
-    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml Controller ComputeAvrs
-
-.. Note:: To deploy VRS + AVRS computes in the same deployment, add "Compute" role to the above command at the end.
-
-
-**For multi-role AVRS deployment,**: `ComputeAvrsSingle` and `ComputeAvrsDual`
-
-::
-
-    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml Controller Compute ComputeAvrsSingle ComputeAvrsDual
-
-.. Note:: given ``compute-avrs-role.yaml`` file can get updated with newer release
-
-
-:Step 2: Create a flavor and profile:
-
-**For single-role AVRS deployment,**: `computeavrs`
-
-::
-
-    openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrs
-    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrs" computeavrs
-
-**For multi-role AVRS deployment,**: `computeavrssingle` and `computeavrsdual`
-
-::
-
-    openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrssingle
-    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrssingle" computeavrssingle
-
-    openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrsdual
-    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrsdual" computeavrsdual
-
-
-:Step 3: Set profile to AVRS nodes:
-
-**For single-role AVRS deployment,:**
-
-::
-
-    openstack baremetal node set --property capabilities='profile:computeavrs,boot_option:local' <node-uuid>
-
-**For multi-role AVRS deployment,:**
-
-::
-
-    openstack baremetal node set --property capabilities='profile:computeavrssingle,boot_option:local' <node-uuid>
-    openstack baremetal node set --property capabilities='profile:computeavrsdual,boot_option:local' <node-uuid>
-
-
-
-:Step 4: Create `node-info.yaml` with correct Node information.
-
-**For single-role AVRS deployment,:** add the count and flavor for ComputeAvrs Role in the `node-info.yaml` file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeAvrs nodes:
-
-::
-
-    parameter_defaults:
-      OvercloudControllerFlavor: control
-      ControllerCount: 1
-      OvercloudComputeFlavor: compute
-      ComputeCount: 2
-      OvercloudComputeAvrsFlavor: computeavrs
-      ComputeAvrsCount: 2
-
-**For multi-role AVRS deployment,** set the `node-info.yaml` with the corresponding role name. The following example shows how to create a deployment with one Controller node, two Compute nodes,  two ComputeAvrsSingle and two ComputeAvrsDual Avrs nodes:
-
-::
-
-    parameter_defaults:
-      OvercloudControllerFlavor: control
-      ControllerCount: 1
-      OvercloudComputeFlavor: compute
-      ComputeCount: 2
-      OvercloudComputeAvrsSingleFlavor: computeavrssingle
-      ComputeAvrsSingleCount: 2
-      OvercloudComputeAvrsSingleFlavor: computeavrsdual
-      ComputeAvrsDualCount: 2
-
-
-:Step 5: Modify avrs environment file in /home/stack/nuage-tripleo-heat-templates/environments/.
-
-    **For single-role AVRS deployment,** the environment file can found at:  `compute-avrs-environment.yaml <../../nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml>`_ file. See the sample in the `Sample Templates`_ section.
-    **For multi-role AVRS deployment,** the environment file can be found at : `compute-avrs-mutlirole-environment.yaml <../../nuage-tripleo-heat-templates/environments/compute-avrs-mutlirole-environment.yaml>`_ file. See the sample in the `Sample Templates`_ section.
-    **Please notice these are sample templates and parameter values can be customized depending on the use case. Please contact Nuage for the recommended values for these parameters**.
-
-
-    a. For AVRS deployment, Virtual Accelerator requires information including which logical cores run the fast path, list of ports enabled in the fast path, additional fast path options and so on, to be set inside `/etc/fast-path.env`.
-       Below is the mapping between parameters in heat template to parameters in `fast-path.env`.
-
-    ::
-
-        FastPathMask           =====>    FP_MASK
-        FastPathNics           =====>    FP_PORTS
-        CorePortMapping        =====>    CORE_PORT_MAPPING
-        FastPathMemory         =====>    FP_MEMORY
-        VmMemory               =====>    VM_MEMORY
-        NbMbuf                 =====>    NB_MBUF
-        FastPathOffload        =====>    FP_OFFLOAD
-        FastPathNicDescriptors =====>    FPNSDK_OPTIONS
-        FastPathDPVI           =====>    DPVI_MASK
-        FastPathOptions        =====>    FP_OPTIONS
-
-
-    b. For AVRS deployment, Virtual Accelerator requires to configure monkey_patch parameters in `nova.conf` and we use below to configure them.
-
-    ::
-
-        ComputeAvrsExtraConfig:
-            nova::config::nova_config:
-              DEFAULT/monkey_patch:
-                value: true
-              DEFAULT/monkey_patch_modules:
-                value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
-
-    c. For AVRS deployment, Virtual Accelerator requires hugepages to be configured and the value can be varied. You also need to enable VT-d.
-
-
-    ::
-
-        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
-
-    .. Note:: Above kernel arguments are consumed by the another env file which include in deployment command `/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`
-
-    .. Note:: You also can set GpgCheck to "no" in environment files if user want to disable GPG Check while installating packages on AVRS Node deployment.
-
-    d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to the value 0. We already set CPUSET_ENABLE value to 0 in our templates by default so you don't need to set is explicitly.
-
-    ::
-
-        CpuSetEnable        =====>    CPUSET_ENABLE
-
-
-4. **(Optional)** To enable SR-IOV, perform the following instructions:
-
-  This feature allows an OpenStack installation to support Single Root I/O Virtualization (SR-IOV)-attached VMs (https://wiki.openstack.org/wiki/SR-IOV-Passthrough-For-Networking) with VSP-managed VMs on the same KVM hypervisor cluster. It provides a Nuage ML2 mechanism driver that coexists with the sriovnicswitch mechanism driver.
-
-  Neutron ports attached through SR-IOV are configured by the sriovnicswitch mechanism driver. Neutron ports attached to Nuage VSD-managed networks are configured by the Nuage ML2 mechanism driver.
-
-  To enable SR-IOV, perform the following steps:
-
-:Step 1: When updating the Undercloud codebase, no additional changes are required.
-
-:Step 2: When modifying the overcloud-full image", use the script provided to update the image. No additional changes are required.
-
-:Step 3: Create a new compute-sriov-role.yaml file to deploy SR-IOV Compute nodes. The command used to create this file is:
-
-::
-
-    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles/ -o /home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml Controller Compute ComputeSriov
-
-
-:Step 4: If deploying OpenStack Neutron SR-IOV in your overcloud, include ``/home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml`` and ``/usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-sriov.yaml`` environment file so the director can prepare the images. When following **Phase 8 Step 4** please include below environment. The following snippet is an example on how to include this environment file:
-
-::
-
-    openstack overcloud container image prepare \
-    ...
-    -r /home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml
-    -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-sriov.yaml \
-    ...
-
-
-:Step 5: Create a flavor and profile for computesriov:
-
-      Please refer: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_cli_tools#sect-Tagging_Nodes_into_Profiles for more information.
-
-::
-
-    openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computesriov
-    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computesriov" computesriov
-
-
-
-:Step 6: Assign SR-IOV nodes with the appropriate computesriov profile:
-
-::
-
-    openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
-
-
-:Step 7: Add the count and flavor for ComputeSriov Role in the node-info.yaml file. The following example shows how to create a deployment with one Controller node, two Compute nodes, and two ComputeSriov nodes:
-
-::
-
-    parameter_defaults:
-      OvercloudControllerFlavor: control
-      ControllerCount: 1
-      OvercloudComputeFlavor: compute
-      ComputeCount: 2
-      OvercloudComputeSriovFlavor: computesriov
-      ComputeSriovCount: 2
-
-
-:Step 8: To deploy the Overcloud, additional parameters and template files are required.
-
-    * Include the following parameter values in the heat template neutron-nuage-config.yaml:
-
-    ::
-
-         NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3,trunk,NuageNetTopology'
-         NeutronTypeDrivers: "vlan,vxlan,flat"
-         NeutronMechanismDrivers: ['nuage','nuage_sriov','sriovnicswitch']
-         NeutronFlatNetworks: '*'
-         NeutronTunnelIdRanges: "1:1000"
-         NeutronNetworkVLANRanges: "physnet1:2:100,physnet2:2:100"
-         NeutronVniRanges: "1001:2000"
-
-
-    * Add this parameter value in the heat template nova-nuage-config.yaml:
-
-    ::
-
-        NovaPCIPassthrough: "[{"devname":"eno2","physical_network":"physnet1"},{"devname":"eno3","physical_network":"physnet2"}]"
-
-
-    * Include "neutron-sriov.yaml" file in the Overcloud deployment command. See the sample in the `Sample Templates`_ section.
-
-
-5. Network Isolation on Overcloud nodes
-
-** Linux Bonding with VLAN **
-
-
-:Step 1: Nuage uses the default Linux bridge and Linux bonds.
-
-
-:Step 2: Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ for deploying overcloud controller and computesriov by configuring linux bond with vlans.
-
-
-:Step 3: The network templates provided by Nuage by default supports the below topology and users can modify these network templates to match their topology.
-
-    * controller.yaml expect controller nodes to have 3 interfaces, 1st interface for provisioning and remaining 2 for linux bond with vlan for all networks.
-    * compute.yaml expect compute nodes to have 3 interfaces, 1st interface for provisioning, 2 for linux bond with vlan for all networks.
-    * computesriov.yaml expect computesriov nodes to have 3 interfaces, 1st interface for provisioning, 2 for linux bond with vlan for all networks.
-    * computeavrs.yaml expect computeavrs nodes to have 3 interfaces, 1st interface for provisioning, 2 for linux bond with vlan for all networks.
-    * computeavrssingle.yaml expect computeavrssingle nodes to have 3 interfaces, 1st interface for provisioning, 2 for linux bond with vlan for all networks.
-    * computeavrsdual.yaml expect computeavrsdual nodes to have 3 interfaces, 1st interface for provisioning, 2 for linux bond with vlan for all networks.
-
-
-:Step 4: The following are sample network template changes for the Linus bond with VLANs for all interface type.
-
-::
-
-            ...
-              - type: linux_bond
-                name: bond1
-
-                dns_servers:
-                  get_param: DnsServers
-                bonding_options: 'mode=active-backup'
-                members:
-                - type: interface
-                  name: nic2
-                  primary: true
-                - type: interface
-                  name: nic3
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: StorageNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: StorageIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: StorageMgmtNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: StorageMgmtIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: InternalApiNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: InternalApiIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: TenantNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: TenantIpSubnet
-              - type: vlan
-                device: bond1
-                vlan_id:
-                  get_param: ExternalNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: ExternalIpSubnet
-                routes:
-                - default: true
-                  next_hop:
-                    get_param: ExternalInterfaceDefaultRoute
-            ...
-
-
-:Step 6: Modify ``/home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml`` with appropriate values.
-
-
-.. Note:: In OSPD 9 and later, a verification step was added where the Overcloud nodes ping the gateway to verify connectivity on the external network VLAN. Without this verification step, the deployment, such as one with Linux bonding and network isolation, would fail. For this verification step, the ExternalInterfaceDefaultRoute IP configured in the template network-environment.yaml should be reachable from the Overcloud Controller nodes on the external API VLAN. This gateway can also reside on the Undercloud. The gateway needs to be tagged with the same VLAN ID as that of the external API network of the Controller. ExternalInterfaceDefaultRoute IP should be able to reach outside because the Overcloud Controller uses this IP address as a default route to reach the Red Hat Registry to pull the Overcloud container images.
-
-
-
-Phase 8. Nuage Docker Containers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Nuage containers from Redhat Partner Container Catalog (For Nuage release greater than or equals 5.4.1u4)**
-
-1. On the Undercloud, use the following instructions to get Nuage images from a Red Hat container registry using registry service account tokens. You will need to `create a registry service account <https://access.redhat.com/terms-based-registry>`_ to use prior to completing the following task.
+   Make sure to `create a registry service account <https://access.redhat.com/terms-based-registry>`_ before completing this step.
 
 ::
 
@@ -717,20 +217,21 @@ Phase 8. Nuage Docker Containers
     Password: ${REGISTRY-SERVICE-ACCOUNT-PASSWORD}
     Login Succeeded!
 
-2. Now change the working directory to /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
+2. Change the working directory to `/home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/`.
 
 ::
 
     $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
 
-3. Configure `nuage_container_config.yaml` with appropriate values. See the following sample.
+
+3. Configure `nuage_container_config.yaml` with appropriate values. See the following example.
 
 ::
 
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for exmaple: Nuage release 5.4.1u9 please enter following
+    # for example: Nuage release 5.4.1 U9 please enter following
     release: 5-4-1-u9
     #Tag for Nuage container images
     tag: latest
@@ -739,32 +240,690 @@ Phase 8. Nuage Docker Containers
     #List of Nuage containers
     nuage_images: ['heat-api-cfn', 'heat-api', 'heat-engine', 'horizon', 'neutron-server', 'nova-compute']
 
-4. Run the `nuage_container_pull.py` script by passing nuage_container_config.yaml to "--nuage-config" argument.
+
+4. Run the `nuage_container_pull.py` script by passing `nuage_container_config.yaml` to the ``--nuage-config`` argument.
+
+   This command does the following actions:
+
+      a. Pull Nuage container images from Red Hat Registry.
+
+      b. Retag the Nuage container images, by modifying the registry to point to the local registry.
+
+      c. Push the retagged Nuage container images to the local registry.
+
+      d. Remove the container images that got created in Step 1 and Step 2 in this phase from the Undercloud machine.
+
+   After running `nuage_container_pull.py`, the `nuage_overcloud_images.yaml` file is created in the `/home/stack/nuage-tripleo-heat-templates/environments` directory.
+
+      ::
+
+          $ python nuage_container_pull.py --nuage-config nuage_container_config.yaml
+
+
+   This example shows how nuage_overcloud_images.yaml should be used when deploying overcloud:
+
+     ::
+
+         openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml - e <remaining environment files>
+
+
+.. Note:: The `/home/stack/templates/overcloud_images.yaml` file should take precedence over this file.
+
+
+Phase 4: Prepare the Overcloud
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this phase, you perform the basic configuration of the Overcloud.
+
+The process includes modifying the Overload image and environment file, creating the dataplane roles and updating node profiles, and assigning the roles to a Compute or Controller node.
+
+**Role**: A role is a personality assigned to a node where a specific set of operations is allowed.
+For more information about roles, see the Red Hat OpenStack documentation:
+
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-Planning_your_Overcloud#sect-Planning_Node_Deployment_Roles
+
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/advanced_overcloud_customization/index#sect-Creating_a_Custom_Roles_File
+
+
+As part of the Nuage integration, Nuage provides these roles:
+
+   * Single Accelerated VRS (AVRS) role: ComputeAvrs
+   * Multiple AVRS roles: ComputeAvrsSingle and ComputeAvrsDual
+   * Single Root I/O Virtualization (SR-IOV): ComputeSriov
+
+
+You only need to configure the roles for your deployment and assign the roles to the appropriate nodes. For example, the network topology diagram in `Workflow Overview of the Nuage VSP Integration with OpenStack Platform Director`_ shows that each Compute node has different roles:
+
+   * Compute node with VRS only
+   * Compute node with VRS and SR-IOV
+   * Compute node with AVRS only
+
+Phase 4.1: Register and Inspect the Bare Metal Nodes
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+In the Red Hat OpenStack Platform Director documentation, follow the steps using the CLI *up to where* the ``openstack overcloud deploy`` command is run:
+
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_cli_tools
+
+To verify the Ironic node status, follow these steps:
+
+1. Check the bare metal node status.
+
+   The results should show the *Provisioning State* status as *available* and the *Maintenance* status as *False*.
+
 ::
 
-    $ python nuage_container_pull.py --nuage-config nuage_container_config.yaml
+    openstack baremetal node list
 
-5. This above command does the following actions:
 
-:Step1: Pull Nuage container images from Red Hat Registry
+2. If profiles are being set for a specific placement in the deployment, check the Overcloud profile status.
 
-:Step2: Retag the Nuage container images, by modifying the registry to point to local registry
-
-:Step3: Push the retagged Nuage container images to local registry
-
-:Step4: Remove the container images that got created in step1 and step2 from undercloud machine.
-
-6. After executing `nuage_container_pull.py`, there will be a nuage_overcloud_images.yaml created under /home/stack/nuage-tripleo-heat-templates/environments and always /home/stack/templates/overcloud_images.yaml should take precedence over this file.
+   The results should show the *Provisioning State* status as *available* and the *Current Profile* status as *control* or *compute*.
 
 ::
+
+    openstack overcloud profiles list
+
+
+Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 4.3: Modify the Overcloud Image`_).
+
+The repository contents may change depending on the roles configured for your deployment.
+
+::
+
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Group          | Packages                                     | Location (tar.gz or link)                                                                 |
+   +================+==============================================+===========================================================================================+
+   |                | nuage-bgp                                    | nuage-vrs-el7 or nuage-avrs-el7                                                           |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
+   | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Packages       | nuage-puppet-modules-5.3.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-metadata-agent                         | nuage-vrs-el7 or nuage-avrs-el7                                                           |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | python-openswitch-nuage                      | nuage-vrs-el7 or nuage-avrs-el7                                                           |
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage VRS      | nuage-openvswitch                            | nuage-vrs-el7                                                                             |
+   | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | selinux-policy-nuage                         | nuage-selinux                                                                             |
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-dpdk                               | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Accelerated    | 6windgate-dpdk-pmd-mellanox-rdma-core        | nuage-avrs-el7                                                                            |
+   | VRS (AVRS)     +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | 6WIND          | 6windgate-dpdk-pmd-virtio-host               | nuage-avrs-el7                                                                            |
+   | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fp                                 | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fpn-sdk-dpdk                       | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync                      | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fpn-sdk-dpdk                       | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-fptun                | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-ovs                  | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-vrf                  | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-product-base                       | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-daemonctl        | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-libconsole       | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-pyroute2         | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | dkms                                         | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openvswitch-6wind                      | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | python-pyelftools                            | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | virtual-accelerator-base                     | nuage-avrs-el7                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | selinux-policy-nuage-avrs                    | nuage-avrs-selinux                                                                        |
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | nuage-openstack                                                                           |
+   | packages       |                                              |                                                                                           |
+   |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+
+
+Phase 4.3: Modify the Overcloud Image
+++++++++++++++++++++++++++++++++++++++++
+
+In this phase, you modify the overcloud-full.qcow2 image with the required Nuage packages.
+
+Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2):
+
+1. Install the required packages: libguestfs-tools and python-yaml
+
+::
+
+    yum install libguestfs-tools python-yaml -y
+
+
+2. Copy the *image-patching* folder from /home/stack/nuage-ospdirector/image-patching/ on the hypervisor machine that is accessible to the nuage-rpms repository.
+
+::
+
+    cd nuage_image_patching_scripts
+
+
+3. Copy *overcloud-full.qcow2* from /home/stack/images/ on the Undercloud director to this location and make a backup of *overcloud-full.qcow2*.
+
+::
+
+    cp overcloud-full.qcow2 overcloud-full-bk.qcow2
+
+4. This script takes in *nuage_patching_config.yaml* as input parameters. You need to configure the following parameters:
+
+   * ImageName (required) is the name of the qcow2 image (for example, overcloud-full.qcow2).
+   * NuageMajorVersion (required) is the Nuage Major Version. Valid options are either *5.0* or *6.0*. Enter *5.0*.
+   * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs* or *avrs*.
+
+     - For any combination of VRS and SR-IOV deployments, specify the deployment type as ["vrs"].
+     - For any combination of AVRS, VRS and SR-IOV deployments, specify the deployment type as [ "avrs"].
+
+   * RhelUserName (optional) is the user name for the Red Hat Enterprise Linux (RHEL) subscription.
+   * RhelPassword (optional) is the password for the Red Hat Enterprise Linux subscription.
+   * RhelPool (optional) is the Red Hat Enterprise Linux pool to which the base packages are subscribed. Instructions to get them are `here <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud#registering-and-updating-your-undercloud>`_ in the second point.
+   * RpmPublicKey (optional) is where you pass all the file paths of the GPG key that you want to add to your Overcloud images before deploying the required packages for your deployment.
+
+     .. Note::
+
+        * Any Nuage package signing keys are delivered with other Nuage artifacts.  See ``nuage-package-signing-keys-*.tar.gz``.
+
+        * Make sure to copy the GPGKey files to the same folder as the ``nuage_overcloud_full_patch.py`` patching script directory.
+
+   * RepoFile (required) is the name of the repository hosting the RPMs required for patching.
+
+     - Make sure to place the repository file in the same folder as the ``nuage_overcloud_full_patch.py`` patching script directory.
+     - For a sample RepoFile, see ``nuage_5.0_ospd13.repo.sample``.
+     - RepoFile can contain multiple Nuage repository with the required Nuage packages and can also have extra repositories with non-Nuage packages.
+
+      [nuage] repo should have: (We recommend user to enable this repo "enabled=1" by default as below packages will be installed via this repo)
+           nuage-puppet-modules
+           python-openvswitch-nuage
+           selinux-policy-nuage
+           nuage-bgp
+           nuage-openstack-neutronclient
+
+      [nuage_vrs] repo should have:
+           nuage-openvswitch
+           nuage-metadata-agent
+
+      [nuage_avrs] should have all the packages provided by Nuage for openvswitch and 6wind rpms.
+           nuage-openvswitch
+           nuage-metadata-agent
+           6wind packages
+
+      [extra] repo should have all the packages that we install as part of dependency packages:
+          libvirt
+          perl-JSON
+          lldpad
+
+   * logFileName is used to pass log filename.
+
+   For examples of nuage_patching_config.yaml, go to `Nuage Patching Configuration`_.
+
+5. Run the following command that provides the parameter values to start the image patching process:
+
+::
+
+    python nuage_overcloud_full_patch.py --nuage-config nuage_patching_config.yaml
+
+
+.. Note:: If the image patching fails, remove the partially patched overcloud-full.qcow2 and create a copy of it from the backup image before retrying the image patching process.
+
+    ::
+
+        rm overcloud-full.qcow2
+        cp overcloud-full-bk.qcow2 overcloud-full.qcow2
+
+
+6. Verify that the *machine-id* is clear in the Overcloud image. The result should be empty output.
+
+::
+
+    guestfish -a overcloud-full.qcow2 run : mount /dev/sda / : cat /etc/machine-id
+
+7. Copy the patched image back to /home/stack/images/ on the Undercloud and upload it to Glance.
+
+   a. Check that the current images are uploaded:
+
+        ::
+
+            [stack@director ~]$ source ~/stackrc
+            (undercloud) [stack@director ~]$ openstack image list
+
+   b. If the ``openstack image list`` command returns null, run the following command to upload all images in /home/stack/images/ to Glance.
+
+        ::
+
+            [stack@director images]$ openstack overcloud image upload --image-path /home/stack/images/
+
+   c. If the ``openstack image list`` command returns the output similar to this:
+
+        ::
+
+            +--------------------------------------+------------------------+
+            | ID                                   | Name                   |
+            +--------------------------------------+------------------------+
+            | 765a46af-4417-4592-91e5-a300ead3faf6 | bm-deploy-ramdisk      |
+            | 09b40e3d-0382-4925-a356-3a4b4f36b514 | bm-deploy-kernel       |
+            | ef793cd0-e65c-456a-a675-63cd57610bd5 | overcloud-full         |
+            | 9a51a6cb-4670-40de-b64b-b70f4dd44152 | overcloud-full-initrd  |
+            | 4f7e33f4-d617-47c1-b36f-cbe90f132e5d | overcloud-full-vmlinuz |
+            +--------------------------------------+------------------------+
+
+
+      Run the following commands to update the images to Glance:
+
+        ::
+
+            (undercloud) [stack@director images]$ openstack overcloud image upload --update-existing --image-path /home/stack/images/
+            (undercloud) [stack@director images]$ openstack overcloud node configure $(openstack baremetal node list -c UUID -f value)
+
+
+Phase 4.4: Create the Dataplane Roles and Update the Node Profiles
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+In this phase, you add the Nuage Heat templates and dataplane roles for the Nuage integration.
+
+1. Copy the roles from `/usr/share/openstack-tripleo-heat-templates/roles` to `/home/stack/nuage-tripleo-heat-templates/roles`.
+
+    ::
+
+        cp /usr/share/openstack-tripleo-heat-templates/roles/* /home/stack/nuage-tripleo-heat-templates/roles/
+
+2. Create the ComputeAvrs, ComputeAvrsSingle and ComputeAvrsDual Nuage Compute roles, by following command:
+
+   ::
+
+        cd /home/stack/nuage-tripleo-heat-templates/scripts/create_roles
+        ./create_all_roles.sh
+
+
+3. Create a *nuage_roles_data.yaml* file with all the required roles for the current Overcloud deployment.
+
+   This example shows how to create *nuage_roles_data.yaml* with a Controller and Compute nodes for VRS, AVRS, and SR-IOV. The respective roles are specified in the same order. The following example has the respective role names mentioned in the same order.
+
+::
+
+    Syntax:
+    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute <role> <role> ...
 
     Example:
-    openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml - e <remaining environment files>
+    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeAvrs ComputeSriov
 
 
-Phase 9: Deploy the Overcloud
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-You can use the Heat templates with the command-line based template to deploy the Overcloud.
+.. Note:: It is not mandatory to create nuage_roles_data.yaml with all the roles shown in the example. You can specify only the required ones for your deployment.
+
+4. Create ``node-info.yaml`` in /home/stack/templates/ and specify the roles and number of nodes.
+
+  This example shows how to create a *node-info.yaml* file for deployment with three Controller, two Compute, two ComputeAvrs, and two ComputeSriov roles:
+
+::
+
+    Syntax:
+
+    parameter_defaults:
+      Overcloud<Role Name>Flavor: <flavor name>
+      <Role Name>Count: <number of nodes for this role>
+
+
+    Example:
+
+    parameter_defaults:
+      OvercloudControllerFlavor: control
+      ControllerCount: 3
+      OvercloudComputeFlavor: compute
+      ComputeCount: 2
+      OvercloudComputeAvrsFlavor: computeavrs
+      ComputeAvrsCount: 2
+      OvercloudComputeSriovFlavor: computesriov
+      ComputeSriovCount: 2
+
+.. Note:: It is not mandatory to provide node info for all the roles shown in the example. You can specify the node information only for the required roles.
+
+
+Phase 4.6: Generate a CMS ID for the OpenStack Deployment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The Cloud Management System (CMS) ID is used to identify a specific Compute or Controller node.
+
+In this phase, you generate the CMS ID used to configure your OpenStack deployment with the VSD deployment.
+
+1. Go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_ for the files and script to generate the CMS ID, and follow the instructions in the README.md file.
+
+   The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
+
+2. Add the CMS ID to the /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml template file for the ``NeutronNuageCMSId`` parameter.
+
+
+Phase 4.7: Customize the Environment Files
++++++++++++++++++++++++++++++++++++++++++++
+
+In this phase, you create and customize environment files and tag nodes for specific profiles. These profile tags match your nodes to flavors, which assign the flavors to deployment roles.
+
+For more information about the parameters in the environment files, go to `Parameters in Environment Files`_.
+
+For sample environment files, go to `Sample Environment Files`_.
+
+1. Go to `/home/stack/nuage-tripleo-heat-templates/environments/` on the Undercloud machine.
+
+2. Customize these environment files, and add required values, such as CMS ID, and other parameters.
+
+    * neutron-nuage-config.yaml - Add the generated ``cms_id`` to the ``NeutronNuageCMSId`` parameter.
+    * nova-nuage-config.yaml
+
+   Go to `Parameters in Environment Files`_ for details about the required parameters.
+
+
+3. Assign roles to the Compute and Controller nodes, as described in the following steps.
+
+   This is the mapping of the Nuage OpenvSwitch packages to role names:
+
+::
+
+   +----------------+----------------------------------------------------+
+   | Dataplane      | Role Name                                          |
+   +================+====================================================+
+   | VRS            | Compute                                            |
+   |----------------+----------------------------------------------------+
+   | AVRS           | ComputeAvrs, ComputeAvrsSingle, or ComputeAvrsDual |                                                                        |
+   |----------------+----------------------------------------------------+
+   | SR-IOV         | ComputeSriov                                       |                                                                        |
+   +----------------+----------------------------------------------------+
+
+
+Nuage Controller Role (Controller)
+''''''''''''''''''''''''''''''''''''
+
+      For a Controller node, assign the Controller role to each of the Controller nodes:
+
+::
+
+   openstack baremetal node set --property capabilities='profile:control,boot_option:local' <node-uuid>
+
+VRS Compute Role (Compute)
+'''''''''''''''''''''''''''
+
+    For a VRS Compute node, assign the appropriate profile:
+
+::
+
+    openstack baremetal node set --property capabilities='profile:compute,boot_option:local' <node-uuid>
+
+Single AVRS Role (ComputeAvrs)
+''''''''''''''''''''''''''''''
+
+    AVRS runs inside the hypervisor and removes performance bottlenecks by offloading virtual switching from the networking stack. For more information about AVRS, go to the *VSP User Guide*.
+
+    For ComputeAvrs Integration, perform the following steps:
+
+    1. Create a flavor and profile:
+
+    ::
+
+        openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrs
+        openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrs" computeavrs
+
+
+    2. Set the profile on the AVRS nodes:
+
+    ::
+
+         openstack baremetal node set --property capabilities='profile:computeavrs,boot_option:local' <node-uuid>
+
+    3. Modify the AVRS environment file in `/home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment`.yaml.
+
+       You can also create a new AVRS role similar to the upstream Compute role.
+
+       The following examples show the settings in the Sample Environment Files. The parameter values can be customized for your deployment. Contact Nuage for the recommended values for these parameters.
+
+       a. For AVRS deployment, Virtual Accelerator requires information including which logical cores run the fast path, list of ports enabled in the fast path, additional fast path options, and so on to be set in `/etc/fast-path.env`.
+
+          Some parameters in ``fast-path.env`` need to be configured in the Heat templates. Use the ``compute-avrs-environment.yaml`` environment file to configure them. Go to `Sample Environment Files`_ for probable values in ``compute-avrs-environment.yaml``.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `fast-path.env`.
+
+       b. Virtual Accelerator requires that the monkey_patch parameters be set in `nova.conf`. This example shows how to configure them.
+
+       ::
+
+           ComputeAvrsExtraConfig:
+               nova::config::nova_config:
+                 DEFAULT/monkey_patch:
+                   value: true
+                 DEFAULT/monkey_patch_modules:
+                   value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+
+       c. Virtual Accelerator requires hugepages to be configured. This example shows how to configure hugepages and enable VT-d.
+
+       ::
+
+            KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+
+       .. Note::
+
+            The kernel arguments are consumed by the another environment file that includes ``/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml`` in the deployment command.
+
+            You can set GpgCheck to ``no`` in environment files if you want to disable GPG Check while installing packages on the AVRS node.
+
+       d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to 0. This does not need to be explicitly set because CPUSET_ENABLE is set to 0 by default in the templates.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `cpuset.env`.
+
+
+Multiple AVRS Roles (ComputeAvrsSingle and ComputeAvrsDual)
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    AVRS runs inside the hypervisor and removes performance bottlenecks by offloading virtual switching from the networking stack. For more information about AVRS, go to the *VSP User Guide*.
+
+    When a single AVRS role is created, users are required to have same set of nodes in their environment because the AVRS Computes all get the same configuration.
+
+    When multiple roles can be created, each role can pass a different configuration to specific AVRS Compute nodes. Users can have a pool of servers that require same configuration and assign them the same role.
+
+    For example, 10 nodes are being deployed. Six nodes are identical, and the remaining 4 nodes are identical.
+    You can assign the first six nodes to the ComputeAvrsSingle role and the remaining four nodes to the ComputeAvrsDual role. The configurations for ComputeAvrsSingle role do not overlap with ComputeAvrsDual.
+
+    For ComputeAvrsSingle and ComputeAvrsDual integration, perform the following steps:
+
+    1. Create a flavor and profile:
+
+    ::
+
+       openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrssingle
+       openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrssingle" computeavrssingle
+
+       openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrsdual
+       openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrsdual" computeavrsdual
+
+
+    2. Set the profile on the AVRS nodes:
+
+    ::
+
+        openstack baremetal node set --property capabilities='profile:computeavrssingle,boot_option:local' <node-uuid>
+        openstack baremetal node set --property capabilities='profile:computeavrsdual,boot_option:local' <node-uuid>
+
+
+    3. Modify the AVRS environment file in the `/home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-mutlirole-environment.yaml`.
+
+       For an example of an environment file with multiple AVRS roles, see a `sample file <../../nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml>`_.
+
+       The following examples for the AVRS deployment show the Sample Environment Files. The parameter values can be customized for your deployment. Contact Nuage for the recommended values for these parameters.
+
+       a. Virtual Accelerator requires information including which logical cores run the fast path, list of ports enabled in the fast path, additional fast path options, and so on to be set in `/etc/fast-path.env`.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `fast-path.env`.
+
+       b. Virtual Accelerator requires that the monkey_patch parameters be set in `nova.conf`. Use the following settings.
+
+       ::
+
+           ComputeAvrsExtraConfig:
+               nova::config::nova_config:
+                 DEFAULT/monkey_patch:
+                   value: true
+                 DEFAULT/monkey_patch_modules:
+                   value: nova.virt.libvirt.vif:openstack_6wind_extensions.queens.nova.virt.libvirt.vif.decorator
+
+       c. Virtual Accelerator requires hugepages to be configured. This shows how to configure hugepages and enable VT-d.
+
+       ::
+
+           KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+
+       .. Note::
+
+          The kernel arguments are consumed by the another environment file that includes `/usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml` in the deployment command.
+
+          You also can set GpgCheck to ``no`` in environment files if you want to disable GPG Check while installing packages on the AVRS node.
+
+       d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to 0. This does not need to be set explicitly because CPUSET_ENABLE is set to 0 by default in the templates.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `cpuset.env`.
+
+
+SR-IOV Role (ComputeSriov)
+'''''''''''''''''''''''''''
+
+Nuage supports the Virtual Routing and Switching (VRS) role (Compute) and the Single Root I/O Virtualization (SR-IOV) role (ComputeSriov).
+The Nuage plugin supports Single Root I/O Virtualization (SR-IOV)-attached VMs (https://wiki.openstack.org/wiki/SR-IOV-Passthrough-For-Networking) with VSP-managed VMs on the same KVM hypervisor cluster.
+For more information, go to the "VSP OpenStack ML2 Driver Guide*.
+
+    To enable SR-IOV, perform the following steps:
+
+    1. Create a flavor and profile for ComputeSriov:
+
+       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/chap-configuring_basic_overcloud_requirements_with_the_cli_tools#sect-Tagging_Nodes_into_Profiles for the detailed steps.
+
+    ::
+
+        openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computesriov
+        openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computesriov" computesriov
+
+
+    2. Assign SR-IOV nodes with the appropriate ComputeSriov profile:
+
+    ::
+
+        openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
+
+
+    3. To deploy the Overcloud, additional parameters and template files are required.
+
+       * Include the following parameter values in the Heat template *neutron-nuage-config.yaml*:
+
+         ::
+
+             NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3,trunk,NuageNetTopology'
+             NeutronTypeDrivers: "vlan,vxlan,flat"
+             NeutronMechanismDrivers: ['nuage','nuage_sriov','sriovnicswitch']
+             NeutronFlatNetworks: '*'
+             NeutronTunnelIdRanges: "1:1000"
+             NeutronNetworkVLANRanges: "physnet1:2:100,physnet2:2:100"
+             NeutronVniRanges: "1001:2000"
+
+
+       * Include  the *neutron-sriov.yaml* file in the Overcloud deployment command. For an example, go to `Sample Environment Files`_.
+
+         For more information, refer to the `SRIOV-NFV-CONFIGURATION <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/network_functions_virtualization_planning_and_configuration_guide/index#part-sriov-nfv-configuration>`_ section from Red Hat.
+
+       .. Note:: Make sure that the physical network mappings parameters in neutron-nuage-config.yaml and neutron-sriov.yaml match with your hardware profile. To check interface information for your inspected nodes, run ``openstack baremetal introspection interface list [node uuid]``.
+
+Network Isolation
+''''''''''''''''''
+
+   The Nuage plugin supports Network Isolation on the Overcloud nodes. It provides fully distributed L2 and L3 networking, including L2 and L3 network isolation, without requiring centralized routing instances such as the Neutron L3 agent.
+
+   **Linux Bonding with VLANs**
+
+    The plugin uses the default Linux bridge and Linux bonding. Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/advanced_overcloud_customization/overcloud-network-interface-bonding for more information about Linux bonding on OpenStack.
+
+    To deploy the Overcloud Controller and ComputeSriov, Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ that configure the Linux bonding with VLANs.
+
+    By default, these network templates support the following topology. You can modify the templates to match your topology.
+
+    * controller.yaml expects the Controller nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks.
+    * compute.yaml expects Compute nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks
+    * computeavrs.yaml expects the ComputeAvrs nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks..
+    * computeavrssingle.yaml expects the ComputeAvrssingle nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks.
+    * computeavrsdual.yaml expects the ComputeAvrsdual nodes to have three interfaces, where the first interface is for provisioning and the rest ones are for Linux bonding with VLANs for all networks.
+
+    The following example shows the changes to the sample network template for the Linux bonding with VLANs for all interface types.
+
+    To customize the template, modify ``/home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml`` with the appropriate values.
+
+     ::
+
+                ...
+                  - type: linux_bond
+                    name: bond1
+
+                    dns_servers:
+                      get_param: DnsServers
+                    bonding_options: 'mode=active-backup'
+                    members:
+                    - type: interface
+                      name: nic2
+                      primary: true
+                    - type: interface
+                      name: nic3
+                  - type: vlan
+                    device: bond1
+                    vlan_id:
+                      get_param: StorageNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: StorageIpSubnet
+                  - type: vlan
+                    device: bond1
+                    vlan_id:
+                      get_param: StorageMgmtNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: StorageMgmtIpSubnet
+                  - type: vlan
+                    device: bond1
+                    vlan_id:
+                      get_param: InternalApiNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: InternalApiIpSubnet
+                  - type: vlan
+                    device: bond1
+                    vlan_id:
+                      get_param: TenantNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: TenantIpSubnet
+                  - type: vlan
+                    device: bond1
+                    vlan_id:
+                      get_param: ExternalNetworkVlanID
+                    addresses:
+                    - ip_netmask:
+                        get_param: ExternalIpSubnet
+                    routes:
+                    - default: true
+                      next_hop:
+                        get_param: ExternalInterfaceDefaultRoute
+                ...
+
+
+
+
+Phase 5: Deploy the Overcloud
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use the ``openstack overcloud deploy`` command options to pass the environment files and to create or update an Overcloud deployment where:
 
@@ -774,85 +933,98 @@ Use the ``openstack overcloud deploy`` command options to pass the environment f
 
 For AVRS, also include the following role and environment files.
 
-    For a single role deployment:
-        * compute-avrs-role.yaml
+    For single AVRS role deployment:
+
+        * nuage_roles_data.yaml
         * compute-avrs-environment.yaml
 
-    For a multi-role deployment:
+    For multiple AVRS roles deployment:
 
-        * compute-avrs-multirole.yaml
+        * nuage_roles_data.yaml
         * compute-avrs-multirole-environment.yaml
 
+For SR-IOV, also include the following role and environment files.
+
+        * nuage_roles_data.yaml
+        * neutron-sriov.yaml
 
 1. For a non-HA Overcloud deployment, use one of the following commands:
 
 ::
 
+    For VRS Computes as bare metal, use:
     openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
-    For a virtual deployment, add the --libvirt-type parameter:
+    For VRS Computes as virtual machines, add the --libvirt-type parameter:
     openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS single-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For single AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS multi-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For multiple AVRS roles deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
 2. For an HA deployment, use one of the following commands:
 
 ::
 
+    For VRS Computes as bare metal, use:
     openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
-    For a virtual deployment, add the --libvirt-type parameter:
+    For VRS Computes as virtual machines, add the --libvirt-type parameter:
     openstack overcloud deploy --templates --libvirt-type qemu -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS single-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For single AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS multi-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For multiple AVRS roles deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
 
-3. For SR-IOV, use following commands:
+3. For SR-IOV, use following command:
 
 ::
 
-   openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-sriov-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/neutron-sriov.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
+   openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/templates/neutron-sriov.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
 
-4. For a Linux-bonding HA deployment with Nuage, use the following:
+5. For a Linux-bonding HA deployment with Nuage, use the following:
 
 ::
 
     openstack overcloud deploy --templates -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS single-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For single AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
 
-    For an AVRS multi-role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/compute-avrs-role.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+    For multiple AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+
+
+6. For VRS, SR-IOV, and AVRS deployment with Nuage using Linux-bonding, use the following:
+
+::
+
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/templates/overcloud_images.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/templates/node-info.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml -e /home/stack/templates/neutron-sriov.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/host-config-and-reboot.yaml --ntp-server ntp-server --timeout timeout
+
 
 where:
-   * ``neutron-nuage-config.yaml`` is Controller specific parameter values.
-   * ``nova-nuage-config.yaml`` is Compute specific parameter values.
-   * ``node-info.yaml`` is Information specifies count and flavor for Controller and Compute nodes.
-   * ``network-environment.yaml`` Configures additional network environment variables
-   * ``network-isolation.yaml`` Enables creation of networks for isolated overcloud traffic
-   * ``net-bond-with-vlans.yaml`` Configures an IP address and a pair of bonded nics on each network
-   * ``compute-sriov-role.yaml`` Enables services required for Compute Sriov role
-   * ``neutron-sriov.yaml`` Neutron SRIOV specific parameter values
-   * ``compute-avrs-role.yaml`` Enables services required for Compute Avrs role
-   * ``compute-avrs-environment.yaml``  Configure the parameters for ComputeAvrs
-   * ``compute-avrs-multirole-environment.yaml``  Configure the parameters for ComputeAvrsSingle and ComputeAvrsDual
+
+   * ``neutron-nuage-config.yaml`` has Controller-specific parameter values.
+   * ``nova-nuage-config.yaml`` has Compute-specific parameter values.
+   * ``nuage_roles_data.yaml`` has the roles required for overcloud deployment.
+   * ``node-info.yaml`` has information about the count and flavor for Controller and Compute nodes.
+   * ``network-environment.yaml`` configures additional network environment variables.
+   * ``network-isolation.yaml`` enables the creation of networks for isolated Overcloud traffic.
+   * ``net-bond-with-vlans.yaml`` configures an IP address and a pair of bonded NICs on each network.
+   * ``neutron-sriov.yaml`` has the Neutron SR-IOV-specific parameter values.
+   * ``compute-avrs-environment.yaml``  configures the parameters for ComputeAvrs.
+   * ``host-config-and-reboot.yaml`` configures KernelArgs and reboots the Compute Nodes.
+   * ``ntp-server`` has the NTP settings for the Overcloud nodes.
 
 
-
-
-
-Phase 10: Verify that OpenStack director has been deployed successfully
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Run ``openstack stack list`` to verify that the stack was created.
 
@@ -884,7 +1056,6 @@ Phase 10: Verify that OpenStack director has been deployed successfully
 
 3. Verify that the services are running.
 
-
 4. Check the VRS and VSC connection on an Overcloud Compute node.
 
 ::
@@ -913,28 +1084,131 @@ Phase 10: Verify that OpenStack director has been deployed successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "5.3.1-11-nuage"
+        ovs_version: "5.4.1-349-nuage"
 
 
-Phase 11 (Optional) For SR-IOV, manually install and run the topology collector
+Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The nuage-openstack-neutronclient RPM was downloaded and add to the repository with the other Nuage base packages in `Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository`_
+
+To complete the installation:
+
+1. Enable the Nuage repository hosting the nuage-openstack-neutronclient on the Undercloud.
+
+2. Run ``yum install -y nuage-openstack-neutronclient``
+
+Phase 8: Manually Install and Run the Topology Collector for SR-IOV (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-See the "Installation and Configuration: Topology Collection Agent and LLDP" section in the *Nuage VSP OpenStack Queens Neutron ML2 Driver Guide*.
 
-Also see the OpenStack SR-IOV documentation for more information.
+See the "Installation and Configuration: Topology Collection Agent and LLDP" section in the *Nuage VSP OpenStack Neutron ML2 Driver Guide*.
+
+For more information, see the OpenStack SR-IOV documentation: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_openstack_platform/7/html/networking_guide/sr-iov-support-for-virtual-networking
 
 
-Parameters in the Heat Templates
+Nuage Patching Configuration
+------------------------------
+
+For a local repository for Nuage OpenStack packages and Red Hat OpenStack-dependent packages:
+
+   This is an example of nuage_5.0_ospd13.repo.sample:
+
+    ::
+
+         [nuage]
+         name=nuage_osp13_5.4.1.u9_nuage
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
+         enabled=1
+         gpgcheck=1
+
+         [nuage_vrs]
+         name=nuage_osp13_5.4.1.u9_nuage_vrs
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
+         enabled=0
+         gpgcheck=1
+
+         [nuage_avrs]
+         name=nuage_osp13_5.4.1.u9_nuage_avrs
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
+         enabled=0
+         gpgcheck=1
+
+         [extra]
+         name=extra
+         baseurl=http://1.2.3.4/extra_repo
+         enabled=1
+         gpgcheck=1
+
+   You can configure nuage_patching_config.yaml like this:
+
+   ::
+
+         ImageName: "overcloud-full.qcow2"
+         NuageMajorVersion: "5.0"
+         DeploymentType: ["avrs"]
+         RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
+         RepoFile: './nuage_ospd13.repo'
+         VRSRepoNames: ['nuage_vrs']
+         AVRSRepoNames: ['nuage_avrs']
+         logFileName: "nuage_image_patching.log"
+
+
+For a local repository for Nuage packages and a Red Hat Subscription for dependent packages:
+
+
+   This is an example of nuage_ospd13.repo with four different repositories:
+
+   ::
+
+         [nuage]
+         name=nuage_osp13_5.4.1.u9_nuage
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
+         enabled=1
+         gpgcheck=1
+
+         [nuage_vrs]
+         name=nuage_osp13_5.4.1.u9_nuage_vrs
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
+         enabled=0
+         gpgcheck=1
+
+         [nuage_avrs]
+         name=nuage_osp13_5.4.1.u9_nuage_avrs
+         baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
+         enabled=0
+         gpgcheck=1
+
+
+   You can configure nuage_patching_config.yaml like this:
+
+   ::
+
+         ImageName: "overcloud-full.qcow2"
+         NuageMajorVersion: "5.0"
+         DeploymentType: ["avrs"]
+         RhelUserName: 'abc'
+         RhelPassword: '***'
+         RhelPool: '1234567890123445'
+         RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
+         RepoFile: './nuage_ospd13.repo'
+         VRSRepoNames: ['nuage_vrs']
+         AVRSRepoNames: ['nuage_avrs']
+         logFileName: "nuage_image_patching.log"
+
+
+Parameters in Environment Files
 ---------------------------------
 
-This section has the details about the parameters specified in the template files. It also describes the configuration files where the parameters are set and used.
+This section has the details about the parameters specified in the Heat template files. It also describes the configuration files where the parameters are set and used.
 
 Go to http://docs.openstack.org/developer/heat/template_guide/hot_guide.html and https://docs.openstack.org/queens/configuration/ for more information.
 
+For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 
 Parameters on the Neutron Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following parameters are mapped to values in the /etc/neutron/plugins/nuage/plugin.ini file on the Neutron controller:
+The following parameters are mapped to values in the /etc/neutron/plugins/nuage/plugin.ini file on the Neutron Controller:
 
 ::
 
@@ -958,7 +1232,9 @@ The following parameters are mapped to values in the /etc/neutron/plugins/nuage/
     Maps to the cms_id parameter
 
 
-The following parameters are mapped to values in the /etc/neutron/neutron.conf file on the Neutron controller:
+The following parameters are mapped to values in the /etc/neutron/neutron.conf file on the Neutron Controller:
+
+.. Note:: The values for these parameters depend on the Nuage VSP configuration.
 
 ::
 
@@ -966,7 +1242,9 @@ The following parameters are mapped to values in the /etc/neutron/neutron.conf f
     Maps to service_plugins parameter in [DEFAULT] section
 
 
-The following parameters are mapped to values in the /etc/nova/nova.conf file on the Neutron controller:
+The following parameters are mapped to values in the /etc/nova/nova.conf file on the Neutron Controller:
+
+.. Note:: These values for the parameters depend on the Nuage VSP configuration.
 
 ::
 
@@ -977,7 +1255,7 @@ The following parameters are mapped to values in the /etc/nova/nova.conf file on
     Maps to metadata_proxy_shared_secret parameter in [neutron] section
 
 
-The following parameters are mapped to values in the /etc/neutron/plugins/ml2/ml2_conf.ini file on the Neutron controller:
+The following parameters are mapped to values in the /etc/neutron/plugins/ml2/ml2_conf.ini file on the Neutron Controller:
 
 ::
 
@@ -1006,7 +1284,7 @@ The following parameters are mapped to values in the /etc/neutron/plugins/ml2/ml
     Maps to vni_ranges in [ml2_type_vxlan] section
 
 
-The following parameter is mapped to value in the /etc/heat/heat.conf file on the controller:
+The following parameter is mapped to value in the /etc/heat/heat.conf file on the Controller:
 
 ::
 
@@ -1014,7 +1292,7 @@ The following parameter is mapped to value in the /etc/heat/heat.conf file on th
     Maps to plugin_dirs in [DEFAULT] section
 
 
-The following parameter is mapped to value in the /usr/share/openstack-dashboard/openstack_dashboard/local/local_settings.py on controller
+The following parameter is mapped to value in the /usr/share/openstack-dashboard/openstack_dashboard/local/local_settings.py on the Controller:
 
 ::
 
@@ -1022,7 +1300,7 @@ The following parameter is mapped to value in the /usr/share/openstack-dashboard
     Maps to customization_module in HORIZON_CONFIG dict
 
 
-The following parameter is mapped to value in the /etc/httpd/conf.d/10-horizon_vhost.conf on controller
+The following parameter is mapped to value in the /etc/httpd/conf.d/10-horizon_vhost.conf on the Controller:
 
 ::
 
@@ -1097,7 +1375,7 @@ The following parameters are mapped to values in the /etc/default/nuage-metadata
 Parameters Required for Nuage AVRS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following parameters are mapped to values in the /etc/fast-path.env on Nova Compute AVRS:
+The following parameters are mapped to values in the /etc/fast-path.env on the Nova Compute AVRS:
 
 ::
 
@@ -1132,6 +1410,14 @@ The following parameters are mapped to values in the /etc/fast-path.env on Nova 
     Maps to FP_OPTIONS. FP_OPTIONS specifies additional fast path options.
 
 
+The following parameters are mapped to values in the /etc/cpuset.env on the Nova Compute AVRS:
+
+::
+
+    CpuSetEnable        =====>    CPUSET_ENABLE
+    Maps to CPUSET_ENABLE. CPUSET_ENABLE enabled (1) or disabled (0) the cpuset
+
+
 Parameters Required for Docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1144,8 +1430,8 @@ This parameter is required:
     The value can be multiple addresses separated by commas.
 
 
-Sample Templates
------------------
+Sample Environment Files
+-------------------------
 
 For the latest templates, go to the `Links to Nuage and OpenStack Resources`_ section.
 
@@ -1216,7 +1502,7 @@ neutron-nuage-config.yaml
       NeutronNuageVSDUsername: 'csproot'
       NeutronNuageVSDPassword: 'csproot'
       NeutronNuageVSDOrganization: 'csp'
-      NeutronNuageBaseURIVersion: 'v5_0'
+      NeutronNuageBaseURIVersion:  'v5_0'
       NeutronNuageCMSId: 'a91a28b8-28de-436b-a665-6d08a9346464'
       UseForwardedFor: true
       NeutronPluginMl2PuppetTags: 'neutron_plugin_ml2,neutron_plugin_nuage'
@@ -1240,7 +1526,15 @@ neutron-nuage-config.yaml
         access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
         aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python2.7/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
         directories: [{'path': '/usr/lib/python2.7/site-packages/nuage_horizon', 'options': ['FollowSymLinks'], 'allow_override': ['None'], 'require': 'all granted'}]
-
+      ControllerExtraConfig:
+        neutron::config::server_config:
+          DEFAULT/ipam_driver:
+            value: nuage_internal
+          DEFAULT/enable_snat_by_default:
+            value: false
+        neutron::config::plugin_nuage_config:
+          RESTPROXY/nuage_pat:
+            value: legacy_disabled
 
 neutron-sriov.yaml
 ~~~~~~~~~~~~~~~~~~~
@@ -1263,6 +1557,15 @@ Include this file in the ``openstack overcloud deploy`` command when you deploy 
 
       # Number of VFs that needs to be configured for a physical interface
       NeutronSriovNumVFs: "eno2:5,eno3:7"
+      ComputeSriovParameters:
+        KernelArgs: "iommu=pt intel_iommu=on"
+        TunedProfileName: ""
+        NovaPCIPassthrough:
+          - devname: "eno2"
+            physical_network: "physnet1"
+          - devname: "eno3"
+            physical_network: "physnet2"
+
 
 
 nova-nuage-config.yaml For a Virtual Setup
@@ -1317,8 +1620,8 @@ nova-nuage-config.yaml For a KVM Setup
       VrsExtraConfigs: {}
 
 
-compute-avrs-environment.yaml for AVRS integration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compute-avrs-environment.yaml for AVRS Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1349,7 +1652,7 @@ compute-avrs-environment.yaml for AVRS integration
         GpgCheck: "yes"
 
 
-compute-avrs-multirole-environment.yaml for AVRS integration
+compute-avrs-multirole-environment.yaml for AVRS Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
@@ -1397,7 +1700,6 @@ compute-avrs-multirole-environment.yaml for AVRS integration
         CpuSetEnable: 0
         GpgCheck: "yes"
 
-
 node-info.yaml for Non-HA Deployments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1420,7 +1722,6 @@ node-info.yaml for HA and Linux-Bond HA Deployments
     parameter_defaults:
       ControllerCount: 3
       ComputeCount: 1
-
 
 node-info.yaml for SR-IOV Deployments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1462,6 +1763,8 @@ If the services do not come up, enter ``pcs resource cleanup``.
 
 While Running the Script to Patch and Modify the Overcloud qcow Image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the scripts to patch the Overcloud qcow image, go to `stopgap-script <../../image-patching/stopgap-script>`_
 
 If the following issue occurs:
 
@@ -1537,8 +1840,8 @@ The workaround is to manually remove the instance_uuid reference:
     ironic node-update 9e57d620-3ec5-4b5e-96b1-bf56cce43411 remove instance_uuid
 
 
-While deploying overcloud with Ironic service enabled
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+While Deploying the Overcloud with the Ironic Service Enabled
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the following issue occurs:
 
@@ -1546,27 +1849,36 @@ If the following issue occurs:
 
     resources.ControllerServiceChain: Error in 102 output role_data: The Parameter (UpgradeRemoveUnusedPackages) was not provided
 
-The workaround is to apply this upstream `change <https://review.openstack.org/#/c/617215/3/docker/services/nova-ironic.yaml>`_ .
+The workaround is to apply this upstream `change <https://review.openstack.org/#/c/617215/3/docker/services/nova-ironic.yaml>`_ 
 
-Here is the upstream `bug id <https://bugzilla.redhat.com/show_bug.cgi?id=1648998>`_ .
+Here is the upstream `bug id <https://bugzilla.redhat.com/show_bug.cgi?id=1648998>`_
 
 Known Issues
 ~~~~~~~~~~~~
 
-1. When deploying overcloud computeavrs without network isolation, creation of any fastpath VMs is create unnecessary ifcfg scripts. which prevents network restart.
+1. When deploying the Overcloud ComputeAvrs without Network Isolation, creating any fast path VMs causes the creation of unnecessary ifcfg scripts, which prevents the network from restarting.
 
-  Problem: When a fastpath VM is created on an AVRS through Openstack, `ifcfg` network configuration files are created and `BOOTPROTO` is set to DHCP. When the `systemctl restart network.service` command is run on the ComputeAvrs, the service returns a status of failed as the tap interface unnecessarily tries to acquire an IP address through DHCP.
+   Problem: When a fast path VM is created on AVRS through Openstack, `ifcfg` network configuration files are created and `BOOTPROTO` is set to DHCP. When the `systemctl restart network.service` command is run on the ComputeAvrs, the service returns a status of failed as the tap interface unnecessarily tries to acquire an IP address through DHCP.
 
-  Workaround: Delete all the ifcfg-tap* configuration files from /etc/sysconfig/network-scripts/ prior to running `systemctl restart network.service`. This needs to be done every time before running `systemctl restart network.service` or `systemctl stop network.service` followed by `systemctl start network.service`.
+   Workaround: Delete all the ifcfg-tap* configuration files from /etc/sysconfig/network-scripts/ before running `systemctl restart network.service`. This needs to be done every time before running `systemctl restart network.service` or `systemctl stop network.service`, followed by `systemctl start network.service`.
 
-  Recommended Solution: Deploy overcloud nodes using network isolation.
+   Recommended Solution: Deploy the Overcloud nodes using Network Isolation.
 
 
 Known Limitations
 ~~~~~~~~~~~~~~~~~
 
-1. Using VrsExtraConfigs, users can configure extra parameters in /etc/default/openvswitch, but below are few limitations
+1. Using VrsExtraConfigs, you can configure extra parameters in /etc/default/openvswitch with these limitations:
 
-  Using the current approach, there is a chance to configure parameters that are not present in /etc/default/openvswitch by default.
+   * Using the current approach, parameters that are not present in /etc/default/openvswitch by default may be configured.
 
-  Also, VrsExtraConfigs can configure ACTIVE_CONTROLLER, STANDBY_CONTROLLER and BRIDGE_MTU, by overwriting the already values initially provided.
+   * VrsExtraConfigs can configure ACTIVE_CONTROLLER, STANDBY_CONTROLLER and BRIDGE_MTU by overwriting the values already assigned to them.
+
+Links to Nuage and OpenStack Resources
+---------------------------------------
+
+* For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
+* For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
+* For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
