@@ -9,7 +9,9 @@ Minor Upgrade to Release 5.4.1 U9
    :depth: 3
 
 
-Use this documentation when upgrading between minor releases. The process applies to upgrades from Release 5.4.1 U6 or later to Release 5.4.1 U9. During this process, the Nuage components can be updated at the same time.
+Use this documentation when upgrading between nuage minor releases. The process applies to upgrades from Release 5.4.1 U6 or later to Release 5.4.1 U9. During this process, the Nuage components are updated to 5.4.1 U9.
+
+Note:  Nuage 5.4.1 U9 release is supported with RHEL 7.6. Please make sure Red Hat packages are not updated to newer versions during the Nuage minor update process.
 
 It is assumed the operator is familiar with Red Hat OpenStack Platform Director upgrades, VSP installation, the distribution-specific installation and upgrade practices, and the specific requirements for operations in a production environment.
 
@@ -45,8 +47,9 @@ Before the Upgrade
 
 1. If you are upgrading an AVRS node, migrate all your VMs on the node to an AVRS Compute node that is not being upgraded. Perform the steps in the "Live Migrate a Virtual Machine" section in https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/migrating-virtual-machines-between-compute-nodes-osp#live-migrate-a-vm-osp
 
-2. Create the following repositories:
-    
+2. Create the following repositories containing 5.4.1U9 nuage packages:
+
+
     * Nuage_base_repo:
         
         - It contains Selinux-policy-nuage, nuage-bgp, Python-openvswitch-nuage, nuage-openstack-neutronclient, and nuage-puppet-modules.
@@ -62,6 +65,8 @@ Before the Upgrade
         
         - It contains nuage-metadata-agent, nuage-openvswitch (avrs), nuage-selinux-avrs, and 6WIND packages.
         - Enable this repository on the Nova Compute AVRS nodes.
+
+3. Please run "yum clean all" to clean the old yum cache on all your overcloud nodes after enabling above yum repositories.
 
 
 Upgrade Workflow
