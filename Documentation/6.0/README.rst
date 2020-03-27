@@ -1028,7 +1028,7 @@ Network Isolation
 
        * computeovrs.yaml expects the ComputeOvrs nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces for Linux bonding with VLANs for all networks except the Tenant network. The rest are for OVRS using Mellanox ConnectX-5 NICs to configure Linux bonding with VLANs for the Tenant network.
 
-    4. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs.
+    4. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs without controlplane protection.
 
     ::
 
@@ -1078,6 +1078,81 @@ Network Isolation
                 - ip_netmask:
                     get_param: TenantIpSubnet
             ...
+
+
+    5. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs with controlplane protection.
+
+    ::
+
+        - Define "MellanoxTenantPort1" and "MellanoxTenantPort2" as type string in parameters section
+
+            ...
+                MellanoxTenantPort1:
+                  description: Mellanox Tenant Port1
+                  type: string
+                MellanoxTenantPort2:
+                  description: Mellanox Tenant Port2
+                  type: string
+                TenantPortEthtoolOptions:
+                  description: Port ethtool options for Control Plane Protectionn
+                  type: string
+            ...
+
+    - This is the sample network_config for Linux Bonding over Mellanox ConnectX-5 NICs on Compute nodes using the os-net-config.
+
+    ::
+
+            ...
+              - type: linux_bond
+                name: tenant-bond
+                dns_servers:
+                  get_param: DnsServers
+                bonding_options:
+                  get_param: BondInterfaceOvsOptions
+                members:
+                 - type: sriov_pf
+                   name:
+                    get_param: MellanoxTenantPort1
+                  link_mode: switchdev
+                  numvfs: 8
+                  promisc: true
+                  use_dhcp: false
+                  primary: true
+                  ethtool_opts:
+                    get_param: TenantPortEthtoolOptions
+                - type: sriov_pf
+                  name:
+                    get_param: MellanoxTenantPort2
+                  link_mode: switchdev
+                  numvfs: 8
+                  promisc: true
+                  use_dhcp: false
+                  ethtool_opts:
+                    get_param: TenantPortEthtoolOptions
+              - type: vlan
+                device: tenant-bond
+                vlan_id:
+                  get_param: TenantNetworkVlanID
+                addresses:
+                - ip_netmask:
+                    get_param: TenantIpSubnet
+            ...
+
+    - Later define the parameter inside network-environment.yaml and set this to appropriate values.
+
+    An example of how to set this for a setup with 60 queues total is shown below
+
+    ::
+
+        TenantPortEthtoolOptions: "-L ${DEVICE} combined 60; -X ${DEVICE} equal 58; -U ${DEVICE} flow-type tcp4 src-port 6633 action 59 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 59 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 59 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 59 loc 4"
+
+
+    An example of how to set this for a setup with 40 queues total is shown below
+
+    ::
+
+        TenantPortEthtoolOptions: "-L ${DEVICE} combined 40; -X ${DEVICE} equal 38; -U ${DEVICE} flow-type tcp4 src-port 6633 action 39 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 39 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 39 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 39 loc 4"
+
 
     .. Note::
 
