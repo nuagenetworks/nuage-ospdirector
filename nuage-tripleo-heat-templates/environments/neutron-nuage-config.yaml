@@ -1,0 +1,41 @@
+# A Heat environment file which can be used to enable a
+# a Neutron Nuage backend on the controller, configured via puppet
+parameter_defaults:
+  NeutronNuageNetPartitionName: 'default_name'
+  NeutronNuageVSDIp: '0.0.0.0:0'
+  NeutronNuageVSDUsername: 'username'
+  NeutronNuageVSDPassword: 'password'
+  NeutronNuageVSDOrganization: 'organization'
+  NeutronNuageBaseURIVersion: 'default_uri_version'
+  NeutronNuageCMSId: ''
+  UseForwardedFor: true
+  NeutronPluginMl2PuppetTags: 'neutron_plugin_ml2,neutron_plugin_nuage'
+  NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageL3,trunk'
+  NeutronDBSyncExtraParams: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --config-file /etc/neutron/plugins/nuage/plugin.ini'
+  NeutronTypeDrivers: 'vxlan'
+  NeutronNetworkType: 'vxlan'
+  NeutronMechanismDrivers: "nuage"
+  NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security'
+  NeutronFlatNetworks: '*'
+  NovaOVSBridge: 'alubr0'
+  NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+  NeutronTunnelIdRanges: ''
+  NeutronNetworkVLANRanges: ''
+  NeutronVniRanges: '1001:2000'
+  HeatEnginePluginDirs: ['/usr/lib/python3.6/site-packages/nuage-heat/']
+  HorizonCustomizationModule: 'nuage_horizon.customization'
+  HorizonVhostExtraParams:
+    add_listen: True
+    priority: 10
+    access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
+    directories: [{'allow_override': ['None'], 'path': '/usr/lib/python3.6/site-packages/nuage_horizon', 'require': 'all granted', 'options': ['FollowSymLinks']}]
+    aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python3.6/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
+  ControllerExtraConfig:
+    neutron::config::server_config:
+      DEFAULT/ipam_driver:
+        value: nuage_internal
+      DEFAULT/enable_snat_by_default:
+        value: false
+    neutron::config::plugin_nuage_config:
+      RESTPROXY/nuage_pat:
+        value: legacy_disabled

@@ -1,0 +1,13 @@
+resource_registry:
+  # Network Interface templates to use (these files must exist). You can
+  # override these by including one of the net-*.yaml environment files,
+  # such as net-bond-with-vlans.yaml, or modifying the list here.
+  # Port assignments for the Controller
+  OS::TripleO::Controller::Net::SoftwareConfig:
+    ../network/config/bond-with-vlans/controller.yaml
+  # Port assignments for the Compute
+  OS::TripleO::Compute::Net::SoftwareConfig:
+    ../network/config/bond-with-vlans/compute.yaml
+  # Port assignments for the ComputeSriov
+  OS::TripleO::ComputeSriov::Net::SoftwareConfig:
+    ../network/config/bond-with-vlans/computesriov.yaml

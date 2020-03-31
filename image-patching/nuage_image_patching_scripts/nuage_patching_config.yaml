@@ -1,0 +1,63 @@
+# Name of the qcow2 image
+# type: string
+# required
+ImageName: "overcloud-full.qcow2"
+
+# DeploymentType for your Deployment
+# type: string
+# required
+#      ["vrs"]  --> VRS deployment
+DeploymentType: ["vrs"]
+
+# User name for RHEL Subscription
+# type: string
+# optional
+RhelUserName: ''
+
+# Password for the RHEL Subscription 
+# type: string
+# optional
+RhelPassword: ''
+
+# Pool to subscribe to for base packages
+# type: string
+# optional
+RhelPool: ''
+
+# URL for RHEL Satellite Server
+# type: string
+# optional
+RhelSatUrl: ''
+
+# Organization for RHEL Satellite Subscription
+# type: string
+# optional
+RhelSatOrg: ''
+
+# Activation key for RHEL Satellite Subscription
+# type: string
+# optional
+RhelSatActKey: ''
+
+# RPM GPG Key
+# type: list
+# optional
+# Note: Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py"
+RpmPublicKey: []
+
+# Path for the Repo File
+# type: string
+# required
+# Note: Make sure to place repo file in the same folder as "nuage_overcloud_full_patch.py"
+RepoFile: ''
+
+# Log file name
+# type: string
+# optional
+logFileName: "nuage_image_patching.log"
+
+# If you are behind Proxy you can enter Proxy Server information here
+# type: string
+# optional
+ProxyHostname: ''
+ProxyPort: ''

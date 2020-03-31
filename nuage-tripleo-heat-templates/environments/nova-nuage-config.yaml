@@ -1,0 +1,17 @@
+# Heat environment file which can be used to enable
+# Nuage backend on the compute, configured via puppet
+parameter_defaults:
+  NuageActiveController: '192.168.24.120'
+  NuageStandbyController: '0.0.0.0'
+  NuageBridgeMTU: '9000'
+  NovaIPv6: 'True'
+  NuageMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+  NuageNovaApiEndpoint: 'internalURL'
+  NovaOVSBridge: 'alubr0'
+  NovaComputeLibvirtType: 'kvm'
+  NovaComputeLibvirtVifDriver: 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+  # VrsExtraConfigs can be used to configure extra parameters in /etc/default/openvswitch
+  # For example to set "NETWORK_UPLINK_INTF" see below sample:
+  # VrsExtraConfigs: {"NETWORK_UPLINK_INTF": "eno1"}
+  VrsExtraConfigs: {}
+  NuageGpgKeys: []

@@ -1,0 +1,21 @@
+resource_registry:
+  # Below services are disabled on Controller for neutron_driver: null
+  OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
+  OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
+  OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
+  OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
+
+  # Below services are disabled on Controller for neutron_driver: ovn
+  OS::TripleO::Services::OVNDBs: OS::Heat::None
+  OS::TripleO::Services::OVNController: OS::Heat::None
+
+  # Override the NeutronMl2PluginBase to use Nuage inside Docker container
+  OS::TripleO::Docker::NeutronMl2PluginBase: deployment/neutron/neutron-plugin-ml2-nuage.yaml
+  OS::TripleO::Services::NeutronCorePlugin: deployment/neutron/neutron-plugin-ml2-nuage-container-puppet.yaml
+
+  # Below services are disabled on Compute for Nuage OpenvSwitch
+  OS::TripleO::Services::OVNMetadataAgent:  OS::Heat::None
+  OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
+
+  # Override the ComputeNeutronCorePlugin to use Nuage OpenvSwitch on compute nodes
+  OS::TripleO::Services::ComputeNeutronCorePlugin: deployment/nova/nuage-compute-vrs.yaml

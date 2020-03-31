@@ -1,0 +1,190 @@
+heat_template_version: rocky
+
+description: >
+  OpenStack Neutron Compute Nuage plugin
+parameters:
+  ServiceData:
+    default: {}
+    description: Dictionary packing service data
+    type: json
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.  This
+                 mapping overrides those in ServiceNetMapDefaults.
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  RoleName:
+    default: ''
+    description: Role name on which the service is applied
+    type: string
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  NovaPassword:
+    description: The password for the nova service and db account
+    type: string
+    hidden: true
+  NuageMetadataPort:
+    description: TCP Port to listen for metadata server requests
+    type: string
+    default: '9697'
+  NuageActiveController:
+    description: IP address of the Active Virtualized Services Controller (VSC)
+    type: string
+  NuageStandbyController:
+    description: IP address of the Standby Virtualized Services Controller (VSC)
+    type: string
+  NuageNovaMetadataPort:
+    description: TCP Port used by Nova metadata server
+    type: string
+    default: '8775'
+  NuageMetadataProxySharedSecret:
+    description: Shared secret to sign the instance-id request
+    type: string
+  NuageNovaClientVersion:
+    description: Client Version Nova
+    type: string
+    default: '2'
+  NuageNovaOsUsername:
+    description: Nova username in keystone_authtoken
+    type: string
+    default: 'nova'
+  NuageMetadataAgentStartWithOvs:
+    description: Set to true if nuage-metadata-agent needs to be started with nuage-openvswitch-switch
+    type: boolean
+    default: true
+  NuageNovaApiEndpoint:
+    description: One of publicURL, internalURL, adminURL in "keystone endpoint-list"
+    type: string
+    default: 'publicURL'
+  NuageNovaRegionName:
+    description: Region name in "keystone endpoint-list"
+    type: string
+    default: 'regionOne'
+  NuageBridgeMTU:
+    description: Support for non-default MTU configured on each Compute node
+    type: string
+    default: ''
+  OvsHwOffload:
+    default: false
+    description: |
+      Enable OVS Hardware Offload.
+    type: boolean
+  VrsExtraConfigs:
+    description: Extra config params and values for nuage-openvswitch
+    default: {}
+    type: json
+    tags:
+      - role_specific
+  NuageGpgKeys:
+    type: comma_delimited_list
+    default: []
+    description: Nuage GPG keys
+
+resources:
+
+  RoleParametersValue:
+    type: OS::Heat::Value
+    properties:
+      type: json
+      value:
+        map_replace:
+          - map_replace:
+            - nuage::vrs::enable_hw_offload: OvsHwOffload
+              nuage::vrs::vrs_extra_configs: VrsExtraConfigs
+            - values: {get_param: [RoleParameters]}
+          - values:
+              OvsHwOffload: {get_param: OvsHwOffload}
+              VrsExtraConfigs: {get_param: VrsExtraConfigs}
+
+outputs:
+  role_data:
+    description: Role data for the Neutron Compute Nuage plugin
+    value:
+      service_name: neutron_compute_plugin_nuage
+      config_settings:
+        map_merge:
+          - get_attr: [RoleParametersValue, value]
+          - nuage::vrs::active_controller: {get_param: NuageActiveController}
+            nuage::vrs::standby_controller: {get_param: NuageStandbyController}
+            nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
+            nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
+            nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
+            nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
+            nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
+            nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
+            nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
+            nuage::metadataagent::nova_api_endpoint_type: {get_param: NuageNovaApiEndpoint}
+            nuage::metadataagent::nova_region_name: {get_param: NuageNovaRegionName}
+            tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
+            tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
+            tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
+            tripleo.neutron_compute_plugin_nuage.firewall_rules:
+              '118 neutron vxlan networks':
+                proto: 'udp'
+                dport: 4789
+              '100 metadata agent':
+                dport: {get_param: NuageMetadataPort}
+      step_config: |
+        include ::tripleo::profile::base::neutron::agents::nuage
+      host_prep_tasks:
+        - name: Check if nuage base packages are installed or not #todo(sunny): add nuage-bgp
+          shell: rpm -q nuage-puppet-modules python-openvswitch-nuage selinux-policy-nuage
+          #todo(sunny): add nuage-bgp
+          failed_when: false
+          register: nuage_base_check
+        - name: Installing nuage base packages
+          block:
+          - name: set nuage_gpg_keys fact
+            set_fact:
+              nuage_gpg_keys: {get_param: NuageGpgKeys}
+          - name: Adding nuage_gpg_keys on overcloud node
+            rpm_key:
+              state: present
+              key: "{{ item }}"
+            with_items:
+              - "{{ nuage_gpg_keys }}"
+            when:
+              - nuage_gpg_keys != []
+          - debug:
+              msg: "No NuageGpgKeys Environment variable is set for this deployment"
+            when:
+              - nuage_gpg_keys == []
+          - name: Install python openvswitch nuage
+            yum:
+              name: python-openvswitch-nuage
+              state: present
+          - name: Get upstream openvswitch name
+            register: ovs_pkg_name
+            shell:
+              rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
+          - name: Remove upstream openvswitch amd network-scripts-openvswitch
+            yum:
+              name: "{{ item }}"
+              state: absent
+            with_items:
+              - "{{ ovs_pkg_name.stdout }}"
+              - "network-scripts-{{ ovs_pkg_name.stdout }}"
+            when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
+          - name: Installing nuage packages dependencies and base packages
+            yum:
+              name: "{{ packages }}"
+              state: present
+            vars:
+              packages:
+                - perl-JSON
+                - python2
+                - lldpad
+                - nuage-puppet-modules
+                - selinux-policy-nuage
+# todo(sunny)   - nuage-bgp
+          when: nuage_base_check != 0
