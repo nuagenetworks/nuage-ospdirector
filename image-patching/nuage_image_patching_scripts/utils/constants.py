@@ -15,10 +15,9 @@
 
 # List of Nuage packages
 NUAGE_PYTHON_OVS = "python-openvswitch-nuage"
-#(todo: sai) add nuage-bgp
 NUAGE_PACKAGES = "nuage-puppet-modules " \
                  "nuage-openstack-neutronclient " \
-                 "selinux-policy-nuage"
+                 "selinux-policy-nuage nuage-bgp"
 NUAGE_DEPENDENCIES = "python2 perl-JSON lldpad"
 NUAGE_VRS_PACKAGE = "nuage-openvswitch nuage-metadata-agent"
 VIRT_CUSTOMIZE_MEMSIZE = "2048"

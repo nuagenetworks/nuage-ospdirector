@@ -137,9 +137,8 @@ outputs:
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
       host_prep_tasks:
-        - name: Check if nuage base packages are installed or not #todo(sunny): add nuage-bgp
-          shell: rpm -q nuage-puppet-modules python-openvswitch-nuage selinux-policy-nuage
-          #todo(sunny): add nuage-bgp
+        - name: Check if nuage base packages are installed or not
+          shell: rpm -q nuage-puppet-modules python-openvswitch-nuage selinux-policy-nuage nuage-bgp
           failed_when: false
           register: nuage_base_check
         - name: Installing nuage base packages
@@ -186,5 +185,5 @@ outputs:
                 - lldpad
                 - nuage-puppet-modules
                 - selinux-policy-nuage
-# todo(sunny)   - nuage-bgp
+                - nuage-bgp
           when: nuage_base_check != 0
