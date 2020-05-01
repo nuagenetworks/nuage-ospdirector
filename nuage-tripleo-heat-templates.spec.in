@@ -5,13 +5,10 @@ Version:        @VERSION@
 Release:        %{release}%{dist}
 License:        ASL 2.0
 Group:          System Environment/Base
-URL:            https://github.com/nuagenetworks/nuage-ospdirector/blob/OSPD16/README.md
+URL:            https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/README.md
 Source:         nuage-tripleo-heat-templates.tar.gz
 
-BuildRequires:  python2-devel
-BuildRequires:  python-setuptools
-
-Requires:       PyYAML
+Requires:       python3-pyyaml
 Requires:       openstack-tripleo-heat-templates
 
 %description
@@ -35,6 +32,4 @@ cp -ar nuage-overcloud-resource-registry.yaml %{buildroot}/%{_datadir}/%{name}
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%doc LICENSE
-%doc nuage-overcloud-resource-registry.yaml
 %{_datadir}/%{name}
