@@ -182,6 +182,8 @@ outputs:
               packages:
                 - perl-JSON
                 - python2
+                - python2-ipaddress
+                - python3-httplib2
                 - lldpad
                 - nuage-puppet-modules
                 - selinux-policy-nuage
