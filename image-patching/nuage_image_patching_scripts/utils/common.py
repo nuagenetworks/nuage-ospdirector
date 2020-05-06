@@ -200,7 +200,10 @@ def rhel_subscription(username, password, pool, satellite_url, satellite_org,
             "subscription-manager attach --pool='%s'\n" % pool
         )
     subscription_command += (
-        "sudo subscription-manager repos --enable=rhel-8-for-x86_64-baseos-rpms --enable=rhel-8-for-x86_64-appstream-rpms  \n"
+        "sudo subscription-manager repos "
+        "--enable=rhel-8-for-x86_64-baseos-rpms "
+        "--enable=rhel-8-for-x86_64-appstream-rpms  "
+        "--enable=rhel-8-for-x86_64-highavailability-rpms \n "
     )
     constants.PATCHING_SCRIPT += subscription_command
 
