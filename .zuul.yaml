@@ -1,0 +1,28 @@
+- project:
+    check:
+      jobs:
+        - nuage-ospd-deployment-16-vrs
+        - nuage-ospd-tempest-16-vrs
+    gate:
+      jobs:
+        - nuage-ospd-deployment-16-vrs
+        - nuage-ospd-tempest-16-vrs
+
+- job:
+    name: nuage-ospd-deployment-16-vrs
+    branches: .*
+    parent: ospd-deployment-16-vrs
+    provides: nuage-ospd-deployment-16-vrs
+    description: |
+      Integrated gate job for OSPD 16 using a virtual undercloud and overcloud.
+    nodeset: openstack-single-node-rhel7
+    irrelevant-files: (.+\.rst)|(.+\.md)|(.+\.cfg)|(.+\.spec)|(.+setup\.py)|(.+LICENSE)|(.+PNG)|(.+png)|(.+JPEG)|(.+jpeg)
+
+- job:
+    name: nuage-ospd-tempest-16-vrs
+    parent: ospd-tempest-16-vrs
+    dependencies: nuage-ospd-deployment-16-vrs
+    requires: nuage-ospd-deployment-16-vrs
+    branches: .*
+    irrelevant-files: (.+\.rst)|(.+\.md)|(.+\.cfg)|(.+\.spec)|(.+setup\.py)|(.+LICENSE)|(.+PNG)|(.+png)|(.+JPEG)|(.+jpeg)
+
