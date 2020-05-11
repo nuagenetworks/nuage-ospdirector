@@ -1821,7 +1821,7 @@ neutron-nuage-config.yaml
       NeutronTypeDrivers: 'vxlan'
       NeutronNetworkType: 'vxlan'
       NeutronMechanismDrivers: 'nuage'
-      NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security'
+      NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
       NeutronFlatNetworks: '*'
       NeutronTunnelIdRanges: ''
       NeutronNetworkVLANRanges: ''
