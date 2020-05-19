@@ -97,7 +97,7 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
     To install the required Nuage packages, you run the script to patch the the Overcloud image.
 
-    If you are using the *No Patching* process, skip this phase and follow the steps in the `Phase 4.4: No Patching Workflow`_
+    If you are using the *No Patching* process, skip this phase and follow the steps in the `Phase 4.3: No Patching Workflow`_
 
   - **Phase 4.3: No Patching Workflow**
 
@@ -168,7 +168,7 @@ Phase 3: Prepare Nuage Repository and Containers
 Phase 3.1: Download the Nuage VSP RPMs and Create a Yum Repository
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 4.3: Modify the Overcloud Image`_).
+For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 4.2: Modify the Overcloud Image`_).
 
 The repository contents may change depending on the roles configured for your deployment.
 
@@ -212,6 +212,7 @@ In this phase, you prepare Nuage containers for the integration.
 
 
 ::
+
         excludes:
         - horizon
         - heat-engine
@@ -334,7 +335,7 @@ Phase 4.2: Modify the Overcloud Image
 
 In this phase, you modify the overcloud-full.qcow2 image with the required Nuage packages.
 
-When using the *No Patching* feature, skip this phase and follow the instructions in `Phase 4.4: No Patching Workflow`_
+When using the *No Patching* feature, skip this phase and follow the instructions in `Phase 4.3: No Patching Workflow`_
 
 Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2):
 
@@ -436,13 +437,13 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
         ::
 
-+--------------------------------------+---------------------------------+--------+
-| ID                                   | Name                            | Status |
-+--------------------------------------+---------------------------------+--------+
-| 90cec28e-9609-4d2e-b87b-030804a99090 | overcloud-full                  | active |
-| 4c3dad99-1463-4391-9663-9b8074f714f1 | overcloud-full-initrd           | active |
-| 66e3ba1e-d080-4199-8ad6-2e54439c8d11 | overcloud-full-vmlinuz          | active |
-+--------------------------------------+---------------------------------+--------+
+            +--------------------------------------+---------------------------------+--------+
+            | ID                                   | Name                            | Status |
+            +--------------------------------------+---------------------------------+--------+
+            | 90cec28e-9609-4d2e-b87b-030804a99090 | overcloud-full                  | active |
+            | 4c3dad99-1463-4391-9663-9b8074f714f1 | overcloud-full-initrd           | active |
+            | 66e3ba1e-d080-4199-8ad6-2e54439c8d11 | overcloud-full-vmlinuz          | active |
+            +--------------------------------------+---------------------------------+--------+
 
 
       Run the following commands to update the images to Glance:
@@ -836,13 +837,13 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
 ::
 
     [stack@director ~]$ nova list
-+--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
-| ID                                   | Name                     | Status | Task State | Power State | Networks               |
-+--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
-| 3ca9a740-5f02-41f9-8596-4556964996f8 | overcloud-computesriov-0 | ACTIVE | -          | Running     | ctlplane=192.168.24.19 |
-| 1f220c11-6fc2-4ca8-a3f5-ed353f02ad89 | overcloud-controller-0   | ACTIVE | -          | Running     | ctlplane=192.168.24.13 |
-| b8982526-e308-4d6f-b370-38b6079f06e5 | overcloud-novacompute-0  | ACTIVE | -          | Running     | ctlplane=192.168.24.22 |
-+--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
+    +--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
+    | ID                                   | Name                     | Status | Task State | Power State | Networks               |
+    +--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
+    | 3ca9a740-5f02-41f9-8596-4556964996f8 | overcloud-computesriov-0 | ACTIVE | -          | Running     | ctlplane=192.168.24.19 |
+    | 1f220c11-6fc2-4ca8-a3f5-ed353f02ad89 | overcloud-controller-0   | ACTIVE | -          | Running     | ctlplane=192.168.24.13 |
+    | b8982526-e308-4d6f-b370-38b6079f06e5 | overcloud-novacompute-0  | ACTIVE | -          | Running     | ctlplane=192.168.24.22 |
+    +--------------------------------------+--------------------------+--------+------------+-------------+------------------------+
 
 
 3. Verify that the services are running.
@@ -881,7 +882,7 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
 Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The nuage-openstack-neutronclient RPM was downloaded and add to the repository with the other Nuage base packages in `Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository`_
+The nuage-openstack-neutronclient RPM was downloaded and add to the repository with the other Nuage base packages in `Phase 3.1: Download the Nuage VSP RPMs and Create a Yum Repository`_
 
 To complete the installation:
 
@@ -1167,87 +1168,87 @@ containers-prepare-parameter.yaml
 
 ::
 
-parameter_defaults:
-  NtpServer: ['135.1.1.111']
-  ContainerImageRegistryCredentials:
-    registry.redhat.io:
-      <user-name>: "<password>"
-  ContainerImagePrepare:
-  - push_destination: true
-    set:
-      ceph_alertmanager_image: ose-prometheus-alertmanager
-      ceph_alertmanager_namespace: registry.redhat.io/openshift4
-      ceph_alertmanager_tag: 4.1
-      ceph_grafana_image: rhceph-3-dashboard-rhel7
-      ceph_grafana_namespace: registry.redhat.io/rhceph
-      ceph_grafana_tag: 3
-      ceph_image: rhceph-4-rhel8
-      ceph_namespace: registry.redhat.io/rhceph
-      ceph_node_exporter_image: ose-prometheus-node-exporter
-      ceph_node_exporter_namespace: registry.redhat.io/openshift4
-      ceph_node_exporter_tag: v4.1
-      ceph_prometheus_image: ose-prometheus
-      ceph_prometheus_namespace: registry.redhat.io/openshift4
-      ceph_prometheus_tag: 4.1
-      ceph_tag: latest
-      name_prefix: openstack-
-      name_suffix: ''
-      namespace: registry.redhat.io/rhosp-rhel8
-      neutron_driver: ovn
-      rhel_containers: false
-      tag: '16.0'
-    tag_from_label: '{version}-{release}'
-    excludes:
-    - horizon
-    - heat-engine
-    - heat-api-cfn
-    - neutron-server
-    - heat-api
+    parameter_defaults:
+      NtpServer: ['135.1.1.111']
+      ContainerImageRegistryCredentials:
+        registry.redhat.io:
+          <user-name>: "<password>"
+      ContainerImagePrepare:
+      - push_destination: true
+        set:
+          ceph_alertmanager_image: ose-prometheus-alertmanager
+          ceph_alertmanager_namespace: registry.redhat.io/openshift4
+          ceph_alertmanager_tag: 4.1
+          ceph_grafana_image: rhceph-3-dashboard-rhel7
+          ceph_grafana_namespace: registry.redhat.io/rhceph
+          ceph_grafana_tag: 3
+          ceph_image: rhceph-4-rhel8
+          ceph_namespace: registry.redhat.io/rhceph
+          ceph_node_exporter_image: ose-prometheus-node-exporter
+          ceph_node_exporter_namespace: registry.redhat.io/openshift4
+          ceph_node_exporter_tag: v4.1
+          ceph_prometheus_image: ose-prometheus
+          ceph_prometheus_namespace: registry.redhat.io/openshift4
+          ceph_prometheus_tag: 4.1
+          ceph_tag: latest
+          name_prefix: openstack-
+          name_suffix: ''
+          namespace: registry.redhat.io/rhosp-rhel8
+          neutron_driver: ovn
+          rhel_containers: false
+          tag: '16.0'
+        tag_from_label: '{version}-{release}'
+        excludes:
+        - horizon
+        - heat-engine
+        - heat-api-cfn
+        - neutron-server
+        - heat-api
 
-  - push_destination: true
-    includes:
-    - horizon
-    modify_role: tripleo-modify-image
-    modify_append_tag: "-nuage"
-    modify_vars:
-      tasks_from: modify_image.yml
-      modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/horizon
+      - push_destination: true
+        includes:
+        - horizon
+        modify_role: tripleo-modify-image
+        modify_append_tag: "-nuage"
+        modify_vars:
+          tasks_from: modify_image.yml
+          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/horizon
 
-  - push_destination: true
-    includes:
-    - neutron-server
-    modify_role: tripleo-modify-image
-    modify_append_tag: "-nuage"
-    modify_vars:
-      tasks_from: modify_image.yml
-      modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/neutron-server
+      - push_destination: true
+        includes:
+        - neutron-server
+        modify_role: tripleo-modify-image
+        modify_append_tag: "-nuage"
+        modify_vars:
+          tasks_from: modify_image.yml
+          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/neutron-server
 
-  - push_destination: true
-    includes:
-    - heat-engine
-    modify_role: tripleo-modify-image
-    modify_append_tag: "-nuage"
-    modify_vars:
-      tasks_from: modify_image.yml
-      modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-engine
+      - push_destination: true
+        includes:
+        - heat-engine
+        modify_role: tripleo-modify-image
+        modify_append_tag: "-nuage"
+        modify_vars:
+          tasks_from: modify_image.yml
+          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-engine
 
-  - push_destination: true
-    includes:
-    - heat-api-cfn
-    modify_role: tripleo-modify-image
-    modify_append_tag: "-nuage"
-    modify_vars:
-      tasks_from: modify_image.yml
-      modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api-cfn
+      - push_destination: true
+        includes:
+        - heat-api-cfn
+        modify_role: tripleo-modify-image
+        modify_append_tag: "-nuage"
+        modify_vars:
+          tasks_from: modify_image.yml
+          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api-cfn
 
-  - push_destination: true
-    includes:
-    - heat-api
-    modify_role: tripleo-modify-image
-    modify_append_tag: "-nuage"
-    modify_vars:
-      tasks_from: modify_image.yml
-      modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api
+      - push_destination: true
+        includes:
+        - heat-api
+        modify_role: tripleo-modify-image
+        modify_append_tag: "-nuage"
+        modify_vars:
+          tasks_from: modify_image.yml
+          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api
 
 
 nuage-overcloud-resource-registry.yaml
@@ -1383,7 +1384,7 @@ neutron-nuage-config.yaml
       NeutronTypeDrivers: 'vxlan'
       NeutronNetworkType: 'vxlan'
       NeutronMechanismDrivers: 'nuage'
-      NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security'
+      NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
       NeutronFlatNetworks: '*'
       NeutronTunnelIdRanges: ''
       NeutronNetworkVLANRanges: ''

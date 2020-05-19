@@ -23,7 +23,7 @@ def get_mac():
 
 DEFAULT_CMS_NAME = 'OpenStack_' + get_mac()
 
-from .restproxy import RESTProxyServer
+from restproxy import RESTProxyServer
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
