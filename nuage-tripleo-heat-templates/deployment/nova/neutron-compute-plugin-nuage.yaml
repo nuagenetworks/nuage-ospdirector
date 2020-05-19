@@ -136,56 +136,58 @@ outputs:
                 dport: {get_param: NuageMetadataPort}
       step_config: |
         include ::tripleo::profile::base::neutron::agents::nuage
-      host_prep_tasks:
-        - name: Check if nuage base packages are installed or not
-          shell: rpm -q nuage-puppet-modules python-openvswitch-nuage selinux-policy-nuage nuage-bgp
-          failed_when: false
-          register: nuage_base_check
-        - name: Installing nuage base packages
+      deploy_steps_tasks:
+        - when: step|int == 1
           block:
-          - name: set nuage_gpg_keys fact
-            set_fact:
-              nuage_gpg_keys: {get_param: NuageGpgKeys}
-          - name: Adding nuage_gpg_keys on overcloud node
-            rpm_key:
-              state: present
-              key: "{{ item }}"
-            with_items:
-              - "{{ nuage_gpg_keys }}"
-            when:
-              - nuage_gpg_keys != []
-          - debug:
-              msg: "No NuageGpgKeys Environment variable is set for this deployment"
-            when:
-              - nuage_gpg_keys == []
-          - name: Install python openvswitch nuage
-            yum:
-              name: python-openvswitch-nuage
-              state: present
-          - name: Get upstream openvswitch name
-            register: ovs_pkg_name
-            shell:
-              rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
-          - name: Remove upstream openvswitch amd network-scripts-openvswitch
-            yum:
-              name: "{{ item }}"
-              state: absent
-            with_items:
-              - "{{ ovs_pkg_name.stdout }}"
-              - "network-scripts-{{ ovs_pkg_name.stdout }}"
-            when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
-          - name: Installing nuage packages dependencies and base packages
-            yum:
-              name: "{{ packages }}"
-              state: present
-            vars:
-              packages:
-                - perl-JSON
-                - python2
-                - python2-ipaddress
-                - python3-httplib2
-                - lldpad
-                - nuage-puppet-modules
-                - selinux-policy-nuage
-                - nuage-bgp
-          when: nuage_base_check != 0
+            - name: Check if nuage base packages are installed or not
+              shell: rpm -q nuage-puppet-modules python-openvswitch-nuage selinux-policy-nuage nuage-bgp
+              failed_when: false
+              register: nuage_base_check
+            - name: Installing nuage base packages
+              block:
+              - name: set nuage_gpg_keys fact
+                set_fact:
+                  nuage_gpg_keys: {get_param: NuageGpgKeys}
+              - name: Adding nuage_gpg_keys on overcloud node
+                rpm_key:
+                  state: present
+                  key: "{{ item }}"
+                with_items:
+                  - "{{ nuage_gpg_keys }}"
+                when:
+                  - nuage_gpg_keys != []
+              - debug:
+                  msg: "No NuageGpgKeys Environment variable is set for this deployment"
+                when:
+                  - nuage_gpg_keys == []
+              - name: Install python openvswitch nuage
+                yum:
+                  name: python-openvswitch-nuage
+                  state: present
+              - name: Get upstream openvswitch name
+                register: ovs_pkg_name
+                shell:
+                  rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
+              - name: Remove upstream openvswitch amd network-scripts-openvswitch
+                yum:
+                  name: "{{ item }}"
+                  state: absent
+                with_items:
+                  - "{{ ovs_pkg_name.stdout }}"
+                  - "network-scripts-{{ ovs_pkg_name.stdout }}"
+                when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
+              - name: Installing nuage packages dependencies and base packages
+                yum:
+                  name: "{{ packages }}"
+                  state: present
+                vars:
+                  packages:
+                    - perl-JSON
+                    - python2
+                    - python3-httplib2
+                    - libvirt
+                    - lldpad
+                    - nuage-puppet-modules
+                    - selinux-policy-nuage
+                    - nuage-bgp
+              when: nuage_base_check != 0

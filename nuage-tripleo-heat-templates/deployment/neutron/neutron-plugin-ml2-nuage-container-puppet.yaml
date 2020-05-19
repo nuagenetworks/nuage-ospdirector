@@ -66,4 +66,4 @@ outputs:
       puppet_config: {get_attr: [NeutronContainerBase, role_data, puppet_config]}
       kolla_config: {}
       docker_config: {}
-      host_prep_tasks: {get_attr: [NeutronBase, role_data, host_prep_tasks]}
+      deploy_steps_tasks: {get_attr: [NeutronBase, role_data, deploy_steps_tasks]}

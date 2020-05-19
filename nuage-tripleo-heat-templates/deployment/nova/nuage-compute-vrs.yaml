@@ -51,19 +51,21 @@ outputs:
         get_attr: [NeutronComputePluginNuage, role_data, config_settings]
       step_config:
         get_attr: [NeutronComputePluginNuage, role_data, step_config]
-      host_prep_tasks:
+      deploy_steps_tasks:
         list_concat:
-        - {get_attr: [NeutronComputePluginNuage, role_data, host_prep_tasks]}
-        - - name: Check if nuage vrs and metadata-agent are installed
-            shell: rpm -q nuage-openvswitch nuage-metadata-agent
-            failed_when: false
-            register: nuage_check
-          - name: Installing Nuage VRS Packages
-            yum:
-              name: "{{ packages }}"
-              state: present
-            vars:
-              packages:
-                - nuage-openvswitch
-                - nuage-metadata-agent
-            when: nuage_check.rc != 0
+        - get_attr: [NeutronComputePluginNuage, role_data, deploy_steps_tasks]
+        - - when: step|int == 1
+            block:
+              - name: Check if nuage vrs and metadata-agent are installed
+                shell: rpm -q nuage-openvswitch nuage-metadata-agent
+                failed_when: false
+                register: nuage_check
+              - name: Installing Nuage VRS Packages
+                yum:
+                  name: "{{ packages }}"
+                  state: present
+                vars:
+                  packages:
+                    - nuage-openvswitch
+                    - nuage-metadata-agent
+                when: nuage_check.rc != 0
