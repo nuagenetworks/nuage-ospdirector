@@ -102,5 +102,3 @@ outputs:
             - name: remove repodata
               shell: rm -rf /ovrs/repodata
             when: nuage_ovrs_check.rc != 0
-      upgrade_tasks: {}
-      update_tasks: {}
