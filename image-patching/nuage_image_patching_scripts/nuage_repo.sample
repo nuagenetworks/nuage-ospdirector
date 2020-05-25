@@ -18,6 +18,7 @@ gpgcheck=1
 
 # These are some placeholder for some other repos that user want to enable for these packages.
 # This repo should contain following packages:
+# libvirt
 # perl-JSON
 # lldpad
 # python2
