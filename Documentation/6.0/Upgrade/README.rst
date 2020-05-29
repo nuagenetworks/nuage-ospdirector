@@ -191,11 +191,20 @@ Update Workflow
 
     a. Get the environment values from the /home/stack/nuage-ospdirector-bk directory and update all the templates and environment files for the deployment, such as neutron-nuage/nova-nuage/compute-avrs/ovs-hw-offload/mellanox-environment.
 
-    b. Make sure `NeutronPluginExtensions` options in neutron-nuage-config.yaml contains `nuage_network`, which is added in 6.0.6:
+    b. Make sure `parameter_defaults` section in  neutron-nuage-config.yaml contains following configuration::
 
         ::
 
-            NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
+              NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
+              ControllerExtraConfig:
+                neutron::config::server_config:
+                  DEFAULT/ipam_driver:
+                    value: nuage_internal
+                  DEFAULT/enable_snat_by_default:
+                    value: false
+                neutron::config::plugin_nuage_config:
+                  PLUGIN/enable_ingress_replication:
+                    value: false
 
 
 4. Get the latest Nuage docker images from the Red Hat Partner Registry by following these instructions in Phase 3.2. Nuage Docker Containers from `6.0/README.rst <../../README.rst>`_

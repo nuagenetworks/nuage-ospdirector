@@ -1843,8 +1843,8 @@ neutron-nuage-config.yaml
           DEFAULT/enable_snat_by_default:
             value: false
         neutron::config::plugin_nuage_config:
-          RESTPROXY/nuage_pat:
-            value: legacy_disabled
+          PLUGIN/enable_ingress_replication:
+            value: false
 
 neutron-sriov.yaml
 ~~~~~~~~~~~~~~~~~~~
