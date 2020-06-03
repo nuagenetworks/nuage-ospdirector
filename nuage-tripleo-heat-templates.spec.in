@@ -2,12 +2,13 @@ Name:           nuage-tripleo-heat-templates
 Summary:        Heat templates for Nuage integration with TripleO
 # version will be edited by jenkins build script
 Version:        @VERSION@
-Release:        %{release}%{dist}
+Release:        %{release}
 License:        ASL 2.0
 Group:          System Environment/Base
 URL:            https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/README.md
 Source:         nuage-tripleo-heat-templates.tar.gz
 
+BuildArch:      noarch
 Requires:       python3-pyyaml
 Requires:       openstack-tripleo-heat-templates
 

@@ -17,8 +17,8 @@ import argparse
 import yaml
 import sys
 import logging
-import utils.constants as constants
-from utils.common import *
+from nuage_image_patching_scripts.utils import constants as constants
+from nuage_image_patching_scripts.utils.common import *
 
 '''
 This script is used to patch an existing OpenStack

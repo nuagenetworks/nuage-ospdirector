@@ -1,7 +1,7 @@
-# Name of the qcow2 image
+# Absolute path and name of qcow2 image
 # type: string
 # required
-ImageName: "overcloud-full.qcow2"
+ImageName: "/root/overcloud-full.qcow2"
 
 # DeploymentType for your Deployment
 # type: string
@@ -39,16 +39,14 @@ RhelSatOrg: ''
 # optional
 RhelSatActKey: ''
 
-# RPM GPG Key
+# Absolute path and filename of RPM GPG Key(s)
 # type: list
 # optional
-# Note: Make sure to copy GPG-Key file(s) to the same folder as "nuage_overcloud_full_patch.py"
 RpmPublicKey: []
 
-# Path for the Repo File
+# Absolute path and filename of Repo File
 # type: string
 # required
-# Note: Make sure to place repo file in the same folder as "nuage_overcloud_full_patch.py"
 RepoFile: ''
 
 # Log file name

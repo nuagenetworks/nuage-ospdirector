@@ -365,7 +365,7 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
 4. This script takes in *nuage_patching_config.yaml* as input parameters. You need to configure the following parameters:
 
-   * ImageName (required) is the name of the qcow2 image (for example, overcloud-full.qcow2).
+   * ImageName (required) is the name and absolute path of the qcow2 image (for example, /root/overcloud-full.qcow2).
    * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs*.
 
      - For any combination of VRS and SR-IOV deployments, specify the deployment type as ["vrs"].
@@ -385,11 +385,8 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
         * Any Nuage package signing keys are delivered with other Nuage artifacts.  See ``nuage-package-signing-keys-*.tar.gz``.
 
-        * Make sure to copy the GPGKey files to the same folder as the ``nuage_overcloud_full_patch.py`` patching script directory.
+   * RepoFile (usually required but optional for Red Hat Satellite) is the name and absolute path of the repository hosting the RPMs required for patching.
 
-   * RepoFile (usually required but optional for Red Hat Satellite) is the name of the repository hosting the RPMs required for patching.
-
-     - Make sure to place the repository file in the same folder as the ``nuage_overcloud_full_patch.py`` patching script directory.
      - If Nuage packages are available using the activation key of a Red Hat Satellite server, *RepoFile* becomes optional.
      - RepoFile can contain only a single Nuage repository with the required Nuage packages and can also have extra repositories with non-Nuage packages.
 
@@ -401,7 +398,8 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
 ::
 
-    python3 nuage_overcloud_full_patch.py --nuage-config nuage_patching_config.yaml
+    cd image-patching/
+    python3 nuage_image_patching_scripts/nuage_overcloud_full_patch.py --nuage-config nuage_image_patching_scripts/nuage_patching_config.yaml
 
 
 .. Note:: If the image patching fails, remove the partially patched overcloud-full.qcow2 and create a copy of it from the backup image before retrying the image patching workflow.
@@ -947,14 +945,14 @@ For a local repository for Nuage packages and a Red Hat Subscription for depende
 
 ::
 
-    ImageName: "overcloud-full.qcow2"
+    ImageName: "/root/overcloud-full.qcow2"
       # ["vrs"] --> vrs deployment
     DeploymentType: ["vrs"]
     RhelUserName: 'abc'
     RhelPassword: '***'
     RhelPool: '1234567890123445'
-    RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
-    RepoFile: './nuage_ospd16.repo'
+    RpmPublicKey: ['/root/RPM-GPG-Nuage-key', '/root/RPM-GPG-SOMEOTHER-key']
+    RepoFile: '/root/nuage_ospd16.repo'
     logFileName: "nuage_image_patching.log"
 
 
@@ -969,13 +967,13 @@ For a Red Hat Satellite Server for Nuage packages and Red Hat-dependent packages
 
 ::
 
-    ImageName: "overcloud-full.qcow2"
+    ImageName: "/root/overcloud-full.qcow2"
       # ["vrs"] --> vrs deployment
     DeploymentType: ["vrs"]
     RhelSatUrl: 'https://satellite.example.com'
     RhelSatOrg: 'example_organization'
     RhelSatActKey: 'example_key'
-    RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
+    RpmPublicKey: ['/root/RPM-GPG-Nuage-key', '/root/RPM-GPG-SOMEOTHER-key']
     logFileName: "nuage_image_patching.log"
 
 

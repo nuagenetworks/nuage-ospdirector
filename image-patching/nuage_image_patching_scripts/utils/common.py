@@ -17,7 +17,7 @@ import subprocess
 import sys
 import logging
 import os
-from . import constants
+from nuage_image_patching_scripts.utils import constants
 
 
 logger = logging.getLogger(constants.LOG_FILE_NAME)
