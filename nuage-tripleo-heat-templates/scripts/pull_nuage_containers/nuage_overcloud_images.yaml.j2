@@ -11,5 +11,7 @@ parameter_defaults:
   - {{ nuage_config['local_registry'] }}
   DockerNeutronApiImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-neutron-server-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
   DockerNeutronConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-neutron-server-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+{% if 'nova-compute' in nuage_config['nuage_images'] %}
   DockerNovaComputeAvrsImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
   DockerNovaLibvirtAvrsConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+{% endif %}
