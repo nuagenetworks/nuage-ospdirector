@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ========================================================================
-Integrating Nuage VSP 6.0.6 with Red Hat OpenStack Platform Director 13
+Integrating Nuage VSP 6.0.7 with Red Hat OpenStack Platform Director 13
 ========================================================================
 
 This document has the following topics:
@@ -182,14 +182,14 @@ https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.6 with 13.0-2 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.7 with 13.0-1 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-6:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-6:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-6:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-6:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-6:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-6-0-6:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-7:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-7:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-7:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-7:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-7:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-6-0-7:13.0-1
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -220,8 +220,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for exmaple: Nuage release 6.0.6 please enter following
-    release: 6-0-6
+    # for example: Nuage release 6.0.7 please enter following
+    release: 6-0-7
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -332,7 +332,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-6.2.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
+   | Packages       | nuage-puppet-modules-6.3.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                         | nuage-vrs-el7 or nuage-avrs-el7                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -1350,7 +1350,7 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "6.0.5-181-nuage"
+        ovs_version: "6.0.7-265-nuage"
 
 
 Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -2319,6 +2319,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-6.2.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-6.3.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
