@@ -347,6 +347,14 @@ outputs:
             - name: swapping nuage-openvswitch with nuage-openvswitch-6wind
               command: yum swap -y -- install nuage-openvswitch-6wind -- remove nuage-openvswitch
               when: nuage_openvswitch_check.rc == 0 and nuage_openvswitch_sixwind_output.stdout != ''
+            - name: install new va dependencies
+              yum:
+                name: "{{ item }}"
+                state: present
+                enablerepo: "rhel-7-server-rpms"
+              with_items:
+                - infiniband-diags
+                - opensm-libs
             when: (step|int == 2)
           - block:
             - name: Check if virtual-accelerator-base is updated
