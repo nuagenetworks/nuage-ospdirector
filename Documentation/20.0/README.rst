@@ -65,62 +65,58 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
   In this phase, you install Director on the Undercloud system by following the process in the Red Hat documentation.
 
-* **Phase 2: Download Nuage Source Code**
-
-  In this phase,  you get the following files on Director for the Nuage Overcloud deployment:
-
-  - Nuage Tripleo Heat templates
-  - Image patching files
-  - Additional scripts
-
-* **Phase 3: Prepare Nuage Repository and Containers**
+* **Phase 2: Prepare Nuage Repository and Containers**
 
   In this phase, you prepare Nuage Repository and Containers for the integration.
 
-  - **Phase 3.1: Download the Nuage VSP RPMs and Create a Yum Repository**
+  - **Phase 2.1: Download the Nuage VSP RPMs and Create a Yum Repository**
 
     In this phase, you download the Nuage RPMs and create a repository for them.
 
-    **Phase 3.2: Prepare Nuage Containers**
+  - **Phase 2.2: Install nuage-tripleo-heat-templates**
+
+    In this phase, you will install nuage-tripleo-heat-templates package on Undercloud
+
+    **Phase 2.3: Prepare Nuage Containers**
 
     In this phase, you prepare Nuage containers for the integration.
 
-* **Phase 4: Prepare the Overcloud**
+* **Phase 3: Prepare the Overcloud**
 
   In this phase, you follow procedures in this document and in the Red Hat documentation to do the basic configuration of the Overcloud.
 
-  - **Phase 4.1: Register and Inspect the Bare Metal Nodes**
+  - **Phase 3.1: Register and Inspect the Bare Metal Nodes**
 
     Follow the procedures in the Red Hat documentation for registering and inspecting the hardware nodes in the "Configuring a Basic Overcloud using the CLI Tools" section and check the node status.
 
-  - **Phase 4.2: Modify the Overcloud Image**
+  - **Phase 3.2: Modify the Overcloud Image**
 
-    To install the required Nuage packages, you run the script to patch the the Overcloud image.
+    Install nuage-image-patching-scripts package and run this script to patch the Overcloud image with required Nuage packages
 
-    If you are using the *No Patching* process, skip this phase and follow the steps in the `Phase 4.3: No Patching Workflow`_
+    If you are using the *No Patching* process, skip this phase and follow the steps in the `Phase 3.3: No Patching Workflow`_
 
-  - **Phase 4.3: No Patching Workflow**
+  - **Phase 3.3: No Patching Workflow**
 
     In this release, this feature is for Tech Preview only.
 
     In this phase, follow the steps in this document to automatically install all the required Nuage packages on the Overcloud without running the script to patch the image.
 
-  - **Phase 4.4: Create the Dataplane Roles and Update the Node Profiles**
+  - **Phase 3.4: Create the Dataplane Roles and Update the Node Profiles**
 
     In this phase, you add the Nuage Heat templates and dataplane roles for the Nuage integration.
-    Roles define which actions users can perform. For more information about the supported roles, go to `Phase 4: Prepare the Overcloud`_
+    Roles define which actions users can perform. For more information about the supported roles, go to `Phase 3: Prepare the Overcloud`_
 
-  - **Phase 4.5: Generate a CMS ID for the OpenStack Deployment**
+  - **Phase 3.5: Generate a CMS ID for the OpenStack Deployment**
 
     The Cloud Management System (CMS) ID is created to identify a specific Compute or Controller node.
 
-  - **Phase 4.6: Customize the Environment Files**
+  - **Phase 3.6: Customize the Environment Files**
 
     In this phase, you modify the environment files for your deployment and assign roles (profiles) to the Compute and Controller nodes.
     The files are populated with the required parameters.
     Nuage provides Heat templates and environment files to configure Neutron on the Controller node and RPMs (such as nuage-openvswitch and nuage-metadata-agent) on Compute nodes.
 
-* **Phase 5: Deploy Overcloud**
+* **Phase 4: Deploy Overcloud**
 
   In this phase, you use the ``openstack overcloud deploy`` command with different options to deploy the various use cases.
 
@@ -142,33 +138,15 @@ To prepare for the Nuage VSP integration, install Director on the Undercloud sys
 
 https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/director_installation_and_configuration
 
-Phase 2: Download Nuage Source Code
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this phase, get the Nuage Tripleo Heat Templates, image patching files, and the other scripts by using the following commands on the Undercloud:
-
-::
-
-    cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release-tag>
-    ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
-
-    Example:
-
-    cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 16.200x.1
-    ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
-
-
-
-Phase 3: Prepare Nuage Repository and Containers
+Phase 2: Prepare Nuage Repository and Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Phase 3.1: Download the Nuage VSP RPMs and Create a Yum Repository
+Phase 2.1: Download the Nuage VSP RPMs and Create a Yum Repository
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 4.2: Modify the Overcloud Image`_).
+For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 3.2: Modify the Overcloud Image`_).
 
 The repository contents may change depending on the roles configured for your deployment.
 
@@ -181,7 +159,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-6.2.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-puppet-modules       |
+   | Packages       | nuage-puppet-modules-20.5.2                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-puppet-modules       |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                         | nuage-vrs-el8                                                                             |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -193,6 +171,10 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                         | nuage-openstack                                                                           |
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage OSP      | nuage-tripleo-heat-templates                 | nuage-ospdirector                                                                         |
+   | Director       +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Packages       | nuage-image-patching-scripts                 | nuage-ospdirector                                                                         |
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                            | nuage-vrs-el8                                                                             |
    | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | selinux-policy-nuage                         | nuage-selinux                                                                             |
@@ -202,7 +184,27 @@ The repository contents may change depending on the roles configured for your de
    |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
 
-Phase 3.2: Prepare Nuage Containers
+Phase 2.2: Install nuage-tripleo-heat-templates
++++++++++++++++++++++++++++++++++++++++++++++++
+
+In this phase, you will enable Nuage repository on Undercloud and install nuage-tripleo-heat-templates
+
+1. Enable Nuage repository that is created in Phase 2.1 on Undercloud machine.
+
+2. Install nuage-tripleo-heat-templates package by using
+
+::
+
+    $ sudo yum install -y nuage-tripleo-heat-templates
+
+3. Copy nuage-tripleo-heat-templates to /home/stack before customizing environment files
+
+::
+
+    $ cp -r /usr/share/nuage-tripleo-heat-templates /home/stack/
+
+
+Phase 2.3: Prepare Nuage Containers
 +++++++++++++++++++++++++++++++++++
 
 In this phase, you prepare Nuage containers for the integration.
@@ -210,9 +212,14 @@ In this phase, you prepare Nuage containers for the integration.
 
 1. Add the below contents to /home/stack/containers-prepare-parameter.yaml. A complete file can be found in `Sample Environment Files`_.
 
-
 ::
 
+
+      ContainerImageRegistryCredentials:
+        registry.connect.redhat.com:
+          <username>: "<pwd>"
+
+      <Truncated output>
         excludes:
         - horizon
         - heat-engine
@@ -221,69 +228,22 @@ In this phase, you prepare Nuage containers for the integration.
         - heat-api
 
       - push_destination: true
+        set:
+          name_prefix: "rhosp16-openstack-"
+          name_suffix: "-20-5-2"
+          namespace: registry.connect.redhat.com/nuagenetworks
+          neutron_driver: null
+          rhel_containers: false
+          tag: 'latest'
         includes:
-        - horizon
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/horizon
-
-      - push_destination: true
-        includes:
-        - neutron-server
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/neutron-server
-
-      - push_destination: true
-        includes:
-        - heat-engine
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-engine
-
-      - push_destination: true
-        includes:
-        - heat-api-cfn
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api-cfn
-
-      - push_destination: true
-        includes:
-        - heat-api
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api
+          - horizon
+          - heat-engine
+          - heat-api-cfn
+          - neutron-server
+          - heat-api
 
 
-2. Under `/home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/` you can find different openstack project folder. Please fill in nuage.repo in each folder with proper information.
-
-::
-
-    Sample nuage.repo
-    [Nuage]
-    name=nuage
-    baseurl=http://url_to_nuage_repo
-    enabled=1
-    gpgcheck=1
-    gpgkey=file:///tmp/RPM-GPG-KEY-Nuage
-
-
-3. Copy Nuage Gpgkey to all these folder with name RPM-GPG-KEY-Nuage
-
-
-
-Phase 4: Prepare the Overcloud
+Phase 3: Prepare the Overcloud
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this phase, you perform the basic configuration of the Overcloud.
@@ -303,7 +263,7 @@ You only need to configure the roles for your deployment and assign the roles to
    * Compute node with VRS and SR-IOV
 
 
-Phase 4.1: Register and Inspect the Bare Metal Nodes
+Phase 3.1: Register and Inspect the Bare Metal Nodes
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 In the Red Hat OpenStack Platform Director documentation, follow the steps using the CLI *up to where* the ``openstack overcloud deploy`` command is run:
@@ -330,12 +290,12 @@ To verify the Ironic node status, follow these steps:
     openstack overcloud profiles list
 
 
-Phase 4.2: Modify the Overcloud Image
+Phase 3.2: Modify the Overcloud Image
 ++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you modify the overcloud-full.qcow2 image with the required Nuage packages.
 
-When using the *No Patching* feature, skip this phase and follow the instructions in `Phase 4.3: No Patching Workflow`_
+When using the *No Patching* feature, skip this phase and follow the instructions in `Phase 3.3: No Patching Workflow`_
 
 Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2):
 
@@ -347,23 +307,29 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
 ::
 
-    yum install libguestfs-tools python-yaml -y
+    yum install -y libguestfs-tools python3-pyyaml
 
 
-2. Copy the *image-patching* folder from /home/stack/nuage-ospdirector/image-patching/ on the hypervisor machine that is accessible to the nuage-rpms repository.
+2. Enable Nuage repository that is created in Phase 2.1 on this machine and install nuage-image-patching-scripts package using
 
 ::
 
-    cd nuage_image_patching_scripts
+    yum install -y nuage-image-patching-scripts
 
 
-3. Copy *overcloud-full.qcow2* from /home/stack/images/ on the Undercloud director to this location and make a backup of *overcloud-full.qcow2*.
+3. Copy *overcloud-full.qcow2* from /home/stack/images/ on the Undercloud director to /root/ location and make a backup of *overcloud-full.qcow2*.
 
 ::
 
     cp overcloud-full.qcow2 overcloud-full-bk.qcow2
 
-4. This script takes in *nuage_patching_config.yaml* as input parameters. You need to configure the following parameters:
+4. This script takes in *nuage_patching_config.yaml* as input parameters. A sample can be found in /etc/nuage-image-patching/nuage_patching_config.yaml, copy this to /root/.
+
+::
+
+    cp /etc/nuage-image-patching/nuage_patching_config.yaml /root/
+
+5. You need to configure the following parameters:
 
    * ImageName (required) is the name and absolute path of the qcow2 image (for example, /root/overcloud-full.qcow2).
    * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs*.
@@ -394,12 +360,12 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
    For examples of nuage.repo and nuage_patching_config.yaml, go to `Nuage Patching Configuration`_.
 
-5. Run the following command that provides the parameter values to start the image patching workflow:
+6. Run the following command that provides the parameter values to start the image patching workflow:
 
 ::
 
-    cd image-patching/
-    python3 nuage_image_patching_scripts/nuage_overcloud_full_patch.py --nuage-config nuage_image_patching_scripts/nuage_patching_config.yaml
+    cd /root/
+    nuage-image-patching --nuage-config nuage_patching_config.yaml
 
 
 .. Note:: If the image patching fails, remove the partially patched overcloud-full.qcow2 and create a copy of it from the backup image before retrying the image patching workflow.
@@ -410,13 +376,13 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
         cp overcloud-full-bk.qcow2 overcloud-full.qcow2
 
 
-6. Verify that the *machine-id* is clear in the Overcloud image. The result should be empty output.
+7. Verify that the *machine-id* is clear in the Overcloud image. The result should be empty output.
 
 ::
 
     guestfish -a overcloud-full.qcow2 run : mount /dev/sda / : cat /etc/machine-id
 
-7. Copy the patched image back to /home/stack/images/ on the Undercloud and upload it to Glance.
+8. Copy the patched image back to /home/stack/images/ on the Undercloud and upload it to Glance.
 
    a. Check that the current images are uploaded:
 
@@ -452,7 +418,7 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
             (undercloud) [stack@director images]$ openstack overcloud node configure $(openstack baremetal node list -c UUID -f value)
 
 
-Phase 4.3: No Patching Workflow
+Phase 3.3: No Patching Workflow
 ++++++++++++++++++++++++++++++++
 
 In this release, this feature is for Tech Preview only.
@@ -478,7 +444,7 @@ Follow these instructions:
 3. Follow the instructions in the  Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/advanced_overcloud_customization/ansible-based-registration#registering-the-overcloud-to-red-hat-satellite>`_
 
 
-Phase 4.4: Create the Dataplane Roles and Update the Node Profiles
+Phase 3.4: Create the Dataplane Roles and Update the Node Profiles
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you add the Nuage Heat templates and dataplane roles for the Nuage integration.
@@ -524,7 +490,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 .. Note:: It is not mandatory to provide node info for all the roles shown in the example. You can specify the node information only for the required roles.
 
 
-Phase 4.5: Generate a CMS ID for the OpenStack Deployment
+Phase 3.5: Generate a CMS ID for the OpenStack Deployment
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The Cloud Management System (CMS) ID is used to identify a specific Compute or Controller node.
@@ -538,7 +504,7 @@ In this phase, you generate the CMS ID used to configure your OpenStack deployme
 2. Add the CMS ID to the /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml template file for the ``NeutronNuageCMSId`` parameter.
 
 
-Phase 4.6: Customize the Environment Files
+Phase 3.6: Customize the Environment Files
 +++++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you create and customize environment files and tag nodes for specific profiles. These profile tags match your nodes to flavors, which assign the flavors to deployment roles.
@@ -753,7 +719,7 @@ Network Isolation
        For this verification step, the *ExternalInterfaceDefaultRoute* IP configured in the network-environment.yaml template should be reachable from the Overcloud Controller nodes on the external API VLAN. This gateway can also be on the Undercloud. The gateway needs to be tagged with the same VLAN ID as that for the external API network of the Controller. The *ExternalInterfaceDefaultRoute* IP should be able to reach outside because the Overcloud Controller uses this IP address as a default route to reach the Red Hat Registry to pull the Overcloud container images.
 
 
-Phase 5: Deploy the Overcloud
+Phase 4: Deploy the Overcloud
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use the ``openstack overcloud deploy`` command options to pass the environment files and to create or update an Overcloud deployment where:
@@ -814,7 +780,7 @@ where:
    * ``ntp-server`` has the NTP settings for the Overcloud nodes.
 
 
-Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
+Phase 5: Verify that OpenStack Platform Director Has Been Deployed Successfully
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Run ``openstack stack list`` to verify that the stack was created.
@@ -874,13 +840,13 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "6.0.5-191-nuage"
+        ovs_version: "20.5.1-16-nuage"
 
 
-Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
+Phase 6: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The nuage-openstack-neutronclient RPM was downloaded and add to the repository with the other Nuage base packages in `Phase 3.1: Download the Nuage VSP RPMs and Create a Yum Repository`_
+The nuage-openstack-neutronclient RPM was downloaded and add to the repository with the other Nuage base packages in `Phase 2.1: Download the Nuage VSP RPMs and Create a Yum Repository`_
 
 To complete the installation:
 
@@ -888,7 +854,7 @@ To complete the installation:
 
 2. Run ``yum install -y nuage-openstack-neutronclient``
 
-Phase 8: Manually Install and Run the Topology Collector for SR-IOV (Optional)
+Phase 7: Manually Install and Run the Topology Collector for SR-IOV (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 See the "Installation and Configuration: Topology Collection Agent and LLDP" section in the *Nuage VSP OpenStack Neutron ML2 Driver Guide*.
@@ -1171,6 +1137,9 @@ containers-prepare-parameter.yaml
       ContainerImageRegistryCredentials:
         registry.redhat.io:
           <user-name>: "<password>"
+        registry.connect.redhat.com:
+          <user-name>: "<password>"
+
       ContainerImagePrepare:
       - push_destination: true
         set:
@@ -1204,50 +1173,19 @@ containers-prepare-parameter.yaml
         - heat-api
 
       - push_destination: true
+        set:
+          name_prefix: "rhosp16-openstack-"
+          name_suffix: "-20-5-2"
+          namespace: registry.connect.redhat.com/nuagenetworks
+          neutron_driver: null
+          rhel_containers: false
+          tag: 'latest'
         includes:
-        - horizon
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/horizon
-
-      - push_destination: true
-        includes:
-        - neutron-server
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/neutron-server
-
-      - push_destination: true
-        includes:
-        - heat-engine
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-engine
-
-      - push_destination: true
-        includes:
-        - heat-api-cfn
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api-cfn
-
-      - push_destination: true
-        includes:
-        - heat-api
-        modify_role: tripleo-modify-image
-        modify_append_tag: "-nuage"
-        modify_vars:
-          tasks_from: modify_image.yml
-          modify_dir_path: /home/stack/nuage-ospdirector/nuage-ospd16-dockerfiles/heat-api
-
+          - horizon
+          - heat-engine
+          - heat-api-cfn
+          - neutron-server
+          - heat-api
 
 nuage-overcloud-resource-registry.yaml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1636,6 +1574,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-6.2.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-20.5.2), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
