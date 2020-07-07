@@ -63,7 +63,7 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
 * **Phase 1: Install Red Hat OpenStack Platform Director**
 
-  In this phase, you install Director on the Undercloud system by following the process in the Red Hat documentation.
+  In this phase, you install Director on the Undercloud system by following the process in the Red Hat documentation. RedHat recommends to install the latest RHEL 7 release, which may be different from the one that was used for validation by Nuage at the time of writing.
 
 * **Phase 2: Download Nuage Source Code**
 
