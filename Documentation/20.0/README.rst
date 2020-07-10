@@ -1423,7 +1423,9 @@ Include this file in the ``openstack overcloud deploy`` command when you deploy 
       # Add PciPassthroughFilter to the scheduler default filters
       NovaSchedulerDefaultFilters: ['RetryFilter','AvailabilityZoneFilter','ComputeFilter','ComputeCapabilitiesFilter','ImagePropertiesFilter','ServerGroupAntiAffinityFilter','ServerGroupAffinityFilter','PciPassthroughFilter']
       NovaSchedulerAvailableFilters: ["nova.scheduler.filters.all_filters","nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter"]
-      NeutronPhysicalDevMappings: "physnet1:ens15f0,physnet2:ens15f1"
+      NeutronPhysicalDevMappings:
+        - physnet1:ens15f0
+        - physnet2:ens15f1
 
       # Number of VFs that needs to be configured for a physical interface
       NeutronSriovNumVFs: "ens15f0:7,ens15f1:7"
