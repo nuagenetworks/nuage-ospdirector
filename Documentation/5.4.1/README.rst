@@ -138,25 +138,20 @@ To prepare for the Nuage VSP integration, install Director on the Undercloud sys
 
 https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/installing-the-undercloud
 
-Then make sure the required images for the RHEL 7.6 deployment are available:
+Then make sure the required images for the RHEL 7.8 deployment are available:
 
-1. After the Undercloud is installed, make sure that you have openstack-tripleo-heat-templates-8.3.1-54.el7ost package.
-
-::
-
-    yum swap openstack-tripleo-heat-templates openstack-tripleo-heat-templates-8.3.1-54.el7ost
-
-
-2. Download following images for the RHEL 7.6 Overcloud qcow2 file:
+1. After the Undercloud is installed, make sure that you have openstack-tripleo-heat-templates-8.4.1-58.el7ost package.
 
 ::
 
-    yum install rhosp-director-images-13.0-20190627.1.el7ost rhosp-director-images-ipa-13.0-20190627.1.el7ost
+    yum swap openstack-tripleo-heat-templates openstack-tripleo-heat-templates-8.4.1-58.el7ost.noarch
 
 
+2. Download following images for the RHEL 7.8 Overcloud qcow2 file:
 
+::
 
-
+    yum install rhosp-director-images-13.0-20200610.2.el7ost rhosp-director-images-ipa-13.0-20200610.2.el7ost
 
 
 Phase 2: Download Nuage Source Code
@@ -173,7 +168,7 @@ In this phase, get the Nuage Tripleo Heat Templates, image patching files, and t
     Example:
 
     cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.541U9.1
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.541U12.1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -187,20 +182,20 @@ In this phase, you prepare the Red Hat OpenStack and Nuage containers for the in
 Phase 3.1: Configure the Container Image Source and Pull the Red Hat OpenStack Containers
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This release is supported only on RHEL 7.6. Go to https://github.com/nuagenetworks/nuage-ospdirector/wiki/RHEL-7.6-container-list for the and list of Overcloud container images based on RHEL 7.6.
+This release is supported only on RHEL 7.8. The list of RHEL 7.8 based overcloud container images that were used for qualification can be found on the wiki: https://github.com/nuagenetworks/nuage-ospdirector/wiki/upstream-container-list-tested-with-Nuage-5.4.1.U12-(RHEL-7.8 OSPD13z12).
 
 
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 5.4.1 U9 with 13.0-2 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 5.4.1 U12 with 13.0-1 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u9:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u9:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u9:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u9:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u9:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-5-4-1-u9:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u12:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u12:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u12:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u12:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u12:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-5-4-1-u12:13.0-1
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -231,8 +226,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 5.4.1 U9 please enter following
-    release: 5-4-1-u9
+    # for example: Nuage release 5.4.1 U12 please enter following
+    release: 5-4-1-u12
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -341,7 +336,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-5.4.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
+   | Packages       | nuage-puppet-modules-5.4.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/5.4/OSPD13/nuage-puppet-modules   |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                         | nuage-vrs-el7 or nuage-avrs-el7                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -1084,7 +1079,7 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "5.4.1-349-nuage"
+        ovs_version: "5.4.1-443-nuage"
 
 
 Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -1116,19 +1111,19 @@ For a local repository for Nuage OpenStack packages and Red Hat OpenStack-depend
     ::
 
          [nuage]
-         name=nuage_osp13_5.4.1.u9_nuage
+         name=nuage_osp13_5.4.1.u12_nuage
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
          enabled=1
          gpgcheck=1
 
          [nuage_vrs]
-         name=nuage_osp13_5.4.1.u9_nuage_vrs
+         name=nuage_osp13_5.4.1.u12_nuage_vrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
          enabled=0
          gpgcheck=1
 
          [nuage_avrs]
-         name=nuage_osp13_5.4.1.u9_nuage_avrs
+         name=nuage_osp13_5.4.1.u12_nuage_avrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
          enabled=0
          gpgcheck=1
@@ -1161,19 +1156,19 @@ For a local repository for Nuage packages and a Red Hat Subscription for depende
    ::
 
          [nuage]
-         name=nuage_osp13_5.4.1.u9_nuage
+         name=nuage_osp13_5.4.1.u12_nuage
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
          enabled=1
          gpgcheck=1
 
          [nuage_vrs]
-         name=nuage_osp13_5.4.1.u9_nuage_vrs
+         name=nuage_osp13_5.4.1.u12_nuage_vrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
          enabled=0
          gpgcheck=1
 
          [nuage_avrs]
-         name=nuage_osp13_5.4.1.u9_nuage_avrs
+         name=nuage_osp13_5.4.1.u12_nuage_avrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
          enabled=0
          gpgcheck=1
