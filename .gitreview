@@ -2,4 +2,4 @@
 host=gerrit.an.nuagenetworks.net
 port=29418
 project=nuagenetworks/nuage-ospdirector.git
-defaultbranch=OSPD13
+defaultbranch=5.4/OSPD13

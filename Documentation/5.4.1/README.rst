@@ -341,7 +341,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-5.3.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
+   | Packages       | nuage-puppet-modules-5.4.0                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD13/nuage-puppet-modules       |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                         | nuage-vrs-el7 or nuage-avrs-el7                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -1879,6 +1879,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.3.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-5.4.0), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
