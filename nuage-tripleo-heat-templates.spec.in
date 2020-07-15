@@ -23,6 +23,7 @@ building Heat Templates to do deployments of OpenStack with Nuage integration.
 install -d -m 755 %{buildroot}/%{_datadir}/%{name}
 cp -ar deployment %{buildroot}/%{_datadir}/%{name}
 cp -ar environments %{buildroot}/%{_datadir}/%{name}
+cp -ar firstboot %{buildroot}/%{_datadir}/%{name}
 cp -ar network %{buildroot}/%{_datadir}/%{name}
 cp -ar roles %{buildroot}/%{_datadir}/%{name}
 cp -ar scripts %{buildroot}/%{_datadir}/%{name}

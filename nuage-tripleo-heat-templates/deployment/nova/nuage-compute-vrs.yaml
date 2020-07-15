@@ -69,3 +69,8 @@ outputs:
                     - nuage-openvswitch
                     - nuage-metadata-agent
                 when: nuage_check.rc != 0
+              - name: Start a vsctl manager so nova can directly access the ovs database
+                shell: >
+                  /usr/bin/ovs-vsctl --timeout=5 --id=@manager -- create Manager
+                  "target=\"ptcp:6640:127.0.0.1\"" -- add Open_vSwitch .
+                  manager_options @manager

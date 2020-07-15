@@ -79,6 +79,8 @@ parameters:
     description: |
       Enable OVS Hardware Offload.
     type: boolean
+    tags:
+      - role_specific
   VrsExtraConfigs:
     description: Extra config params and values for nuage-openvswitch
     default: {}

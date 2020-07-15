@@ -19,3 +19,6 @@ resource_registry:
 
   # Override the ComputeNeutronCorePlugin to use Nuage OpenvSwitch on compute nodes
   OS::TripleO::Services::ComputeNeutronCorePlugin: deployment/nova/nuage-compute-vrs.yaml
+
+  # OVRS resources
+  OS::TripleO::ComputeOvrs::NodeUserData: firstboot/mellanox_fw_update.yaml

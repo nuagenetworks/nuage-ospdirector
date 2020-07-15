@@ -11,3 +11,5 @@ resource_registry:
   # Port assignments for the ComputeSriov
   OS::TripleO::ComputeSriov::Net::SoftwareConfig:
     ../network/config/bond-with-vlans/computesriov.yaml
+  # Port assignments for the ComputeOvrs
+  OS::TripleO::ComputeOvrs::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeovrs.yaml
