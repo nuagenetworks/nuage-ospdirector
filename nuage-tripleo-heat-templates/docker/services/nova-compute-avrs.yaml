@@ -361,12 +361,14 @@ outputs:
                   enabled: yes
                 # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
                 ignore_errors: yes
+                async: 240 # 4 min timeout
+                poll: 0 # fire and forget
               # avrs.service restarts network.service as well, so we need to wait till
               # the computeavrs node is reachable from undercloud
               - name: waiting for AVRS nodes to come back after virtual-accelerator restart
                 wait_for_connection:
                   delay: 10
-                  timeout: 100
+                  timeout: 240 # 4 min timeout
               - name: check if virtual-accelerator is active
                 command: systemctl status virtual-accelerator
               - name: Remove va_update file if virtual-accelerator-base is updated
