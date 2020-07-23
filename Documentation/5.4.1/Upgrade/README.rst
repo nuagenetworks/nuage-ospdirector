@@ -224,30 +224,30 @@ Post Upgrade Verifications
             nuage-metadata-agent-5.4.1-443.el7.x86_64
 
             [heat-admin@overcloud-computeavrs-1 ~]$ rpm -qa | grep "nuage\|6wind\|virtual"
+            6windgate-linux-fp-sync-vrf-4.23.12.NUAGE.5-0.x86_64
+            6windgate-tools-common-libs-pyroute2-0.4.13-6windgate.4.23.12.NUAGE.5.x86_64
+            nuage-openvswitch-5.4.1-443.6wind.el7.x86_64
+            6windgate-linux-fp-sync-4.23.12.NUAGE.5-0.x86_64
+            nuage-openstack-neutronclient-6.5.0-5.4.1_336_nuage.noarch
+            nuage-bgp-5.4.1-443.x86_64
+            python-pyelftools-0.24-6windgate.4.23.12.NUAGE.5.x86_64
+            6windgate-dpdk-pmd-mellanox-rdma-core-4.23.12.NUAGE.5-0.x86_64
+            6windgate-tools-common-libs-daemonctl-4.23.12.NUAGE.5-0.x86_64
+            6windgate-fp-ovs-4.23.12.NUAGE.5-0.x86_64
+            6windgate-dpdk-pmd-virtio-host-4.23.12.NUAGE.5-0.x86_64
+            virtual-accelerator-base-1.9.12.NUAGE.5-0.x86_64
+            python-openvswitch-nuage-5.4.1-443.6wind.el7.x86_64
+            selinux-policy-nuage-5.4.1-443.el7.x86_64
+            6windgate-fpn-sdk-dpdk-4.23.12.NUAGE.5-0.x86_64
+            6windgate-fp-4.23.12.NUAGE.5-0.x86_64
+            6windgate-linux-fp-sync-fptun-4.23.12.NUAGE.5-0.x86_64
+            nuage-metadata-agent-5.4.1-443.6wind.el7.x86_64
+            nuage-puppet-modules-5.4-0.x86_64
             6windgate-dpdk-4.23.12.NUAGE.5-0.x86_64
             6windgate-linux-fp-sync-ovs-4.23.12.NUAGE.5-0.x86_64
-            6windgate-dpdk-pmd-mellanox-rdma-core-4.23.12.NUAGE.5-0.x86_64
-            6windgate-fp-ovs-4.23.12.NUAGE.5-0.x86_64
-            nuage-openstack-neutronclient-6.5.0-5.4.1_445_nuage.noarch
-            nuage-puppet-modules-5.4-0.x86_64
-            6windgate-tools-common-libs-daemonctl-4.23.12.NUAGE.5-0.x86_64
-            6windgate-product-base-4.23.12.NUAGE.5-0.x86_64
-            nuage-bgp-5.4.1-446.x86_64
-            6windgate-fp-4.23.12.NUAGE.5-0.x86_64
-            6windgate-dpdk-pmd-virtio-host-4.23.12.NUAGE.5-0.x86_64
-            nuage-openvswitch-5.4.1-446.6wind.el7.x86_64
-            python-openvswitch-nuage-5.4.1-446.6wind.el7.x86_64
-            6windgate-linux-fp-sync-vrf-4.23.12.NUAGE.5-0.x86_64
+            selinux-policy-nuage-avrs-5.4.1-443.el7.x86_64
             6windgate-tools-common-libs-libconsole-4.23.12.NUAGE.5-0.x86_64
-            6windgate-linux-fp-sync-4.23.12.NUAGE.5-0.x86_64
-            nuage-metadata-agent-5.4.1-446.6wind.el7.x86_64
-            selinux-policy-nuage-5.4.1-445.el7.x86_64
-            6windgate-fpn-sdk-dpdk-4.23.12.NUAGE.5-0.x86_64
-            python-pyelftools-0.24-6windgate.4.23.12.NUAGE.5.x86_64
-            virtual-accelerator-base-1.9.12.NUAGE.5-0.x86_64
-            selinux-policy-nuage-avrs-5.4.1-445.el7.x86_64
-            6windgate-linux-fp-sync-fptun-4.23.12.NUAGE.5-0.x86_64
-            6windgate-tools-common-libs-pyroute2-0.4.13-6windgate.4.23.12.NUAGE.5.x86_64
+            6windgate-product-base-4.23.12.NUAGE.5-0.x86_64
 
 
   - The computes should now have the Nuage VXLAN iptables rule as stateless
