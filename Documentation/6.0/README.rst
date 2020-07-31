@@ -1862,6 +1862,7 @@ compute-avrs-environment.yaml for AVRS Integration
 
     resource_registry:
       OS::TripleO::Services::NovaComputeAvrs: ../docker/services/nova-compute-avrs.yaml
+      OS::TripleO::Services::ComputeNeutronCorePluginNuage: ../puppet/services/neutron-compute-plugin-nuage.yaml
 
     parameter_defaults:
       ComputeAvrsExtraConfig:
@@ -1894,6 +1895,7 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
 
     resource_registry:
       OS::TripleO::Services::NovaComputeAvrs: ../docker/services/nova-compute-avrs.yaml
+      OS::TripleO::Services::ComputeNeutronCorePluginNuage: ../puppet/services/neutron-compute-plugin-nuage.yaml
 
     parameter_defaults:
       NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
