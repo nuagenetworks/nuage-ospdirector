@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ========================================================================
-Integrating Nuage VSP 20.0.x with Red Hat OpenStack Platform Director 16
+Integrating Nuage VSP 20.5.2 with Red Hat OpenStack Platform Director 16
 ========================================================================
 
 This document has the following topics:
