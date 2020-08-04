@@ -212,33 +212,37 @@ In this phase, you prepare Nuage containers for the integration.
 
 ::
 
-
       ContainerImageRegistryCredentials:
         registry.connect.redhat.com:
           <username>: "<pwd>"
 
-      <Truncated output>
-        excludes:
-        - horizon
-        - heat-engine
-        - heat-api-cfn
-        - neutron-server
-        - heat-api
+      ContainerImagePrepare:
+        <Truncated output>
+          excludes:
+           - horizon
+           - heat-engine
+           - heat-api-cfn
+           - neutron-server
+           - heat-api
 
-      - push_destination: true
-        set:
-          name_prefix: "rhosp16-openstack-"
-          name_suffix: "-20-5-2"
-          namespace: registry.connect.redhat.com/nuagenetworks
-          neutron_driver: null
-          rhel_containers: false
-          tag: 'latest'
-        includes:
-          - horizon
-          - heat-engine
-          - heat-api-cfn
-          - neutron-server
-          - heat-api
+        - push_destination: true
+          set:
+            name_prefix: "rhosp16-openstack-"
+            name_suffix: "-20-5-2"
+            namespace: registry.connect.redhat.com/nuagenetworks
+            neutron_driver: null
+            rhel_containers: false
+            tag: 'latest'
+          includes:
+            - horizon
+            - heat-engine
+            - heat-api-cfn
+            - neutron-server
+            - heat-api
+
+      # https://bugzilla.redhat.com/show_bug.cgi?id=1844239
+      ContainerNeutronApiImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-2:latest
+      ContainerNeutronConfigImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-2:latest
 
 
 Phase 3: Prepare the Overcloud
@@ -1137,51 +1141,56 @@ containers-prepare-parameter.yaml
           <user-name>: "<password>"
 
       ContainerImagePrepare:
-      - push_destination: true
-        set:
-          ceph_alertmanager_image: ose-prometheus-alertmanager
-          ceph_alertmanager_namespace: registry.redhat.io/openshift4
-          ceph_alertmanager_tag: 4.1
-          ceph_grafana_image: rhceph-3-dashboard-rhel7
-          ceph_grafana_namespace: registry.redhat.io/rhceph
-          ceph_grafana_tag: 3
-          ceph_image: rhceph-4-rhel8
-          ceph_namespace: registry.redhat.io/rhceph
-          ceph_node_exporter_image: ose-prometheus-node-exporter
-          ceph_node_exporter_namespace: registry.redhat.io/openshift4
-          ceph_node_exporter_tag: v4.1
-          ceph_prometheus_image: ose-prometheus
-          ceph_prometheus_namespace: registry.redhat.io/openshift4
-          ceph_prometheus_tag: 4.1
-          ceph_tag: latest
-          name_prefix: openstack-
-          name_suffix: ''
-          namespace: registry.redhat.io/rhosp-rhel8
-          neutron_driver: ovn
-          rhel_containers: false
-          tag: '16.1'
-        tag_from_label: '{version}-{release}'
-        excludes:
-        - horizon
-        - heat-engine
-        - heat-api-cfn
-        - neutron-server
-        - heat-api
+        - push_destination: true
+          set:
+            ceph_alertmanager_image: ose-prometheus-alertmanager
+            ceph_alertmanager_namespace: registry.redhat.io/openshift4
+            ceph_alertmanager_tag: 4.1
+            ceph_grafana_image: rhceph-3-dashboard-rhel7
+            ceph_grafana_namespace: registry.redhat.io/rhceph
+            ceph_grafana_tag: 3
+            ceph_image: rhceph-4-rhel8
+            ceph_namespace: registry.redhat.io/rhceph
+            ceph_node_exporter_image: ose-prometheus-node-exporter
+            ceph_node_exporter_namespace: registry.redhat.io/openshift4
+            ceph_node_exporter_tag: v4.1
+            ceph_prometheus_image: ose-prometheus
+            ceph_prometheus_namespace: registry.redhat.io/openshift4
+            ceph_prometheus_tag: 4.1
+            ceph_tag: latest
+            name_prefix: openstack-
+            name_suffix: ''
+            namespace: registry.redhat.io/rhosp-rhel8
+            neutron_driver: ovn
+            rhel_containers: false
+            tag: '16.1'
+          tag_from_label: '{version}-{release}'
+          excludes:
+            - horizon
+            - heat-engine
+            - heat-api-cfn
+            - neutron-server
+            - heat-api
 
-      - push_destination: true
-        set:
-          name_prefix: "rhosp16-openstack-"
-          name_suffix: "-20-5-2"
-          namespace: registry.connect.redhat.com/nuagenetworks
-          neutron_driver: null
-          rhel_containers: false
-          tag: 'latest'
-        includes:
-          - horizon
-          - heat-engine
-          - heat-api-cfn
-          - neutron-server
-          - heat-api
+        - push_destination: true
+          set:
+            name_prefix: "rhosp16-openstack-"
+            name_suffix: "-20-5-2"
+            namespace: registry.connect.redhat.com/nuagenetworks
+            neutron_driver: null
+            rhel_containers: false
+            tag: 'latest'
+          includes:
+            - horizon
+            - heat-engine
+            - heat-api-cfn
+            - neutron-server
+            - heat-api
+
+      # https://bugzilla.redhat.com/show_bug.cgi?id=1844239
+      ContainerNeutronApiImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-2:latest
+      ContainerNeutronConfigImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-2:latest
+
 
 nuage-overcloud-resource-registry.yaml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
