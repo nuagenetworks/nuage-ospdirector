@@ -37,8 +37,8 @@ Requirements and Best Practices
 
 For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD] and Virtualized Services Controller [VSC]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD and VSC) should already be deployed.
 
-For Red Hat OpenStack Platform Director 16.0 requirements and best practices, see the Red Hat upstream documentation:
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/
+For Red Hat OpenStack Platform Director 16.1 requirements and best practices, see the Red Hat upstream documentation:
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/
 
 
 Recommended Topologies
@@ -136,7 +136,7 @@ Phase 1: Install Red Hat OpenStack Platform Director
 
 To prepare for the Nuage VSP integration, install Director on the Undercloud system by following the steps in the Red Hat documentation:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/director_installation_and_configuration
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/director_installation_and_configuration
 
 
 Phase 2: Prepare Nuage Repository and Containers
@@ -253,9 +253,9 @@ The process includes modifying the Overload image and environment file, creating
 **Role**: A role is a personality assigned to a node where a specific set of operations is allowed.
 For more information about roles, see the Red Hat OpenStack documentation:
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/planning-your-overcloud
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/planning-your-overcloud
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
 
 You only need to configure the roles for your deployment and assign the roles to the appropriate nodes. For example, the network topology diagram in `Workflow Overview of the Nuage VSP Integration with OpenStack Platform Director`_ shows that each Compute node has different roles:
 
@@ -268,7 +268,7 @@ Phase 3.1: Register and Inspect the Bare Metal Nodes
 
 In the Red Hat OpenStack Platform Director documentation, follow the steps using the CLI *up to where* the ``openstack overcloud deploy`` command is run:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
 
 To verify the Ironic node status, follow these steps:
 
@@ -441,7 +441,7 @@ Follow these instructions:
         NuageGpgKeys: ['http://1.2.3.4/Nuage-RPM-GPG-Key1', 'http://1.2.3.4/Nuage-RPM-GPG-Key2']
 
 
-3. Follow the instructions in the  Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/advanced_overcloud_customization/ansible-based-registration#registering-the-overcloud-to-red-hat-satellite>`_
+3. Follow the instructions in the  Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/ansible-based-registration#registering-the-overcloud-to-red-hat-satellite>`_
 
 
 Phase 3.4: Create the Dataplane Roles and Update the Node Profiles
@@ -567,7 +567,7 @@ For more information, go to the "VSP OpenStack ML2 Driver Guide*.
 
     1. Create a flavor and profile for ComputeSriov:
 
-       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
+       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
 
     ::
 
@@ -599,7 +599,7 @@ For more information, go to the "VSP OpenStack ML2 Driver Guide*.
 
        * Include  the *neutron-sriov.yaml* file in the Overcloud deployment command. For an example, go to `Sample Environment Files`_.
 
-         For more information, refer to the `CONFIGURING SR-IOV <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/network_functions_virtualization_planning_and_configuration_guide/part-sriov-nfv-configuration#sect-configuring-sriov>`_ section from Red Hat.
+         For more information, refer to the `CONFIGURING SR-IOV <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/network_functions_virtualization_planning_and_configuration_guide/part-sriov-nfv-configuration#sect-configuring-sriov>`_ section from Red Hat.
 
        .. Note:: Make sure that the physical network mappings parameters in neutron-nuage-config.yaml and neutron-sriov.yaml match with your hardware profile. To check interface information for your inspected nodes, run ``openstack baremetal introspection interface list [node uuid]``.
 
@@ -610,7 +610,7 @@ Network Isolation
 
    **Linux Bonding with VLANs**
 
-    The plugin uses the default Linux bridge and Linux bonding. Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.0/html/advanced_overcloud_customization/overcloud-network-interface-bonding for more information about Linux bonding on OpenStack.
+    The plugin uses the default Linux bridge and Linux bonding. Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/overcloud-network-interface-bonding for more information about Linux bonding on OpenStack.
 
     To deploy the Overcloud Controller and ComputeSriov, Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ that configure the Linux bonding with VLANs.
 
@@ -1163,7 +1163,7 @@ containers-prepare-parameter.yaml
           namespace: registry.redhat.io/rhosp-rhel8
           neutron_driver: ovn
           rhel_containers: false
-          tag: '16.0'
+          tag: '16.1'
         tag_from_label: '{version}-{release}'
         excludes:
         - horizon
