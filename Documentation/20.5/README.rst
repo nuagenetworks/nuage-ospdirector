@@ -97,8 +97,6 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
   - **Phase 3.3: No Patching Workflow**
 
-    In this release, this feature is for Tech Preview only.
-
     In this phase, follow the steps in this document to automatically install all the required Nuage packages on the Overcloud without running the script to patch the image.
 
   - **Phase 3.4: Create the Dataplane Roles and Update the Node Profiles**
@@ -420,8 +418,6 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
 Phase 3.3: No Patching Workflow
 ++++++++++++++++++++++++++++++++
-
-In this release, this feature is for Tech Preview only.
 
 The *No Patching* feature installs all the required Nuage packages on Overcloud nodes during the Overcloud deployment, instead of patching the Overcloud image.
 
