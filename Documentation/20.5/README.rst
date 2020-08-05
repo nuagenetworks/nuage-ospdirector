@@ -157,7 +157,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-20.5.2                   | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-puppet-modules       |
+   | Packages       | nuage-puppet-modules-16.1-20.5.2_38          | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                         | nuage-vrs-el8                                                                             |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -169,9 +169,9 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                         | nuage-openstack                                                                           |
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates                 | nuage-ospdirector                                                                         |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.5.2_191 | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts                 | nuage-ospdirector                                                                         |
+   | Packages       | nuage-image-patching-scripts-16.1-20.5.2_191 | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                            | nuage-vrs-el8                                                                             |
    | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -1161,7 +1161,7 @@ containers-prepare-parameter.yaml
             name_prefix: openstack-
             name_suffix: ''
             namespace: registry.redhat.io/rhosp-rhel8
-            neutron_driver: ovn
+            neutron_driver: null
             rhel_containers: false
             tag: '16.1'
           tag_from_label: '{version}-{release}'
