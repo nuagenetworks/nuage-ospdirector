@@ -396,6 +396,8 @@ Network Isolation
 
     The current release supports the Active/StandBy scenario which requires a Linux bond under an OVS bridge in active-backup mode.
 
+::
+
       - type: linux_bond
         name: bond0
         members:
@@ -637,46 +639,46 @@ neutron-nuage-config.yaml
 #   OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
 #   OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
 
-parameter_defaults:
-  ControllerExtraConfig:
-    neutron::config::server_config:
-      DEFAULT/ipam_driver:
-        value: nuage_internal
-    neutron::config::plugin_ml2_config:
-      RESTPROXY/default_net_partition_name:
-        value: 'DefaultOrg'
-      RESTPROXY/server:
-        value: '10.40.1.41:8443'
-      RESTPROXY/serverauth:
-        value: 'csproot:csproot'
-      RESTPROXY/organization:
-        value: 'csp'
-      RESTPROXY/auth_resource:
-        value: '/me'
-      RESTPROXY/serverssl:
-        value: True
-      RESTPROXY/base_uri:
-        value: '/nuage/api/v6'
-      RESTPROXY/cms_id:
-        value: '152bab92-8ce9-4394-aabc-0b111457948a'
-  NeutronDebug: true
-  NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,router,segments,NuageNetTopology'
-  NeutronTypeDrivers: vlan,vxlan,flat
-  NeutronNetworkType: vlan
-  NeutronMechanismDrivers: [nuage_hwvtep, openvswitch, nuage_sriov, sriovnicswitch]
+    parameter_defaults:
+      ControllerExtraConfig:
+        neutron::config::server_config:
+          DEFAULT/ipam_driver:
+            value: nuage_internal
+        neutron::config::plugin_ml2_config:
+          RESTPROXY/default_net_partition_name:
+            value: 'DefaultOrg'
+          RESTPROXY/server:
+            value: '10.40.1.41:8443'
+          RESTPROXY/serverauth:
+            value: 'csproot:csproot'
+          RESTPROXY/organization:
+            value: 'csp'
+          RESTPROXY/auth_resource:
+            value: '/me'
+          RESTPROXY/serverssl:
+            value: True
+          RESTPROXY/base_uri:
+            value: '/nuage/api/v6'
+          RESTPROXY/cms_id:
+            value: '152bab92-8ce9-4394-aabc-0b111457948a'
+      NeutronDebug: true
+      NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,router,segments,NuageNetTopology'
+      NeutronTypeDrivers: vlan,vxlan,flat
+      NeutronNetworkType: vlan
+      NeutronMechanismDrivers: [nuage_hwvtep, openvswitch, nuage_sriov, sriovnicswitch]
 
-  NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security,nuage_network'
-  NeutronFlatNetworks: '*'
-  NeutronTunnelIdRanges: ''
-  NeutronNetworkVLANRanges: 'physnet1:1:4000,public:1:4000'
-  NeutronVniRanges: '1001:2000'
-  NeutronOvsIntegrationBridge: br-int
-  NeutronDhcpOvsIntegrationBridge: br-int
-  NeutronBridgeMappings: "physnet1:br-ex,public:br-public"
-  NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
-  InstanceNameTemplate: 'inst-%08x'
-  HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
-  HorizonCustomizationModule: 'nuage_horizon.customization'
+      NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security,nuage_network'
+      NeutronFlatNetworks: '*'
+      NeutronTunnelIdRanges: ''
+      NeutronNetworkVLANRanges: 'physnet1:1:4000,public:1:4000'
+      NeutronVniRanges: '1001:2000'
+      NeutronOvsIntegrationBridge: br-int
+      NeutronDhcpOvsIntegrationBridge: br-int
+      NeutronBridgeMappings: "physnet1:br-ex,public:br-public"
+      NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
+      InstanceNameTemplate: 'inst-%08x'
+      HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
+      HorizonCustomizationModule: 'nuage_horizon.customization'
 
 
 nic-configs/compute.yaml
@@ -684,51 +686,51 @@ nic-configs/compute.yaml
 
 ::
 
-resources:
-  OsNetConfigImpl:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          template:
-            get_file: /usr/share/openstack-tripleo-heat-templates/network/scripts/run-os-net-config.sh
-          params:
-            $network_config:
-              network_config:
-              - type: interface
-                name: "nic1"
-                mtu: 1450
-                use_dhcp: false
-                dns_servers:
-                   get_param: DnsServers
-                addresses:
-                - ip_netmask:
-                    list_join:
-                    - /
-                    - - get_param: ControlPlaneIp
-                      - get_param: ControlPlaneSubnetCidr
-                routes:
-                - ip_netmask: 169.254.169.254/32
-                   next_hop:
-                     get_param: EC2MetadataIp
-                - default: true
-                  next_hop:
-                    get_param: ControlPlaneDefaultRoute
-              - type: ovs_bridge
-                name: br-ex
-                use_dhcp: false
-                members:
-                - type: linux_bond
-                  name: bond0
-                  bonding_options: "mode=active-backup miimon=100"
-                  members:
+    resources:
+      OsNetConfigImpl:
+        type: OS::Heat::SoftwareConfig
+        properties:
+          group: script
+          config:
+            str_replace:
+              template:
+                get_file: /usr/share/openstack-tripleo-heat-templates/network/scripts/run-os-net-config.sh
+              params:
+                $network_config:
+                  network_config:
                   - type: interface
-                    name: nic2
-                    primary: true
-                  - type: interface
-                    name: nic3
-                    primary: false
+                    name: "nic1"
+                    mtu: 1450
+                    use_dhcp: false
+                    dns_servers:
+                       get_param: DnsServers
+                    addresses:
+                    - ip_netmask:
+                        list_join:
+                        - /
+                        - - get_param: ControlPlaneIp
+                          - get_param: ControlPlaneSubnetCidr
+                    routes:
+                    - ip_netmask: 169.254.169.254/32
+                       next_hop:
+                         get_param: EC2MetadataIp
+                    - default: true
+                      next_hop:
+                        get_param: ControlPlaneDefaultRoute
+                  - type: ovs_bridge
+                    name: br-ex
+                    use_dhcp: false
+                    members:
+                    - type: linux_bond
+                      name: bond0
+                      bonding_options: "mode=active-backup miimon=100"
+                      members:
+                      - type: interface
+                        name: nic2
+                        primary: true
+                      - type: interface
+                        name: nic3
+                        primary: false
 
 
 Troubleshooting
