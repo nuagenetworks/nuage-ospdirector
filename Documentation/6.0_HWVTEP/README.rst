@@ -633,12 +633,11 @@ neutron-nuage-config.yaml
 
 ::
 
-# Uncomment to disable corresponding services
-# resource_registry:
-#   OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
-#   OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
-#   OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
-
+    # Uncomment to disable corresponding services
+    # resource_registry:
+    #   OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
+    #   OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
+    #   OS::TripleO::Services::NeutronMetadataAgent: OS::Heat::None
     parameter_defaults:
       ControllerExtraConfig:
         neutron::config::server_config:
