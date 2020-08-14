@@ -1332,14 +1332,14 @@ neutron-nuage-config.yaml
       NeutronVniRanges: '1001:2000'
       NovaOVSBridge: 'alubr0'
       NeutronMetadataProxySharedSecret: 'NuageNetworksSharedSecret'
-      HeatEnginePluginDirs: ['/usr/lib/python2.7/site-packages/nuage-heat/']
+      HeatEnginePluginDirs: ['/usr/lib/python3.6/site-packages/nuage-heat/']
       HorizonCustomizationModule: 'nuage_horizon.customization'
       HorizonVhostExtraParams:
         add_listen: true
         priority: 10
         access_log_format: '%a %l %u %t \"%r\" %>s %b \"%%{}{Referer}i\" \"%%{}{User-Agent}i\"'
         aliases: [{'alias': '%{root_url}/static/nuage', 'path': '/usr/lib/python3.6/site-packages/nuage_horizon/static'}, {'alias': '%{root_url}/static', 'path': '/usr/share/openstack-dashboard/static'}]
-        directories: [{'path': '/usr/lib/python2.7/site-packages/nuage_horizon', 'options': ['FollowSymLinks'], 'allow_override': ['None'], 'require': 'all granted'}]
+        directories: [{'path': '/usr/lib/python3.6/site-packages/nuage_horizon', 'options': ['FollowSymLinks'], 'allow_override': ['None'], 'require': 'all granted'}]
       ControllerExtraConfig:
         neutron::config::server_config:
           DEFAULT/ipam_driver:
