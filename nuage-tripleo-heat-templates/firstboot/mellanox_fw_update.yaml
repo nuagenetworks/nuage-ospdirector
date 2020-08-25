@@ -3,6 +3,7 @@ heat_template_version: queens
 description: >
   This's a temporary workaround for upgrading Mellanox FW
   and configuring Sriov in the FW
+
 parameters:
   BIN_DIR_URL:
     type: string
@@ -86,6 +87,7 @@ resources:
             from six.moves.urllib import request as urlRequest
 
             from oslo_concurrency import processutils
+
             FW_VERSION_REGEX = r'FW Version:\s*\t*(?P<fw_ver>\d+\.\d+\.\d+)'
             RUNNING_FW_VERSION_REGEX = r'FW Version\(Running\):\s*\t*(?P<fw_ver>\d+\.\d+\.\d+)'
             PSID_REGEX = r'PSID:\s*\t*(?P<psid>\w+)'
@@ -102,6 +104,7 @@ resources:
                 filemode='w',
                 level=logging.DEBUG)
             LOG = logging.getLogger("mellnox_fw_update")
+
             _MLX_CONFIG = {
                 "SRIOV_EN": "$SRIOV_EN",
                 "NUM_OF_VFS": "$NUM_OF_VFS",
@@ -112,6 +115,8 @@ resources:
                 "ESWITCH_HAIRPIN_TOT_BUFFER_SIZE": $ESWITCH_HAIRPIN_TOT_BUFFER_SIZE,
                 "ESWITCH_HAIRPIN_DESCRIPTORS": $ESWITCH_HAIRPIN_DESCRIPTORS
             }
+
+
             def run_command(*cmd, **kwargs):
                 try:
                     out, err = processutils.execute(*cmd, **kwargs)
@@ -122,9 +127,13 @@ resources:
                     LOG.warning("Got stderr output: %s" % err)
                 LOG.debug(out)
                 return out
+
+
             def parse_mstflint_query_output(out):
                 """ Parse Mstflint query output
+
                 For now just extract 'FW Version' and 'PSID'
+
                 :param out: mstflint query output
                 :return: dictionary of query attributes
                 """
@@ -140,8 +149,11 @@ resources:
                     if psid:
                         query_info["psid"] = psid.group('psid')
                 return query_info
+
+
             class MlnxDevices(object):
                 """ Discover and retrieve Mellanox PCI devices.
+
                 Can be used as an iterator once discover has been called.
                 """
 
@@ -151,10 +163,12 @@ resources:
 
                 def discover(self):
                     """ Discover Mellanox devices in the system. (first PF of every device)
+
                     :return: None
                     """
                     if self._devs:
                         return self._devs
+
                     devs = []
                     cmd = ['lspci', '-D', '-d', '15b3:']
                     out = run_command(*cmd)
@@ -175,6 +189,7 @@ resources:
 
                 def __len__(self):
                     return len(self._devs)
+
                 def __iter__(self):
                     return self._devs.__iter__()
 
@@ -197,6 +212,7 @@ resources:
             class MlnxDeviceConfig(object):
                 """ Get/Set Mellanox Device configurations
                 """
+
                 def __init__(self, pci_dev):
                     self.pci_dev = pci_dev
                     self._tool_confs = None
@@ -315,6 +331,7 @@ resources:
 
                 def set_config(self, conf_dict):
                     """ Set device configurations
+
                     :param conf_dict: a dictionary of:
                                       {"PARAM_NAME": "Param value to set", ...}
                     :return: None
@@ -338,6 +355,7 @@ resources:
                         ) not in current_mlx_config.get(key).lower():
                             # Aggregate all configurations required to be modified
                             params_to_set.append("%s=%s" % (key, value))
+
                     if params_to_set:
                         LOG.info("Setting configurations for device: %s" % self.pci_dev)
                         run_command("mstconfig", "-d", self.pci_dev, "-y",
@@ -346,14 +364,20 @@ resources:
                                  " ".join(params_to_set))
                     else:
                         LOG.info("Set device configurations: No operation required")
+
+
             class MlnxFirmwareBinary(object):
+
                 def __init__(self, local_bin_path):
                     self.bin_path = local_bin_path
                     self.image_info = {}
+
                 def get_info(self):
                     """ Get firmware information from binary
+
                     Caller should wrap this call under try catch to skip non compliant
                     firmware binaries.
+
                     :return: dict of firmware image attributes
                     """
                     if self.image_info.get('file_path', '') == self.bin_path:
@@ -364,9 +388,12 @@ resources:
                     self.image_info.update(parse_mstflint_query_output(out))
                     # Note(adrianc): deep copy ?
                     return self.image_info
+
+
             class MlnxFirmwareBinariesFetcher(object):
                 """ A class for fetching firmware binaries form a directory
                 provided by a URL link
+
                 Note: URL MUST point to a directory and end with '/'
                 e.g http://www.mysite.com/mlnx_bins/
                 """
@@ -375,22 +402,28 @@ resources:
                 class FileHTMLParser(html_parser.HTMLParser):
                     """ A crude HTML Parser to extract files from an HTTP response.
                     """
+
                     def __init__(self, suffix):
                         # HTMLParser is Old style class dont use super() method
                         html_parser.HTMLParser.__init__(self)
                         self.matches = []
                         self.suffix = suffix
+
                     def handle_starttag(self, tag, attrs):
                         for name, val in attrs:
                             if name == 'href' and val.endswith(self.suffix):
                                 self.matches.append(val)
+
                 def __init__(self, url):
                     self.url = url
+
                 def __del__(self):
                     self._cleanup_dest_dir()
+
                 def _cleanup_dest_dir(self):
                     if os.path.exists(MlnxFirmwareBinariesFetcher.dest_dir):
                         shutil.rmtree(MlnxFirmwareBinariesFetcher.dest_dir)
+
                 def _get_file_from_url(self, file_name):
                     try:
                         full_path = self.url + "/" + file_name
@@ -405,10 +438,12 @@ resources:
                     with open(dest_file_path, 'wb') as f:
                         f.write(url_data.read())
                     return dest_file_path
+
                 def _get_file_create_bin_obj(self, file_name, fw_bins):
                     """ This wrapper method will download a firmware binary,
                     create MlnxFirmwareBinary object and append to the provided
                     fw_bins list.
+
                     :return: None
                     """
                     try:
@@ -421,8 +456,10 @@ resources:
                     except Exception as e:
                         LOG.warning("Failed to download and query %s, skipping file. "
                                     "%s", file_name, str(e))
+
                 def get_firmware_binaries(self):
                     """ Get Firmware binaries
+
                     :return: list containing the files downloaded
                     """
                     # get list of files
@@ -446,6 +483,7 @@ resources:
                     parser.close()
                     if not parser.matches:
                         LOG.warning("No bin Files found in the provided URL: %s", self.url)
+
                     fw_bins = []
                     threads = []
                     for file_name in parser.matches:
@@ -458,9 +496,12 @@ resources:
                     for t in threads:
                         t.join()
                     return fw_bins
+
+
             class MlnxDevFirmwareOps(object):
                 """ Perform various Firmware related operations on device
                 """
+
                 def __init__(self, dev):
                     self.dev = dev
                     self.dev_info = {}
@@ -474,14 +515,17 @@ resources:
                     """
                     if not force and self.dev_info.get('device', '') == self.dev:
                         return self.dev_info
+
                     self.dev_info = {'device': self.dev}
                     cmd = ['mstflint', '-d', self.dev, '-qq', 'query']
                     out = run_command(*cmd)
                     self.dev_info = parse_mstflint_query_output(out)
                     # Note(adrianc): deep copy ?
                     return self.dev_info
+
                 def need_update(self, image_info):
                     """ Check if device requires firmware update
+
                     :param image_info: image_info dict as returned from
                                        MlnxFirmwareBinary.get_info()
                     :return: bool, True if update is needed
@@ -514,6 +558,7 @@ resources:
 
                 def burn_firmware(self, image_path):
                     """ Burn firmware on device
+
                     :param image_path: firmware binary file path
                     :return: None
                     """
@@ -537,6 +582,7 @@ resources:
 
             def check_prereq():
                 """ Check that all needed tools are available in the system.
+
                 :return: None
                 """
                 try:
@@ -551,12 +597,16 @@ resources:
                 except Exception as e:
                     LOG.error("Failed Prerequisite check. %s", str(e))
                     raise e
+
+
             def process_device(pci_dev, psid_map):
                 """ Process a single Mellanox device.
+
                 Processing pipeline:
                     - Perform firmware update if required
                     - Reset device to load firmware if required
                     - Perform device configurations if required
+
                 :param pci_dev: mellanox PCI device address (String)
                 :param psid_map: dict mapping between PSID and an image_info dict
                 :return: None
@@ -586,6 +636,8 @@ resources:
                     LOG.info("Device %s processed successfully.", pci_dev)
                 except Exception as e:
                     LOG.error("Failed to process device %s. %s", pci_dev, str(e))
+
+
             def main():
                 check_prereq()
                 # discover devices
@@ -594,12 +646,12 @@ resources:
                 # get binaries and prep psid map
                 psid_map = {}
                 if _BIN_DIR_URL:
-                binary_getter = MlnxFirmwareBinariesFetcher(_BIN_DIR_URL)
-                fw_binaries = binary_getter.get_firmware_binaries()
+                    binary_getter = MlnxFirmwareBinariesFetcher(_BIN_DIR_URL)
+                    fw_binaries = binary_getter.get_firmware_binaries()
 
-                for fw_bin in fw_binaries:
-                    image_info = fw_bin.get_info()
-                    psid_map[image_info['psid']] = image_info
+                    for fw_bin in fw_binaries:
+                        image_info = fw_bin.get_info()
+                        psid_map[image_info['psid']] = image_info
                 # process devices
                 for pci_dev in mlnx_devices:
                     process_device(pci_dev, psid_map)
@@ -607,6 +659,7 @@ resources:
 
             if __name__ == '__main__':
                 main()
+
           params:
             $BIN_DIR_URL: {get_param: BIN_DIR_URL}
             $FORCE_UPDATE: {get_param: FORCE_UPDATE}
