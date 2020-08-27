@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ========================================================================================
-Integrating Nuage VSP 6.0.7-HW VTEP solution with Red Hat OpenStack Platform Director 13
+Integrating Nuage VSP 6.0.9-HW VTEP solution with Red Hat OpenStack Platform Director 13
 ========================================================================================
 
 This document has the following topics:
@@ -34,7 +34,7 @@ The OpenStack Platform Director architecture allows partners to create custom te
 Requirements and Best Practices
 ---------------------------------
 
-For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD] and Virtualized Services Controller [VSC]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD and VSC) should already be deployed.
+For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD) should already be deployed.
 
 For Red Hat OpenStack Platform Director 13 requirements and best practices, see the Red Hat upstream documentation:
 https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/
@@ -45,18 +45,18 @@ Recommended Topologies
 
 The deployment topology and networking segmentation varies depending on the OpenStack end-to-end requirements and underlay topology. A typical OpenStack setup with Nuage integration has the following topology:
 
-.. figure:: ./sw1024.png
+.. figure:: ./sw3005.png
 
 Workflow Overview of the Nuage VSP Integration with OpenStack Platform Director
 --------------------------------------------------------------------------------
 
 The workflow to integrate Nuage VSP with OpenStack Platform Director includes these phases:
-*********************** MODIFY FIGURE BELOW ******************
-.. figure:: ./sw1027.png
+
+.. figure:: ./sw3003.png
 
 * **Phase 0: Install the VSP Core Components**
 
-  Before installing OSPD on the Undercloud, install and configure VSD and VSC. See `Recommended Topologies`_ for a typical OpenStack setup with Nuage integration.
+  Before installing OSPD on the Undercloud, install and configure VSD. See `Recommended Topologies`_ for a typical OpenStack setup with Nuage integration.
 
   The hardware VTEP solution requires a WBX as a leaf/spine switch for Data Center and Enterprise networks deployments. See the WBX documentation for more details.
 
@@ -68,7 +68,7 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
   In this phase, you get the following files on Director for the Nuage Overcloud deployment:
 
-  - Additional Scripts (Generate CMS ID)
+  - Additional Scripts (Generate CMS ID, Pull Nuage Containers)
 
 * **Phase 3: Prepare the Containers**
 
@@ -90,9 +90,9 @@ The workflow to integrate Nuage VSP with OpenStack Platform Director includes th
 
     Follow the procedures in the Red Hat documentation for registering and inspecting the hardware nodes in the "Configuring a Basic Overcloud using the CLI Tools" section and check the node status.
 
-  - **Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository**
+  - **Phase 4.2: Download the Nuage RPMs**
 
-    In this phase, you download the Nuage RPMs and create a repository for them.
+    In this phase, you download the Nuage RPMs.
 
   - **Phase 4.3: Create the Dataplane Roles**
 
@@ -118,7 +118,7 @@ Deployment Workflow
 Phase 0: Install the VSP Core Components
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To install VSD and VSC, see the *VSP Install Guide* and the  *VSP User Guide* for the deployment requirements and procedures.
+To install VSD, see the *VSP Install Guide* and the *VSP User Guide* for the deployment requirements and procedures.
 
 To install WBX, see the WBX documentation.
 
@@ -132,7 +132,7 @@ https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html
 Phase 2: Download Nuage Source Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this phase, get the Nuage Tripleo Heat Templates, image patching files, and the other scripts by using the following commands on the Undercloud:
+In this phase, get the Generate CMS ID and Image Pull scripts by using the following commands on the Undercloud:
 
 ::
 
@@ -143,7 +143,7 @@ In this phase, get the Nuage Tripleo Heat Templates, image patching files, and t
     Example:
 
     cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.607.1
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.609.1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -165,14 +165,13 @@ https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.latest with 13.0-1 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.9 with 13.0-5 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-latest:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-latest:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-latest:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-latest:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-latest:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-6-0-latest:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-9:13.0-5
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-9:13.0-5
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-9:13.0-5
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-9:13.0-5
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-9:13.0-5
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -203,14 +202,14 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 6.0.latest please enter following
-    release: 6-0-latest
+    # for example: Nuage release 6.0.9 please enter following
+    release: 6-0-9
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
     local_registry: 192.168.24.1:8787
     #List of Nuage containers
-    nuage_images: ['heat-api-cfn', 'heat-api', 'heat-engine', 'horizon', 'neutron-server', 'nova-compute']
+    nuage_images: ['heat-api-cfn', 'heat-api', 'heat-engine', 'horizon', 'neutron-server']
 
 
 4. Run the `nuage_container_pull.py` script by passing `nuage_container_config.yaml` to the ``--nuage-config`` argument.
@@ -284,12 +283,10 @@ To verify the Ironic node status, follow these steps:
     openstack overcloud profiles list
 
 
-Phase 4.2: Download the Nuage VSP RPMs and Create a Yum Repository
+Phase 4.2: Download the Nuage VSP RPMs
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-For Nuage VSP integrations, download all the required components and create a yum repository reachable from the Undercloud hypervisor or any other machine used to modify the Overcloud image (see `Phase 4.3: Modify the Overcloud Image`_).
-
-The repository contents may change depending on the roles configured for your deployment.
+The hardware VTEP solution needs the following packages to be downloaded from Nokia OLCS (Online Customer Support) web site.
 
 ::
 
@@ -308,16 +305,16 @@ The repository contents may change depending on the roles configured for your de
 Phase 4.3: Create the Dataplane Roles
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In this phase, you add the dataplane roles. This release of the hardware VTEP solution only requires Controller and Compute roles (unmodified upstream roles).
+In this phase, you add the dataplane roles. The hardware VTEP solution supports any combination of Controller, Compute, ComputeSriov and ComputeOvsDpdk roles.
 
 1. Create a *nuage_roles_data.yaml* file with all the required roles for the current Overcloud deployment.
 
-   This example shows how to create *nuage_roles_data.yaml* with a Controller and Compute nodes.
+   This example shows how to create *nuage_roles_data.yaml* with a Controller, Compute, ComputeSriov and ComputeOvsDpdk roles.
 
 ::
 
     Syntax:
-    openstack overcloud roles generate -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute
+    openstack overcloud roles generate -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeSriov ComputeOvsDpdk
 
 
 2. Create ``node-info.yaml`` in /home/stack/templates/ and specify the roles and number of nodes.
@@ -353,10 +350,9 @@ In this phase, you generate the CMS ID used to configure your OpenStack deployme
 
    The CMS ID is displayed in the output, and a copy of it is stored in a file called cms_id.txt in the same folder.
 
-2. Add the CMS ID to the /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml template file for the ``NeutronNuageCMSId`` parameter.
+2. Add the CMS ID as a specific configuration in the controller using the parameter 'ControllerExtraConfig'. See `Parameters on the Neutron Controller`_.
 
-
-Phase 4.7: Customize the Environment Files
+Phase 4.5: Customize the Environment Files
 +++++++++++++++++++++++++++++++++++++++++++
 
 In this phase, you create and customize environment files and tag nodes for specific profiles. These profile tags match your nodes to flavors, which assign the flavors to deployment roles.
@@ -369,7 +365,7 @@ For sample environment files, go to `Sample Environment Files`_.
 Nuage Controller Role (Controller)
 ''''''''''''''''''''''''''''''''''''
 
-      For a Controller node, assign the Controller role to each of the Controller nodes:
+For a Controller node, assign the Controller role to each of the Controller nodes:
 
 ::
 
@@ -384,17 +380,34 @@ Compute Role (Compute)
 
     openstack baremetal node set --property capabilities='profile:compute,boot_option:local' <node-uuid>
 
+ComputeSriov Role (Compute)
+''''''''''''''''''''''"'''''
+
+For a ComputeSriov node, assign the appropriate profile:
+
+::
+
+    openstack baremetal node set --property capabilities='profile:computesriov,boot_option:local' <node-uuid>
+
+ComputeOvsDpdk Role (Compute)
+''''''''''''''''''''''''''''''
+
+For a ComputeOvsDpdk node, assign the appropriate profile:
+
+::
+
+    openstack baremetal node set --property capabilities='profile:computeovsdpdk,boot_option:local' <node-uuid>
 
 Network Isolation
 ''''''''''''''''''
 
-   Follow procedures in the Red Hat Documentation to implement network isolation and custom composable networks.
+Follow procedures in the Red Hat Documentation to implement network isolation and custom composable networks.
 
    **Linux Bonding**
 
-    The hardware VTEP solution relies on upstream network interface templates to define NIC layout on the nodes. Please follow the procedures in the Red Hat Documentation.
+    The hardware VTEP solution relies on upstream network interface templates to define NIC layout on the nodes. Follow the procedures in the Red Hat Documentation.
 
-    The current release supports the Active/StandBy scenario which requires a Linux bond under an OVS bridge in active-backup mode.
+    This solution supports different configuration of the network interfaces facing the WBXs. Naming, single interface under an OVS bridge, Linux bonds in both, active-backup and 802.3ad modes under an OVS bridge, and DPDK bonds with active LACP under OVS_USER_BRIDGE bonds.
 
 ::
 
@@ -414,6 +427,7 @@ Phase 5: Deploy the Overcloud
 
 Use the ``openstack overcloud deploy`` command options to pass the environment files and to create or update an Overcloud deployment. Refer to procedures in the Red Hat Documentation.
 
+To pass Nuage specific configuration to the controller, please use the parameter 'ControllerExtraConfig' in the environment files. See `Parameters in Environment Files`_.
 
 Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -581,7 +595,7 @@ Upstream services such as L3, dhcp, metadata can coexist with the nuage_hwvtep m
 Sample Environment Files
 -------------------------
 
-For the latest templates, go to the `Links to Nuage and OpenStack Resources`_ section.
+The following templates show examples of parameters used in a hardware VTEP deployment.
 
 
 network-environment.yaml
