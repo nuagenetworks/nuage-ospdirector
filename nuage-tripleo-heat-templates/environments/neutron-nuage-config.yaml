@@ -15,6 +15,8 @@ parameter_defaults:
   NeutronTypeDrivers: 'vxlan'
   NeutronNetworkType: 'vxlan'
   NeutronMechanismDrivers: "nuage"
+#  Use below NeutronMechanismDrivers config for AVRS deployments
+#  NeutronMechanismDrivers: "nuage, ovs-fp, openvswitch"
   NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
   NeutronFlatNetworks: '*'
   NovaOVSBridge: 'alubr0'
@@ -39,3 +41,9 @@ parameter_defaults:
     neutron::config::plugin_nuage_config:
       RESTPROXY/nuage_pat:
         value: legacy_disabled
+#    Enable below config for AVRS deployments
+#    neutron::config::plugin_ml2_config:
+#      ovs_fp/ovs_agent_required:
+#         value: False
+#      ovs_fp/allowed_network_types:
+#         value: 'vxlan,gre,vlan'

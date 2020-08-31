@@ -1,0 +1,26 @@
+parameter_defaults:
+  NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+  NeutronFastpathOptVolumes:
+    - /run/fp_rpcd:/run/fp_rpcd
+  ComputeAvrsSingleParameters:
+    KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+    NovaComputeCpuSharedSet: [2-4]
+    NovaComputeCpuDedicatedSet: [5-7]
+    FastPathNics: "0000:06:00.1 0000:06:00.2"
+    FastPathMask: "1"
+    FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+    FastPathDPVI: "0"
+    FastPathOffload: "off"
+
+  ComputeAvrsDualParameters:
+    KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+    NovaComputeCpuSharedSet: [2-7]
+    NovaComputeCpuDedicatedSet: [10-15]
+    FastPathNics: "0000:06:00.1 0000:06:00.2"
+    FastPathMask: "1,9"
+    FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+    FastPathDPVI: "0"
+    FastPathOffload: "off"
+

@@ -153,15 +153,15 @@ The repository contents may change depending on the roles configured for your de
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Group          | Packages                                     | Location (tar.gz or link)                                                                 |
    +================+==============================================+===========================================================================================+
-   |                | nuage-bgp                                    | nuage-vrs-el8                                                                             |
+   |                | nuage-bgp                                    | nuage-vrs-el8 or nuage-avrs-el8                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
    | Packages       | nuage-puppet-modules-16.1-20.10.<U>_<B>      | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-metadata-agent                         | nuage-vrs-el8                                                                             |
+   |                | nuage-metadata-agent                         | nuage-vrs-el8 or nuage-avrs-el8                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | python-openswitch-nuage                      | nuage-vrs-el8                                                                             |
+   |                | python-openswitch-nuage                      | nuage-vrs-el8 or nuage-avrs-el8                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-neutron                      | nuage-openstack                                                                           |
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -180,6 +180,46 @@ The repository contents may change depending on the roles configured for your de
    | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | nuage-openstack                                                                           |
    | packages       |                                              |                                                                                           |
    |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-dpdk                               | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Accelerated    | 6windgate-dpdk-pmd-mellanox-rdma-core        | nuage-avrs-el8                                                                            |
+   | VRS (AVRS)     +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   | 6WIND          | 6windgate-dpdk-pmd-virtio-host               | nuage-avrs-el8                                                                            |
+   | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fp                                 | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fp-ovs                             | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fpn-sdk-dpdk                       | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync                      | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-fptun                | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-ovs                  | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-vrf                  | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-product-base                       | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-daemonctl        | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-libconsole       | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-libvrf           | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openvswitch-6wind                      | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | virtual-accelerator-base                     | nuage-avrs-el8                                                                            |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | selinux-policy-nuage-avrs                    | nuage-avrs-selinux                                                                        |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | os-vif-6wind-plugin                          | 6wind                                                                                     |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | fp-vdev-remote                               | 6wind                                                                                     |
+   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | networking-6wind                             | 6wind                                                                                     |
+   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
 
 Phase 2.2: Install nuage-tripleo-heat-templates
@@ -270,6 +310,7 @@ You only need to configure the roles for your deployment and assign the roles to
 
    * Compute node with VRS only
    * Compute node with VRS and SR-IOV
+   * Compute node with AVRS only
    * Compute node with OVRS only
 
 
@@ -342,9 +383,10 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 5. You need to configure the following parameters:
 
    * ImageName (required) is the name and absolute path of the qcow2 image (for example, /root/overcloud-full.qcow2).
-   * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs*.
+   * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs* or *avrs*.
 
      - For any combination of VRS, OVRS and SR-IOV deployments, specify the deployment type as ["vrs"].
+     - For any combination of AVRS, OVRS, VRS and SR-IOV, specify the deployment type as ["avrs"].
 
    * RhelUserName (optional) is the user name for the Red Hat Enterprise Linux (RHEL) subscription.
    * RhelPassword (optional) is the password for the Red Hat Enterprise Linux subscription.
@@ -463,7 +505,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 
         cp /usr/share/openstack-tripleo-heat-templates/roles/* /home/stack/nuage-tripleo-heat-templates/roles/
 
-2. Create the ComputeOvrs role, by following command:
+2. Create the ComputeAvrs, ComputeOvrs, ComputeAvrsSingle and ComputeAvrsDual Nuage Compute roles, by following command:
 
    ::
 
@@ -472,7 +514,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 
 3. Create a *nuage_roles_data.yaml* file with all the required roles for the current Overcloud deployment.
 
-   This example shows how to create *nuage_roles_data.yaml* with a Controller and Compute nodes for VRS and SR-IOV. The respective roles are specified in the same order. The following example has the respective role names mentioned in the same order.
+   This example shows how to create *nuage_roles_data.yaml* with a Controller and Compute nodes for VRS, AVRS and SR-IOV. The respective roles are specified in the same order. The following example has the respective role names mentioned in the same order.
 
 ::
 
@@ -487,7 +529,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 
 4. Create ``node-info.yaml`` in /home/stack/templates/ and specify the roles and number of nodes.
 
-  This example shows how to create a *node-info.yaml* file for deployment with three Controller, two Compute, two ComputeSriov roles:
+  This example shows how to create a *node-info.yaml* file for deployment with three Controller, two Compute, two ComputeAvrs, two ComputeOvrs, and two ComputeSriov roles:
 
 ::
 
@@ -505,6 +547,8 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
       ControllerCount: 3
       OvercloudComputeFlavor: compute
       ComputeCount: 2
+      OvercloudComputeAvrsFlavor: computeavrs
+      ComputeAvrsCount: 2
       OvercloudComputeOvrsFlavor: computeovrs
       ComputeOvrsCount: 2
       OvercloudComputeSriovFlavor: computesriov
@@ -557,6 +601,8 @@ For sample environment files, go to `Sample Environment Files`_.
    +================+====================================================+
    | VRS            | Compute                                            |
    |----------------+----------------------------------------------------+
+   | AVRS           | ComputeAvrs, ComputeAvrsSingle, or ComputeAvrsDual |
+   +----------------+----------------------------------------------------+
    | OVRS           | ComputeOvrs                                        |
    |----------------+----------------------------------------------------+
    | SR-IOV         | ComputeSriov                                       |
@@ -580,6 +626,128 @@ VRS Compute Role (Compute)
 ::
 
     openstack baremetal node set --property capabilities='profile:compute,boot_option:local' <node-uuid>
+
+
+Single AVRS Role (ComputeAvrs)
+''''''''''''''''''''''''''''''
+
+    AVRS runs inside the hypervisor and removes performance bottlenecks by offloading virtual switching from the networking stack. For more information about AVRS, go to the *VSP User Guide*.
+
+    For ComputeAvrs Integration, perform the following steps:
+
+    1. Create a flavor and profile:
+
+    ::
+
+        openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrs
+        openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrs" --property resources:CUSTOM_BAREMETAL='1' --property resources:DISK_GB='0' --property resources:MEMORY_MB='0' --property resources:VCPU='0' computeavrs
+
+
+    2. Set the profile on the AVRS nodes:
+
+    ::
+
+         openstack baremetal node set --property capabilities='profile:computeavrs,boot_option:local' <node-uuid>
+
+    3. Modify the AVRS environment file in `/home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment`.yaml.
+
+       You can also create a new AVRS role similar to the upstream Compute role.
+
+       The following examples show the settings in the Sample Environment Files. The parameter values can be customized for your deployment. Contact Nuage for the recommended values for these parameters.
+
+       a. For AVRS deployment, Virtual Accelerator requires information including which logical cores run the fast path, list of ports enabled in the fast path, additional fast path options, and so on to be set in `/etc/fast-path.env`.
+
+          Some parameters in ``fast-path.env`` need to be configured in the Heat templates. Use the ``compute-avrs-environment.yaml`` environment file to configure them. Go to `Sample Environment Files`_ for probable values in ``compute-avrs-environment.yaml``.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `fast-path.env`.
+
+       b. Virtual Accelerator requires that the NeutronFastpathOptVolumes parameters be set in `nova.conf`. This example shows how to configure them.
+
+       ::
+
+           parameter_defaults:
+             NeutronFastpathOptVolumes:
+               - /run/fp_rpcd:/run/fp_rpcd
+
+       c. Virtual Accelerator requires hugepages to be configured. This example shows how to configure hugepages and enable VT-d.
+
+       ::
+
+            KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+
+       .. Note::
+
+            You can set GpgCheck to ``no`` in environment files if you want to disable GPG Check while installing packages on the AVRS node.
+
+       d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to 0. This does not need to be explicitly set because CPUSET_ENABLE is set to 0 by default in the templates.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `cpuset.env`.
+
+
+Multiple AVRS Roles (ComputeAvrsSingle and ComputeAvrsDual)
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    AVRS runs inside the hypervisor and removes performance bottlenecks by offloading virtual switching from the networking stack. For more information about AVRS, go to the *VSP User Guide*.
+
+    When a single AVRS role is created, users are required to have same set of nodes in their environment because the AVRS Computes all get the same configuration.
+
+    When multiple roles are created, each role can pass a different configuration to specific AVRS Compute nodes. Users can have a pool of servers that require same configuration and assign them the same role.
+
+    For example, 10 nodes are being deployed. Six nodes are identical, and the remaining 4 nodes are identical.
+    You can assign the first six nodes to the ComputeAvrsSingle role and the remaining four nodes to the ComputeAvrsDual role. The configurations for ComputeAvrsSingle role do not overlap with ComputeAvrsDual.
+
+    For ComputeAvrsSingle and ComputeAvrsDual integration, perform the following steps:
+
+    1. Create a flavor and profile:
+
+    ::
+
+       openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrssingle
+       openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrssingle" --property resources:CUSTOM_BAREMETAL='1' --property resources:DISK_GB='0' --property resources:MEMORY_MB='0' --property resources:VCPU='0' computeavrssingle
+
+       openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeavrsdual
+       openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeavrsdual" --property resources:CUSTOM_BAREMETAL='1' --property resources:DISK_GB='0' --property resources:MEMORY_MB='0' --property resources:VCPU='0' computeavrsdual
+
+
+    2. Set the profile on the AVRS nodes:
+
+    ::
+
+        openstack baremetal node set --property capabilities='profile:computeavrssingle,boot_option:local' <node-uuid>
+        openstack baremetal node set --property capabilities='profile:computeavrsdual,boot_option:local' <node-uuid>
+
+
+    3. Modify the AVRS environment file in the `/home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml`.
+
+       For an example of an environment file with multiple AVRS roles, see a `sample file <../../nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml>`_.
+
+       The following examples for the AVRS deployment show the Sample Environment Files. The parameter values can be customized for your deployment. Contact Nuage for the recommended values for these parameters.
+
+       a. Virtual Accelerator requires information including which logical cores run the fast path, list of ports enabled in the fast path, additional fast path options, and so on to be set in `/etc/fast-path.env`.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `fast-path.env`.
+
+       b. Virtual Accelerator requires that the NeutronFastpathOptVolumes parameters be set in `nova.conf`. This example shows how to configure them.
+
+       ::
+
+           parameter_defaults:
+             NeutronFastpathOptVolumes:
+               - /run/fp_rpcd:/run/fp_rpcd
+
+       c. Virtual Accelerator requires hugepages to be configured. This shows how to configure hugepages and enable VT-d.
+
+       ::
+
+           KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+
+       .. Note::
+
+          You also can set GpgCheck to ``no`` in environment files if you want to disable GPG Check while installing packages on the AVRS node.
+
+       d. For IsolatedCPU or CPUAffinity to be respected, CPUSET_ENABLE needs to be set to 0. This does not need to be set explicitly because CPUSET_ENABLE is set to 0 by default in the templates.
+
+          Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `cpuset.env`.
 
 
 Offload VRS Role (ComputeOvrs)
@@ -682,6 +850,9 @@ Network Isolation
 
     * controller.yaml expects the Controller nodes to have three interfaces, where the first interface is for provisioning and the others are for Linux bonding with VLANs for all networks.
     * compute.yaml expects Compute nodes to have three interfaces, where the first interface is for provisioning and the others are for Linux bonding with VLANs for all networks
+    * computeavrs.yaml expects the ComputeAvrs nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks..
+    * computeavrssingle.yaml expects the ComputeAvrssingle nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks.
+    * computeavrsdual.yaml expects the ComputeAvrsdual nodes to have three interfaces, where the first interface is for provisioning and the rest ones are for Linux bonding with VLANs for all networks.
     * computesriov.yaml expects the ComputeSriov nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces are for Linux bonding with VLANs for all networks except the Tenant network. The others are for creating VF's for SR-IOV to configure Linux bonding with VLANs for the Tenant network.
     * computeovrs.yaml expects the ComputeOvrs nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces are for Linux bonding with VLANs for all networks except the Tenant network. The others are for OVRS with the Mellanox ConnectX-5 NICs to configure Linux bonding with VLANs for the Tenant network.
 
@@ -971,6 +1142,18 @@ Use the ``openstack overcloud deploy`` command options to pass the environment f
     * node-info.yaml has information specifying the count and flavor for the Controller and Compute nodes.
     * nova-nuage-config.yaml has the Nuage-specific Compute parameter values.
 
+For AVRS, also include the following role and environment files.
+
+    For single AVRS role deployment:
+
+        * nuage_roles_data.yaml
+        * compute-avrs-environment.yaml
+
+    For multiple AVRS roles deployment:
+
+        * nuage_roles_data.yaml
+        * compute-avrs-multirole-environment.yaml
+
 For SR-IOV, also include the following role and environment files.
 
         * nuage_roles_data.yaml
@@ -991,6 +1174,12 @@ For OVRS, also include the following role and environment files.
 
     For VRS Computes as virtual machines, add the --libvirt-type parameter:
     openstack overcloud deploy --templates --libvirt-type qemu -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
+
+    For single AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
+
+    For multiple AVRS roles deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
 2. For OVRS using Mellanox ConnectX-5 NICs, use:
 
@@ -1014,14 +1203,20 @@ For OVRS, also include the following role and environment files.
 
 ::
 
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml  --ntp-server ntp-server --timeout timeout
+
+    For single AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
+
+    For multiple AVRS role deployment, use:
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
 
-5. For VRS, SR-IOV deployment with Nuage using Linux-bonding, use the following:
+5. For VRS, SR-IOV, and AVRS deployment with Nuage using Linux-bonding, use the following:
 
 ::
 
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/neutron-sriov.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/neutron-sriov.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml  --ntp-server ntp-server --timeout timeout
 
 
 where:
@@ -1037,6 +1232,7 @@ where:
    * ``net-single-nic-hw-offload.yaml``  configures an IP address with a VLAN on each network except for the Tenant network.
    * ``net-bond-with-vlans.yaml`` configures an IP address and a pair of bonded NICs on each network.
    * ``ovs-hw-offload.yaml`` enables OVS hardware offloading on OVRS Compute nodes.
+   * ``compute-avrs-environment.yaml``  configures the parameters for ComputeAvrs.
    * ``mellanox-environment.yaml`` has the Mellanox First Boot Firmware configuration.
    * ``ntp-server`` has the NTP settings for the Overcloud nodes.
 
@@ -1149,7 +1345,8 @@ For a local repository for Nuage OpenStack packages and Red Hat OpenStack-depend
 ::
 
     ImageName: "overcloud-full.qcow2"
-      # ["vrs"] --> vrs / ovrs deployment
+      # ["vrs"] --> VRS/OVRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
     RepoFile: './nuage_ospd16.repo'
@@ -1173,7 +1370,8 @@ For a local repository for Nuage packages and a Red Hat Subscription for depende
 ::
 
     ImageName: "/root/overcloud-full.qcow2"
-      # ["vrs"] --> vrs / ovrs deployment
+      # ["vrs"] --> VRS/OVRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RhelUserName: 'abc'
     RhelPassword: '***'
@@ -1195,7 +1393,8 @@ For a Red Hat Satellite Server for Nuage packages and Red Hat-dependent packages
 ::
 
     ImageName: "/root/overcloud-full.qcow2"
-      # ["vrs"] --> vrs deployment
+      # ["vrs"] --> VRS/OVRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RhelSatUrl: 'https://satellite.example.com'
     RhelSatOrg: 'example_organization'
@@ -1380,6 +1579,53 @@ The following parameters are mapped to values in the /etc/default/nuage-metadata
 
     NuageNovaApiEndpoint
     Maps to NOVA_API_ENDPOINT_TYPE parameter. This needs to correspond to  the setting for the Nova API endpoint as configured by OSP Director
+
+
+Parameters Required for Nuage AVRS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following parameters are mapped to values in the /etc/fast-path.env on the Nova Compute AVRS:
+
+::
+
+    FastPathMask           =====>    FP_MASK
+    Maps to FP_MASK.  FP_MASK defines which logical cores run the fast path.
+
+    FastPathNics           =====>    FP_PORTS
+    Maps to FP_PORTS. FP_PORTS defines the list of ports enabled in the fast path.
+
+    CorePortMapping        =====>    CORE_PORT_MAPPING
+    Maps to CORE_PORT_MAPPING. CORE_PORT_MAPPING maps fast path cores with network ports, specifying which logical cores poll which ports.
+
+    FastPathMemory         =====>    FP_MEMORY
+    Maps to FP_MEMORY. FP_MEMORY defines how much memory from the hugepages is reserved for the fast path in MegaBytes.
+
+    VmMemory               =====>    VM_MEMORY
+    Maps to VM_MEMORY. VM_MEMORY defines how much memory from the hugepages to allocate for virtual machines.
+
+    NbMbuf                 =====>    NB_MBUF
+    Maps to NB_MBUF. NB_MBUF defines the total number of mbufs to add in the mbufs pools
+
+    FastPathOffload        =====>    FP_OFFLOAD
+    Maps to FP_OFFLOAD.  FP_OFFLOAD enables or disables the offload support in the fast path.
+
+    FastPathNicDescriptors =====>    FPNSDK_OPTIONS
+    Maps to FPNSDK_OPTIONS. FPNSDK_OPTIONS specifies additional FPNSDK options.
+
+    FastPathDPVI           =====>    DPVI_MASK
+    Maps to DPVI_MASK. DPVI_MASK defines the cores allocated to exception packets processing.
+
+    FastPathOptions        =====>    FP_OPTIONS
+    Maps to FP_OPTIONS. FP_OPTIONS specifies additional fast path options.
+
+
+The following parameters are mapped to values in the /etc/cpuset.env on the Nova Compute AVRS:
+
+::
+
+    CpuSetEnable        =====>    CPUSET_ENABLE
+    Maps to CPUSET_ENABLE. CPUSET_ENABLE enabled (1) or disabled (0) the cpuset
+
 
 
 Parameters Required for OVRS
@@ -1788,6 +2034,60 @@ node-info.yaml for OVRS Deployments
       ControllerCount: 1
       # ComputeOvrsCount  is number of Offload VRS Compute nodes
       ComputeOvrsCount: 2
+
+compute-avrs-environment.yaml for AVRS Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    parameter_defaults:
+      # An array of filters used by Nova to filter a node.These filters will be applied in the order they are listed,
+      # so place your most restrictive filters first to make the filtering process more efficient.
+      NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+      NeutronFastpathOptVolumes:
+        - /run/fp_rpcd:/run/fp_rpcd
+      ComputeAvrsParameters:
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+        NovaComputeCpuSharedSet: [2-7]
+        NovaComputeCpuDedicatedSet: [10-15]
+        FastPathNics: "0000:06:00.1 0000:06:00.2"
+        FastPathMask: "1,9"
+        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+        FastPathDPVI: "0"
+        FastPathOffload: "off"
+
+
+compute-avrs-multirole-environment.yaml for AVRS Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    parameter_defaults:
+      NovaSchedulerDefaultFilters: "RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,PciPassthroughFilter,NUMATopologyFilter,AggregateInstanceExtraSpecsFilter"
+      NeutronFastpathOptVolumes:
+        - /run/fp_rpcd:/run/fp_rpcd
+      ComputeAvrsSingleParameters:
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7"
+        NovaComputeCpuSharedSet: [2-4]
+        NovaComputeCpuDedicatedSet: [5-7]
+        FastPathNics: "0000:06:00.1 0000:06:00.2"
+        FastPathMask: "1"
+        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+        FastPathDPVI: "0"
+        FastPathOffload: "off"
+
+      ComputeAvrsDualParameters:
+        KernelArgs: "default_hugepagesz=1G hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on isolcpus=1-7,9-15"
+        NovaComputeCpuSharedSet: [2-7]
+        NovaComputeCpuDedicatedSet: [10-15]
+        FastPathNics: "0000:06:00.1 0000:06:00.2"
+        FastPathMask: "1,9"
+        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+        FastPathDPVI: "0"
+        FastPathOffload: "off"
 
 
 ovs-hw-offload.yaml for OVRS Deployments

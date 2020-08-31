@@ -1,0 +1,6 @@
+[Nuage]
+name=nuage
+baseurl=http://url_to_nuage_repo
+enabled=1
+gpgcheck=1
+gpgkey=file:///tmp/RPM-GPG-KEY-Nuage

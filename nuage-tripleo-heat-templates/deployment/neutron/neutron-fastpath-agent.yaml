@@ -1,0 +1,213 @@
+heat_template_version: rocky
+description: >
+  OpenStack Neutron openvswitch service
+parameters:
+  ContainerNeutronFastpathImage:
+    description: image
+    type: string
+  ContainerNeutronConfigImage:
+    description: The container image to use for the neutron config_volume
+    type: string
+  DockerOpenvswitchUlimit:
+    default: ['nofile=16384']
+    description: ulimit for Openvswitch Container
+    type: comma_delimited_list
+  NeutronFastpathAgentLoggingSource:
+    type: json
+    default:
+      tag: openstack.neutron.agent.fastpath
+      file: /var/log/containers/neutron/fastpath-agent.log
+  ServiceData:
+    default: {}
+    description: Dictionary packing service data
+    type: json
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.  This
+                 mapping overrides those in ServiceNetMapDefaults.
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  RoleName:
+    default: ''
+    description: Role name on which the service is applied
+    type: string
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  DeployIdentifier:
+    default: ''
+    type: string
+    description: >
+      Setting this to a unique value will re-run any deployment tasks which
+      perform configuration on a Heat stack-update.
+  PythonInterpreter:
+    type: string
+    description: The python interpreter to use for python and ansible actions
+    default: "$(command -v python3 || command -v python)"
+  MonitoringSubscriptionNeutronFastpath:
+    default: 'overcloud-neutron-fastpath-agent'
+    type: string
+  NeutronFastpathOptVolumes:
+    default: []
+    description: list of optional volumes to be mounted
+    type: comma_delimited_list
+resources:
+  ContainersCommon:
+    type: /usr/share/openstack-tripleo-heat-templates/deployment/containers-common.yaml
+  # Merging role-specific parameters (RoleParameters) with the default parameters.
+  # RoleParameters will have the precedence over the default parameters.
+  RoleParametersValue:
+    type: OS::Heat::Value
+    properties:
+      type: json
+      value: {get_param: RoleParameters}
+  NeutronBase:
+    type: /usr/share/openstack-tripleo-heat-templates/deployment/neutron/neutron-base.yaml
+    properties:
+      EndpointMap: {get_param: EndpointMap}
+      ServiceData: {get_param: ServiceData}
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+  NeutronLogging:
+    type: OS::TripleO::Services::Logging::NeutronCommon
+    properties:
+      NeutronServiceName: openvswitch-agent
+outputs:
+  role_data:
+    description: Role data for Neutron openvswitch service
+    value:
+      service_name: neutron_fastpath_agent
+      monitoring_subscription: {get_param: MonitoringSubscriptionNeutronFastpath}
+      config_settings:
+        map_merge:
+          - get_attr: [NeutronBase, role_data, config_settings]
+          - get_attr: [RoleParametersValue, value]
+          - get_attr: [NeutronLogging, config_settings]
+      service_config_settings:
+        map_merge:
+          - get_attr: [NeutronBase, role_data, service_config_settings]
+          - rsyslog:
+              tripleo_logging_sources_neutron_ovs_agent:
+                - {get_param: NeutronFastpathAgentLoggingSource}
+          - collectd:
+              tripleo.collectd.plugins.neutron_ovs_agent:
+                - ovs_events
+                - ovs_stats
+              collectd::plugin::ovs_events::socket: '/var/run/openvswitch/db.sock'
+              collectd::plugin::ovs_stats::socket: '/var/run/openvswitch/db.sock'
+      puppet_config:
+        config_volume: neutron
+        puppet_tags: neutron_config,neutron_plugin_ml2
+        step_config: |
+          include ::tripleo::profile::base::neutron
+        config_image: {get_param: ContainerNeutronConfigImage}
+        # We need to mount /run for puppet_config step. This is because
+        # puppet-vswitch runs the commands "ovs-vsctl list open_vswitch ."
+        # when running vswitch::ovs::enable_hw_offload: true
+        # ovs-vsctl talks to the ovsdb-server (hosting conf.db)
+        # on the unix domain socket - /run/openvswitch/db.sock
+        volumes:
+          - /lib/modules:/lib/modules:ro
+          - /run/openvswitch:/run/openvswitch:shared,z
+      kolla_config:
+        /var/lib/kolla/config_files/neutron_fastpath_agent.json:
+          command: /neutron-fastpath-agent-launcher.sh
+          config_files:
+            - source: "/var/lib/kolla/config_files/src/*"
+              dest: "/"
+              merge: true
+              preserve_properties: true
+          permissions:
+            - path: /var/log/neutron
+              owner: neutron:neutron
+              recurse: true
+      container_config_scripts:
+        neutron-fastpath-agent-launcher.sh:
+          mode: "0755"
+          content:
+            str_replace:
+              template: |
+                #!/bin/bash
+                set -xe
+                /usr/bin/python /usr/bin/neutron-fastpath-agent \
+                --config-file /etc/neutron/rootwrap.conf \
+                --config-file /etc/neutron/neutron.conf \
+                --config-dir /etc/neutron/conf.d/common \
+                --log-file /var/log/neutron/neutron-fastpath-agent.log
+              params:
+                PYTHON: {get_param: PythonInterpreter}
+      docker_config:
+        step_4:
+          neutron_fastpath_agent:
+            start_order: 10
+            image: {get_param: ContainerNeutronFastpathImage}
+            net: host
+            pid: host
+            privileged: true
+            security_opt: 'label=disable'
+            restart: always
+            depends_on:
+              - openvswitch.service
+            healthcheck: {get_attr: [ContainersCommon, healthcheck_rpc_port]}
+            ulimit: {get_param: DockerOpenvswitchUlimit}
+            volumes:
+              list_concat:
+                - {get_attr: [ContainersCommon, volumes]}
+                - {get_attr: [NeutronLogging, volumes]}
+                - {get_param: NeutronFastpathOptVolumes}
+                -
+                  - /var/lib/kolla/config_files/neutron_fastpath_agent.json:/var/lib/kolla/config_files/config.json:ro
+                  - /var/lib/config-data/puppet-generated/neutron:/var/lib/kolla/config_files/src:ro
+                  - /var/lib/container-config-scripts/neutron-fastpath-agent-launcher.sh:/neutron-fastpath-agent-launcher.sh:ro
+                  - /lib/modules:/lib/modules:ro
+                  - /run/openvswitch:/run/openvswitch:shared,z
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+      metadata_settings:
+        get_attr: [NeutronBase, role_data, metadata_settings]
+      host_prep_tasks:
+        list_concat:
+          - {get_attr: [NeutronLogging, host_prep_tasks]}
+          -
+            - block:
+              - name: load openvswitch module
+                import_role:
+                  name: tripleo-module-load
+                vars:
+                  modules:
+                    - name: openvswitch
+              - name: Copy in cleanup script
+                copy:
+                  content: {get_file: /usr/share/openstack-tripleo-heat-templates/deployment/neutron/neutron-cleanup}
+                  dest: '/usr/libexec/neutron-cleanup'
+                  force: yes
+                  mode: '0755'
+              - name: Copy in cleanup service
+                copy:
+                  content: {get_file: /usr/share/openstack-tripleo-heat-templates/deployment/neutron/neutron-cleanup.service}
+                  dest: '/usr/lib/systemd/system/neutron-cleanup.service'
+                  force: yes
+              - name: Enabling the cleanup service
+                service:
+                  name: neutron-cleanup
+                  enabled: yes
+              - name: enable virt_sandbox_use_netlink for healtcheck
+                seboolean:
+                  name: virt_sandbox_use_netlink
+                  persistent: yes
+                  state: yes
+              - name: Run iptables -t raw -L to workaround a rhel8.0 bug (remove once rhbz#1673609 is fixed)
+                shell: |
+                  iptables -t raw -nL
+                  ip6tables -t raw -nL

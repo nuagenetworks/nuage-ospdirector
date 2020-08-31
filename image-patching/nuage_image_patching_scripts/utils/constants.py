@@ -15,6 +15,7 @@
 
 # List of Nuage packages
 NUAGE_PYTHON_OVS = "python-openvswitch-nuage"
+NUAGE_AVRS_PACKAGE = "nuage-openvswitch-6wind"
 NUAGE_PACKAGES = "nuage-puppet-modules " \
                  "nuage-openstack-neutronclient " \
                  "selinux-policy-nuage nuage-bgp"
@@ -28,6 +29,7 @@ PATCHING_SCRIPT = ''
 SCRIPT_NAME = 'patching_script.sh'
 TEMPORARY_PATH = '/tmp/'
 LOG_FILE_NAME = 'nuage_image_patching.log'
+VALID_DEPLOYMENT_TYPES = ['vrs', 'avrs']
 RHEL_SUB_PORTAL = "portal"
 RHEL_SUB_SATELLITE = "satellite"
 RHEL_SUB_DISABLED = "disabled"
