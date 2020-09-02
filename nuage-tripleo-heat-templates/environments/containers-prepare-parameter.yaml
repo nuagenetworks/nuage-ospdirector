@@ -52,7 +52,3 @@ parameter_defaults:
         - heat-api-cfn
         - neutron-server
         - heat-api
-
-  # https://bugzilla.redhat.com/show_bug.cgi?id=1844239
-  ContainerNeutronApiImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
-  ContainerNeutronConfigImage: 192.168.200.1:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
