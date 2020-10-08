@@ -176,7 +176,7 @@ outputs:
                 - selinux-policy-nuage
                 - nuage-puppet-modules
                 - nuage-bgp
-          when: nuage_base_check != 0
+          when: nuage_base_check.rc != 0
       update_tasks:
         - block:
           - name: check if python-openvswitch-nuage is present in the repo
