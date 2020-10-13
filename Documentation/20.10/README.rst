@@ -881,7 +881,7 @@ Network Isolation
             ...
 
 
-    5. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs with controlplane protection.
+    5. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs with control plane protection. Control plane protection is performed by steering control plane traffic to a dedicated NIC Rx queue. This is achieved by configuring a set of ethtool configuration on each PF.
 
     ::
 
@@ -941,19 +941,35 @@ Network Isolation
 
     - Later define the parameter inside network-environment.yaml and set this to appropriate values.
 
-    An example of how to set this for a setup with 60 queues total is shown below
+     The following set of ethtool options need to be configured.
 
-    ::
+     1) additional Rx queues::
 
-        TenantPortEthtoolOptions: "-L ${DEVICE} combined 60; -X ${DEVICE} equal 58; -U ${DEVICE} flow-type tcp4 src-port 6633 action 59 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 59 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 59 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 59 loc 4"
+          ethtool -L ${DEVICE} combined <lower of 60 or number of CPU’s available on the host>
+
+     2) general RSS for the NIC queues to be received by all but 2 queues::
+
+          ethtool -X ${DEVICE} <number of queues from above minus 2. Ie. if -L = 60, then -X = 58>
+
+     3) rules and steering for the control plane traffic::
+
+         Openflow: ethtool -U ${DEVICE} flow-type tcp4 src-port 6633 action <(value from #1) - 1> above loc 1
+         JSON RPC: ethtool -U ${DEVICE} flow-type tcp4 src-port 7406 action <(value from #1) - 1> above loc 2
+         Statistics: ethtool -U ${DEVICE} flow-type tcp4 src-port 39090 action <(value from #1) - 1> above loc 3
+         BGP: ethtool -U ${DEVICE} flow-type tcp4 src-port 179 action <(value from #1) - 1> above loc 4
+
+     An example of how to set this for a setup with 60 queues total is shown below
+
+     ::
+
+         TenantPortEthtoolOptions: "-L ${DEVICE} combined 60; -X ${DEVICE} equal 58; -U ${DEVICE} flow-type tcp4 src-port 6633 action 59 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 59 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 59 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 59 loc 4"
 
 
-    An example of how to set this for a setup with 40 queues total is shown below
+     An example of how to set this for a setup with 40 queues total is shown below
 
-    ::
+     ::
 
-        TenantPortEthtoolOptions: "-L ${DEVICE} combined 40; -X ${DEVICE} equal 38; -U ${DEVICE} flow-type tcp4 src-port 6633 action 39 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 39 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 39 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 39 loc 4"
-
+         TenantPortEthtoolOptions: "-L ${DEVICE} combined 40; -X ${DEVICE} equal 38; -U ${DEVICE} flow-type tcp4 src-port 6633 action 39 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 39 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 39 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 39 loc 4"
 
     .. Note::
 
@@ -1847,7 +1863,7 @@ mellanox-environment.yaml for OVRS Deployments
 
 
 net-bond-with-vlans.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
