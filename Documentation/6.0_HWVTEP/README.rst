@@ -678,8 +678,8 @@ neutron-nuage-config.yaml
       NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,router,segments,NuageNetTopology'
       NeutronTypeDrivers: vlan,vxlan,flat
       NeutronNetworkType: vlan
-      NeutronMechanismDrivers: [nuage_hwvtep, openvswitch, nuage_sriov, sriovnicswitch]
-
+      # mind: order matters:
+      NeutronMechanismDrivers: [openvswitch, nuage_hwvtep, nuage_sriov, sriovnicswitch]
       NeutronPluginExtensions: 'nuage_subnet,nuage_port,port_security,nuage_network'
       NeutronFlatNetworks: '*'
       NeutronTunnelIdRanges: ''
