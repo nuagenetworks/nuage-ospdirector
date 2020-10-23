@@ -4,7 +4,7 @@ USER root
 
 COPY RPM-GPG-KEY-Nuage /tmp/RPM-GPG-KEY-Nuage
 COPY nuage.repo /etc/yum.repos.d/nuage.repo
-RUN yum install --disablerepo "*" --enablerepo Nuage nuage-openstack-neutron nuage-openstack-neutronclient -y && yum clean all
+RUN yum install --disablerepo "*" --enablerepo Nuage nuage-openstack-neutron nuage-openstack-neutronclient fp-vdev-remote networking-6wind -y && yum clean all
 
 
 #RUN mkdir -p /opt/nuage_upgrade

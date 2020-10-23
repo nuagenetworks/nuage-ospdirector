@@ -23,3 +23,8 @@ resource_registry:
   # OVRS resources
   OS::TripleO::Services::NuageComputeOvrs: deployment/nova/nuage-compute-vrs.yaml
   OS::TripleO::ComputeOvrs::NodeUserData: firstboot/mellanox_fw_update.yaml
+
+  # AVRS resources
+  OS::TripleO::Services::ComputeNeutronCorePluginNuage: deployment/nova/neutron-compute-plugin-nuage.yaml
+  OS::TripleO::Services::ComputeNeutronFastpathAgent: deployment/neutron/neutron-fastpath-agent.yaml
+  OS::TripleO::Services::NovaComputeAvrs: deployment/nova/nuage-compute-avrs.yaml

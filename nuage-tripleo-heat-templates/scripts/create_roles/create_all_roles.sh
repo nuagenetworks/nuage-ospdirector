@@ -36,3 +36,47 @@ else
 fi
 
 echo "Complete!! Created ComputeOvrs.yaml Role files  "
+
+# Create ComputeAvrs role
+echo "creating ComputeAvrs Role"
+mkdir -p ../../roles
+openstack overcloud roles generate --roles-path ../../roles -o ../../roles/ComputeAvrs.yaml Compute
+sed -i -e 's/ Compute/ ComputeAvrs/g' ../../roles/ComputeAvrs.yaml
+sed -i -e "s/HostnameFormatDefault: '%stackname%-novacompute-%index%'/HostnameFormatDefault: '%stackname%-novacomputeavrs-%index%'/g" ../../roles/ComputeAvrs.yaml
+sed -i -e 's/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g'   ../../roles/ComputeAvrs.yaml
+sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/ComputeAvrs.yaml
+echo "    - OS::TripleO::Services::ComputeNeutronFastpathAgent" >> ../../roles/ComputeAvrs.yaml
+
+FILE=../../roles/ComputeAvrs.yaml
+if [ -f "$FILE" ]; then
+    echo "$FILE has been created"
+else
+    echo "There was some issue creating $FILE"
+    exit 1
+fi
+
+echo "Complete!! Created ComputeAvrs.yaml Role files  "
+
+
+# Create ComputeAvrsSingle and ComputeAvrsDual roles
+roles=(ComputeAvrsSingle ComputeAvrsDual)
+echo "creating ${roles[*]} Role"
+
+mkdir -p ../../roles
+for role in "${roles[@]}"; do
+    openstack overcloud roles generate --roles-path ../../roles -o ../../roles/${role}.yaml Compute
+    sed -i -e "s/ Compute/ ${role}/g" ../../roles/${role}.yaml
+    sed -i -e "s/HostnameFormatDefault: '%stackname%-novacompute-%index%'/HostnameFormatDefault: '%stackname%-nova${role,,}-%index%'/g" ../../roles/${role}.yaml
+    sed -i -e "s/- OS::TripleO::Services::NovaCompute/- OS::TripleO::Services::NovaComputeAvrs/g"   ../../roles/${role}.yaml
+    sed -i -e "s/- OS::TripleO::Services::ComputeNeutronCorePlugin/- OS::TripleO::Services::ComputeNeutronCorePluginNuage/g"   ../../roles/${role}.yaml
+    echo "    - OS::TripleO::Services::ComputeNeutronFastpathAgent" >> ../../roles/${role}.yaml
+    FILE=../../roles/${role}.yaml
+    if [ -f "$FILE" ]; then
+        echo "$FILE has been created"
+    else
+        echo "There was some issue creating $FILE"
+        exit 1
+    fi
+done
+
+echo "Complete!! Created  ${roles[*]} Roles files "

@@ -31,15 +31,17 @@ This script takes in following input parameters:
  RhelSatOrg        : RHEL Satellite organisation
  RhelSatActKey     : RHEL Satellite activation key
  RepoFile          : Name for the file repo hosting the Nuage RPMs
- DeploymentType    : ["vrs"]  --> VRS deployment
- VRSRepoNames      : Name for the repo hosting the Nuage VRS RPMs
+ DeploymentType    : ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
+                     ["vrs"]  --> VRS/OVRS/SRIOV deployment
+ VRSRepoNames      : Name for the repo hosting the Nuage O/VRS RPMs
  RpmPublicKey      : RPM GPG Key
  logFile           : Log file name
 
 The following sequence is executed by the script
  1. Subscribe to RHEL and the pool
  2. Uninstall OVS
- 3. Install NeutronClient, Nuage-BGP, Selinux Policy Nuage,
+ 3. Download AVRS packages to the image if AVRS is enabled
+ 4. Install NeutronClient, Nuage-BGP, Selinux Policy Nuage,
     Nuage Puppet Module packages.
  5. Install VRS, Nuage Metadata Agent
  6. Unsubscribe from RHEL
@@ -73,8 +75,43 @@ yum clean all
 
 
 #####
+# Function to download Nuage AVRS packages that are required
+#####
+
+def download_avrs_packages():
+
+    cmds = '''
+#### Downloading Nuage Avrs and 6wind Packages
+mkdir -p /6wind
+rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
+yum install -y --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind python3-pyelftools* \
+6windgate* %s nuage-metadata-agent virtual-accelerator*
+yum install -y --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
+yum install --setopt=skip_missing_names_on_install=False -y createrepo
+yum clean all
+''' % constants.NUAGE_AVRS_PACKAGE
+    constants.PATCHING_SCRIPT += cmds + '\n'
+
+
+#####
 # Function to check if deployment types provided are valid
 #####
+
+def check_deployment_type(nuage_config):
+    msg = "DeploymentType config option %s is not correct " \
+          "or supported " \
+          " Please enter:\n ['vrs'] --> for VRS/OVRS/SRIOV deployment\n " \
+          "['avrs'] --> for AVRS + VRS/OVRS/SRIOV deployment\n " % \
+          nuage_config["DeploymentType"]
+    if(all(deployment_type in constants.VALID_DEPLOYMENT_TYPES
+           for deployment_type in nuage_config["DeploymentType"])):
+        logger.info("Overcloud Image will be patched with Nuage %s "
+                    "rpms" % nuage_config["DeploymentType"])
+    else:
+        logger.error(msg)
+        sys.exit(1)
 
 
 def check_rhel_subscription_type(nuage_config):
@@ -127,6 +164,7 @@ def check_config(nuage_config):
 
     file_exists(nuage_config["ImageName"])
 
+    check_deployment_type(nuage_config)
 
 ####
 # Image Patching
@@ -163,6 +201,9 @@ def image_patching(nuage_config):
         # Else: check_config checks if file is missing
         logger.info("Copying RepoFile to the overcloud image")
         copy_repo_file(nuage_config["ImageName"], nuage_config["RepoFile"])
+
+    if "avrs" in nuage_config["DeploymentType"]:
+        download_avrs_packages()
 
     install_nuage_packages()
 
