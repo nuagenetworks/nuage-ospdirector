@@ -192,4 +192,4 @@ outputs:
                     - nuage-puppet-modules
                     - selinux-policy-nuage
                     - nuage-bgp
-              when: nuage_base_check != 0
+              when: nuage_base_check.rc != 0
