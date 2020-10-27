@@ -150,76 +150,76 @@ The repository contents may change depending on the roles configured for your de
 
 ::
 
-   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Group          | Packages                                     | Location (tar.gz or link)                                                                 |
-   +================+==============================================+===========================================================================================+
-   |                | nuage-bgp                                    | nuage-vrs-el8 or nuage-avrs-el8                                                           |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage          | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
-   | Common         +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-16.1-20.10.<U>_<B>      | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-metadata-agent                         | nuage-vrs-el8 or nuage-avrs-el8                                                           |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | python-openswitch-nuage                      | nuage-vrs-el8 or nuage-avrs-el8                                                           |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-openstack-neutron                      | nuage-openstack                                                                           |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-openstack-horizon                      | nuage-openstack                                                                           |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-openstack-heat                         | nuage-openstack                                                                           |
-   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.<U>_<B> | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms              |
-   | Director       +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.<U>_<B> | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms              |
-   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage VRS      | nuage-openvswitch                            | nuage-vrs-el8                                                                             |
-   | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | selinux-policy-nuage                         | nuage-selinux                                                                             |
-   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | nuage-openstack                                                                           |
-   | packages       |                                              |                                                                                           |
-   |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-dpdk                               | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Accelerated    | 6windgate-dpdk-pmd-mellanox-rdma-core        | nuage-avrs-el8                                                                            |
-   | VRS (AVRS)     +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | 6WIND          | 6windgate-dpdk-pmd-virtio-host               | nuage-avrs-el8                                                                            |
-   | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-fp                                 | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-fp-ovs                             | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-fpn-sdk-dpdk                       | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-linux-fp-sync                      | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-linux-fp-sync-fptun                | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-linux-fp-sync-ovs                  | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-linux-fp-sync-vrf                  | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-product-base                       | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-tools-common-libs-daemonctl        | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-tools-common-libs-libconsole       | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | 6windgate-tools-common-libs-libvrf           | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | nuage-openvswitch-6wind                      | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | virtual-accelerator-base                     | nuage-avrs-el8                                                                            |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | selinux-policy-nuage-avrs                    | nuage-avrs-selinux                                                                        |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | os-vif-6wind-plugin                          | 6wind                                                                                     |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | fp-vdev-remote                               | 6wind                                                                                     |
-   |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
-   |                | networking-6wind                             | 6wind                                                                                     |
-   +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+   +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Group          | Packages                                       | Location (tar.gz or link)                                                                 |
+   +================+================================================+===========================================================================================+
+   |                | nuage-bgp                                      | nuage-vrs-el8 or nuage-avrs-el8                                                           |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage          | nuage-openstack-neutronclient                  | nuage-openstack                                                                           |
+   | Common         +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Packages       | nuage-puppet-modules-16.1-20.10.1_40           | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-metadata-agent                           | nuage-vrs-el8 or nuage-avrs-el8                                                           |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | python-openswitch-nuage                        | nuage-vrs-el8 or nuage-avrs-el8                                                           |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openstack-neutron                        | nuage-openstack                                                                           |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openstack-horizon                        | nuage-openstack                                                                           |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
+   +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.1_287  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
+   | Packages       | nuage-image-patching-scripts-16.1-20.10.1_287  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
+   | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | selinux-policy-nuage                           | nuage-selinux                                                                             |
+   +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.1-draft    |
+   | packages       |                                                |                                                                                           |
+   |----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-dpdk                                 | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | Accelerated    | 6windgate-dpdk-pmd-mellanox-rdma-core          | nuage-avrs-el8                                                                            |
+   | VRS (AVRS)     +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   | 6WIND          | 6windgate-dpdk-pmd-virtio-host                 | nuage-avrs-el8                                                                            |
+   | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fp                                   | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fp-ovs                               | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-fpn-sdk-dpdk                         | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync                        | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-fptun                  | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-ovs                    | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-linux-fp-sync-vrf                    | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-product-base                         | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-daemonctl          | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-libconsole         | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | 6windgate-tools-common-libs-libvrf             | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | nuage-openvswitch-6wind                        | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | virtual-accelerator-base                       | nuage-avrs-el8                                                                            |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | selinux-policy-nuage-avrs                      | nuage-avrs-selinux                                                                        |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | os-vif-6wind-plugin                            | 6wind                                                                                     |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | fp-vdev-remote                                 | 6wind                                                                                     |
+   |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
+   |                | networking-6wind                               | 6wind                                                                                     |
+   +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
 
 
 Phase 2.2: Install nuage-tripleo-heat-templates
@@ -269,7 +269,7 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-5-3"
+            name_suffix: "-20-10-latest"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -282,14 +282,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-5-3" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
 
 
 Phase 3: Prepare the Overcloud
@@ -1313,7 +1313,7 @@ Phase 5: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "20.10.<U>-16-nuage"
+        ovs_version: "20.10.1-55-nuage"
 
 
 Phase 6: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -1758,7 +1758,7 @@ containers-prepare-parameter.yaml
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-5-3"
+            name_suffix: "-20-10-latest"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -1771,14 +1771,14 @@ containers-prepare-parameter.yaml
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-5-3" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-5-3:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
 
 
 nuage-overcloud-resource-registry.yaml

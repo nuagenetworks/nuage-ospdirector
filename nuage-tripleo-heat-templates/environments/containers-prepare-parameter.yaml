@@ -41,7 +41,7 @@ parameter_defaults:
     - push_destination: true
       set:
         name_prefix: "rhosp16-openstack-"
-        name_suffix: "-20-5-3"
+        name_suffix: "-20-10-latest"
         namespace: registry.connect.redhat.com/nuagenetworks
         neutron_driver: null
         rhel_containers: false
