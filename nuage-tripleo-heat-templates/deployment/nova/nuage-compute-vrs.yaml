@@ -60,15 +60,22 @@ outputs:
                 shell: rpm -q nuage-openvswitch nuage-metadata-agent
                 failed_when: false
                 register: nuage_check
-              - name: Installing Nuage VRS Packages
-                yum:
-                  name: "{{ packages }}"
-                  state: present
-                vars:
-                  packages:
-                    - nuage-openvswitch
-                    - nuage-metadata-agent
+              - name: Ensure VRS is operational in No patching scenarios
                 when: nuage_check.rc != 0
+                block:
+                  - name: Installing Nuage VRS Packages
+                    yum:
+                      name: "{{ packages }}"
+                      state: present
+                    vars:
+                      packages:
+                        - nuage-openvswitch
+                        - nuage-metadata-agent
+                  - name: Start and enable vrs
+                    service:
+                      name: openvswitch
+                      enabled: yes
+                      state: started
               - name: Start a vsctl manager so nova can directly access the ovs database
                 shell: >
                   /usr/bin/ovs-vsctl --timeout=5 --id=@manager -- create Manager
