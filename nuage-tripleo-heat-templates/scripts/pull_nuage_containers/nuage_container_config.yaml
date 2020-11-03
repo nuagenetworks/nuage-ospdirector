@@ -1,0 +1,14 @@
+# OpenStack version number
+version: 16
+# Registry used for pulling AVRS container images
+# Currently supported values are [registry.connect.redhat.com]
+registry_url: registry.connect.redhat.com
+# Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
+# for exmaple: Nuage release 20-10-1 please enter following
+release: 20-10-1
+# Tag for AVRS container images
+tag: latest
+# Undercloud Local Registry IP Address:Port <hostname>.ctlplane.localdomain:8787
+local_registry: undercloud.ctlplane.localdomain:8787
+# List of AVRS containers
+nuage_images: ['nova-compute', 'neutron-openvswitch-agent']

@@ -1,0 +1,8 @@
+parameter_defaults:
+{% if 'nova-compute' in nuage_config['nuage_images'] %}
+  ContainerNovaComputeAvrsImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+  ContainerNovaLibvirtAvrsConfigImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-nova-compute-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+{% endif %}
+{% if 'neutron-openvswitch-agent' in nuage_config['nuage_images'] %}
+  ContainerNeutronFastpathImage: {{ nuage_config['local_registry'] }}/nuagenetworks/rhosp{{ nuage_config['version'] }}-openstack-neutron-openvswitch-agent-{{ nuage_config['release'] }}:{{ nuage_config['tag'] }}
+{% endif %}

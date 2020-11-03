@@ -292,6 +292,84 @@ In this phase, you prepare Nuage containers for the integration.
       ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
 
 
+Phase 2.4: Pull AVRS Containers from the Red Hat Catalog (This step is only necessary for AVRS deployments.)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+In this phase, you pull the AVRS containers for the integration.
+
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.1 with 16.1-1 as an example (this version may change):
+
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-1:16.1-1
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-1:16.1-1
+
+For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
+
+The Nuage containers are now available in the Red Hat Partner Container Catalog. To get the Nuage containers, follow these instructions to connect to a registry remotely:
+
+1. On the Undercloud, use the following instructions to get Nuage images from a Red Hat container registry using registry service account tokens.
+
+   Make sure to `create a registry service account <https://access.redhat.com/terms-based-registry>`_ before completing this step.
+
+::
+
+    $ docker login registry.connect.redhat.com
+    Username: ${REGISTRY-SERVICE-ACCOUNT-USERNAME}
+    Password: ${REGISTRY-SERVICE-ACCOUNT-PASSWORD}
+    Login Succeeded!
+
+2. Change the working directory to `/home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/`.
+
+::
+
+    $ cd /home/stack/nuage-tripleo-heat-templates/scripts/pull_nuage_containers/
+
+
+3. Configure `nuage_container_config.yaml` with appropriate values. See the following example.
+
+::
+
+    #OpenStack version number
+    version: 16
+    #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
+    # for example: Nuage release 20.10.1 please enter following
+    release: 20-10-1
+    #Tag for AVRS container images
+    tag: latest
+    # Undercloud Local Registry IP Address:Port <hostname>.ctlplane.localdomain:8787
+    local_registry: undercloud.ctlplane.localdomain:8787
+    #List of AVRS containers
+    nuage_images: ['nova-compute', 'neutron-openvswitch-agent']
+
+
+4. Run the `nuage_container_pull.py` script by passing `nuage_container_config.yaml` to the ``--nuage-config`` argument.
+
+   This command does the following actions:
+
+      a. Pull AVRS container images from Red Hat Registry.
+
+      b. Retag the AVRS container images, by modifying the registry to point to the local registry.
+
+      c. Push the retagged AVRS container images to the local registry.
+
+      d. Remove the container images that got created in Step 1 and Step 2 in this phase from the Undercloud machine.
+
+   After running `nuage_container_pull.py`, the `nuage_overcloud_images.yaml` file is created in the `/home/stack/nuage-tripleo-heat-templates/environments` directory.
+
+      ::
+
+          $ sudo python3 nuage_container_pull.py --nuage-config nuage_container_config.yaml
+
+
+   This example shows how nuage_overcloud_images.yaml should be used when deploying overcloud:
+
+     ::
+
+         openstack overcloud deploy --templates -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml - e <remaining environment files>
+
+
+.. Note:: The `/home/stack/templates/overcloud_images.yaml` file should take precedence over this file.
+
+
 Phase 3: Prepare the Overcloud
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1192,10 +1270,10 @@ For OVRS, also include the following role and environment files.
     openstack overcloud deploy --templates --libvirt-type qemu -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml --ntp-server ntp-server --timeout timeout
 
     For single AVRS role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
 
     For multiple AVRS roles deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
 2. For OVRS using Mellanox ConnectX-5 NICs, use:
 
@@ -1222,17 +1300,17 @@ For OVRS, also include the following role and environment files.
     openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml  --ntp-server ntp-server --timeout timeout
 
     For single AVRS role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml --ntp-server ntp-server --timeout timeout
 
     For multiple AVRS role deployment, use:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
 
 5. For VRS, SR-IOV, and AVRS deployment with Nuage using Linux-bonding, use the following:
 
 ::
 
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/neutron-sriov.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml  --ntp-server ntp-server --timeout timeout
+    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/neutron-sriov.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-environment.yaml  --ntp-server ntp-server --timeout timeout
 
 
 where:
@@ -1247,6 +1325,7 @@ where:
    * ``network-isolation.yaml`` enables the creation of networks for isolated Overcloud traffic.
    * ``net-single-nic-hw-offload.yaml``  configures an IP address with a VLAN on each network except for the Tenant network.
    * ``net-bond-with-vlans.yaml`` configures an IP address and a pair of bonded NICs on each network.
+   * ``nuage_overcloud_images.yaml`` has AVRS specific images.
    * ``ovs-hw-offload.yaml`` enables OVS hardware offloading on OVRS Compute nodes.
    * ``compute-avrs-environment.yaml``  configures the parameters for ComputeAvrs.
    * ``mellanox-environment.yaml`` has the Mellanox First Boot Firmware configuration.
