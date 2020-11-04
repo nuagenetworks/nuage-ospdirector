@@ -76,8 +76,14 @@ outputs:
                       name: openvswitch
                       enabled: yes
                       state: started
+              - name: Check if manager is present
+                shell: >
+                  /usr/bin/ovs-vsctl get-manager | grep "ptcp:6640:127.0.0.1"
+                failed_when: false
+                register: manager_check
               - name: Start a vsctl manager so nova can directly access the ovs database
                 shell: >
                   /usr/bin/ovs-vsctl --timeout=5 --id=@manager -- create Manager
                   "target=\"ptcp:6640:127.0.0.1\"" -- add Open_vSwitch .
                   manager_options @manager
+                when: manager_check.rc != 0
