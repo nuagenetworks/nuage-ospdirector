@@ -169,9 +169,9 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.1_287  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.1_298  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.1_287  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-image-patching-scripts-16.1-20.10.1_298  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
    | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -269,7 +269,7 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-latest"
+            name_suffix: "-20-10-1"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -282,14 +282,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-1" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-1:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-1:latest
 
 
 Phase 3: Prepare the Overcloud
@@ -1313,7 +1313,7 @@ Phase 5: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "20.10.1-55-nuage"
+        ovs_version: "20.10.1-59-nuage"
 
 
 Phase 6: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -1758,7 +1758,7 @@ containers-prepare-parameter.yaml
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-latest"
+            name_suffix: "-20-10-1"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -1771,14 +1771,14 @@ containers-prepare-parameter.yaml
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-1" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-1:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-1:latest
 
 
 nuage-overcloud-resource-registry.yaml
@@ -2327,6 +2327,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-20.10.<U>), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-20.10.1_40), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
