@@ -165,152 +165,154 @@ outputs:
       container_config_scripts: {get_attr: [NovaComputeAvrsDockerBase, role_data, container_config_scripts]}
       docker_config: {get_attr: [NovaComputeAvrsDockerBase, role_data, docker_config]}
       workflow_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, workflow_tasks]}
-      deploy_steps_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, deploy_steps_tasks]}
       external_post_deploy_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, external_post_deploy_tasks]}
-      host_prep_tasks:
+      host_prep_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
+      deploy_steps_tasks:
         list_concat:
-        - {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
-        - - name: Stoping Network Manager
-            service:
-              name: NetworkManager
-              state: stopped
-              enabled: no
-          - name: Check if 6wind is installed
-            shell: rpm -qa | grep -q virtual-accelerator-base
-            failed_when: false
-            register: sixwind_check
-          - name: Install 6wind and AVRS packages
+        - {get_attr: [NovaComputeAvrsDockerBase, role_data, deploy_steps_tasks]}
+        - - when: step|int == 1
             block:
-              - name: Ansible check /6wind/ exists.
-                stat:
-                  path: /6wind/
-                register: sixwind_dir
-              - name: Install from Local Repos
+              - name: Stoping Network Manager
+                service:
+                  name: NetworkManager
+                  state: stopped
+                  enabled: no
+              - name: Check if 6wind is installed
+                shell: rpm -qa | grep -q virtual-accelerator-base
+                failed_when: false
+                register: sixwind_check
+              - name: Install 6wind and AVRS packages
                 block:
-                  - name: create repo
-                    shell: createrepo /6wind/.
-                  - name: Setup repo
-                    yum_repository:
-                      name: nuage_6wind
-                      baseurl: file:///6wind
-                      enabled: yes
-                      gpgcheck: {get_attr: [RoleParametersValue, value, GPG_CHECK]}
-                      description: Nuage_6wind
-                when: sixwind_dir.stat.exists
-              - name: remove upstream dpdk
-                yum:
-                  name: dpdk
-                  state: absent
-              - name: install base packages
-                yum:
-                  name: "{{ packages }}"
-                  state: present
-                vars:
-                  packages:
-                    - selinux-policy-nuage-avrs
-                    - python3-pyelftools
-              - name: Check if nuage-openvswitch (vrs) is installed
-                shell: rpm -q nuage-openvswitch
-                register: nuage_openvswitch_check
-                ignore_errors: True
-              - name: Uninstall nuage-openvswitch (vrs) if installed
-                yum:
-                  name: nuage-openvswitch
-                  state: absent
-                when: nuage_openvswitch_check.rc == 0
-              - name: installing qemu-kvm, libvirt
-                yum:
-                  name: "{{ packages }}"
-                  state: present
-                vars:
-                  packages:
-                    - qemu-kvm
-                    - libvirt
-                    - python3-libvirt
-              - name: install virtual-accelerator-base
-                yum:
-                  name: virtual-accelerator-base
-                  state: present
-              - name: Check which 6wind package needs to get installed
-                shell: repoquery --all nuage-openvswitch-6wind
-                register: nuage_openvswitch_sixwind_output
-              - name: installing nuage-openvswitch-6wind
-                yum:
-                  name: nuage-openvswitch-6wind
-                  state: present
-                when: nuage_openvswitch_sixwind_output.stdout != ''
-              - name: installing nuage-openvswitch
-                yum:
-                  name: nuage-openvswitch
-                  state: present
-                when: nuage_openvswitch_sixwind_output.stdout == ''
-              - name: install nuage-metadata-agent
-                yum:
-                  name: nuage-metadata-agent
-                  state: present
-              - name: cleanup repo
-                block:
-                  - name: removing nuage_6wind
-                    yum_repository:
-                      name: nuage_6wind
+                  - name: Ansible check /6wind/ exists.
+                    stat:
+                      path: /6wind/
+                    register: sixwind_dir
+                  - name: Install from Local Repos
+                    block:
+                      - name: create repo
+                        shell: createrepo /6wind/.
+                      - name: Setup repo
+                        yum_repository:
+                          name: nuage_6wind
+                          baseurl: file:///6wind
+                          enabled: yes
+                          gpgcheck: {get_attr: [RoleParametersValue, value, GPG_CHECK]}
+                          description: Nuage_6wind
+                    when: sixwind_dir.stat.exists
+                  - name: remove upstream dpdk
+                    yum:
+                      name: dpdk
                       state: absent
-                  - name: remove repodata
-                    shell: rm -rf /6wind/repodata
-                when: sixwind_dir.stat.exists
-            when: sixwind_check.rc == 1
+                  - name: install base packages
+                    yum:
+                      name: "{{ packages }}"
+                      state: present
+                    vars:
+                      packages:
+                        - selinux-policy-nuage-avrs
+                        - python3-pyelftools
+                  - name: Check if nuage-openvswitch (vrs) is installed
+                    shell: rpm -q nuage-openvswitch
+                    register: nuage_openvswitch_check
+                    ignore_errors: True
+                  - name: Uninstall nuage-openvswitch (vrs) if installed
+                    yum:
+                      name: nuage-openvswitch
+                      state: absent
+                    when: nuage_openvswitch_check.rc == 0
+                  - name: installing qemu-kvm, libvirt
+                    yum:
+                      name: "{{ packages }}"
+                      state: present
+                    vars:
+                      packages:
+                        - qemu-kvm
+                        - libvirt
+                        - python3-libvirt
+                  - name: install virtual-accelerator-base
+                    yum:
+                      name: virtual-accelerator-base
+                      state: present
+                  - name: Check which 6wind package needs to get installed
+                    shell: repoquery --all nuage-openvswitch-6wind
+                    register: nuage_openvswitch_sixwind_output
+                  - name: installing nuage-openvswitch-6wind
+                    yum:
+                      name: nuage-openvswitch-6wind
+                      state: present
+                    when: nuage_openvswitch_sixwind_output.stdout != ''
+                  - name: installing nuage-openvswitch
+                    yum:
+                      name: nuage-openvswitch
+                      state: present
+                    when: nuage_openvswitch_sixwind_output.stdout == ''
+                  - name: install nuage-metadata-agent
+                    yum:
+                      name: nuage-metadata-agent
+                      state: present
+                  - name: cleanup repo
+                    block:
+                      - name: removing nuage_6wind
+                        yum_repository:
+                          name: nuage_6wind
+                          state: absent
+                      - name: remove repodata
+                        shell: rm -rf /6wind/repodata
+                    when: sixwind_dir.stat.exists
+                when: sixwind_check.rc == 1
 
-          - name: adding sockfolder pmd-vhost param
-            ini_file:
-              path: /etc/fp-vdev.ini
-              section: pmd-vhost
-              option: sockfolder
-              value: /var/lib/vhost_sockets
-          - name: adding rpcd param to fp-vdev-remote.ini
-            ini_file:
-              path: /etc/fp-vdev-remote.ini
-              section: rpcd
-              option: fp_rpcd_dir
-              value: /run/openvswitch
-          - name: Set params in fast-path.env file
-            lineinfile:
-              dest: /etc/fast-path.env
-              line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
-              regexp: '^: \$[{]{{ item.param }}:='
-              state: present
-              create: yes
-            loop:
-                - { param: 'FP_MASK', val: { get_attr: [RoleParametersValue, value, FP_MASK] }}
-                - { param: 'FP_PORTS', val: { get_attr: [RoleParametersValue, value, FP_PORTS] }}
-                - { param: 'CORE_PORT_MAPPING', val: { get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING] }}
-                - { param: 'FP_MEMORY', val: { get_attr: [RoleParametersValue, value, FP_MEMORY] }}
-                - { param: 'VM_MEMORY', val: { get_attr: [RoleParametersValue, value, VM_MEMORY] }}
-                - { param: 'NB_MBUF', val: { get_attr: [RoleParametersValue, value, NB_MBUF] }}
-                - { param: 'FP_OFFLOAD', val: { get_attr: [RoleParametersValue, value, FP_OFFLOAD] }}
-                - { param: 'FPNSDK_OPTIONS', val: { get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS] }}
-                - { param: 'DPVI_MASK', val: { get_attr: [RoleParametersValue, value, DPVI_MASK] }}
-                - { param: 'FP_OPTIONS', val: { get_attr: [RoleParametersValue, value, FP_OPTIONS] }}
-            register: lineinfile_result
-            when: item.val != ''
-          - name: Set params in cpuset.env file
-            lineinfile:
-              dest: /etc/cpuset.env
-              line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
-              regexp: '^: \$[{]{{ item.param }}:='
-              state: present
-              create: yes
-            loop:
-              - { param: 'CPUSET_ENABLE', val: { get_attr: [RoleParametersValue, value, CPUSET_ENABLE] }}
-          - block:
-            - name: Restarting AVRS service
-              service:
-                name: avrs
-                state: restarted
-                enabled: yes
-              # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
-              ignore_errors: yes
-            - name: check if virtual-accelerator is active
-              command: systemctl status virtual-accelerator
-            when: lineinfile_result.changed
+              - name: adding sockfolder pmd-vhost param
+                ini_file:
+                  path: /etc/fp-vdev.ini
+                  section: pmd-vhost
+                  option: sockfolder
+                  value: /var/lib/vhost_sockets
+              - name: adding rpcd param to fp-vdev-remote.ini
+                ini_file:
+                  path: /etc/fp-vdev-remote.ini
+                  section: rpcd
+                  option: fp_rpcd_dir
+                  value: /run/openvswitch
+              - name: Set params in fast-path.env file
+                lineinfile:
+                  dest: /etc/fast-path.env
+                  line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+                  regexp: '^: \$[{]{{ item.param }}:='
+                  state: present
+                  create: yes
+                loop:
+                    - { param: 'FP_MASK', val: { get_attr: [RoleParametersValue, value, FP_MASK] }}
+                    - { param: 'FP_PORTS', val: { get_attr: [RoleParametersValue, value, FP_PORTS] }}
+                    - { param: 'CORE_PORT_MAPPING', val: { get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING] }}
+                    - { param: 'FP_MEMORY', val: { get_attr: [RoleParametersValue, value, FP_MEMORY] }}
+                    - { param: 'VM_MEMORY', val: { get_attr: [RoleParametersValue, value, VM_MEMORY] }}
+                    - { param: 'NB_MBUF', val: { get_attr: [RoleParametersValue, value, NB_MBUF] }}
+                    - { param: 'FP_OFFLOAD', val: { get_attr: [RoleParametersValue, value, FP_OFFLOAD] }}
+                    - { param: 'FPNSDK_OPTIONS', val: { get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS] }}
+                    - { param: 'DPVI_MASK', val: { get_attr: [RoleParametersValue, value, DPVI_MASK] }}
+                    - { param: 'FP_OPTIONS', val: { get_attr: [RoleParametersValue, value, FP_OPTIONS] }}
+                register: lineinfile_result
+                when: item.val != ''
+              - name: Set params in cpuset.env file
+                lineinfile:
+                  dest: /etc/cpuset.env
+                  line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+                  regexp: '^: \$[{]{{ item.param }}:='
+                  state: present
+                  create: yes
+                loop:
+                  - { param: 'CPUSET_ENABLE', val: { get_attr: [RoleParametersValue, value, CPUSET_ENABLE] }}
+              - block:
+                - name: Restarting AVRS service
+                  service:
+                    name: avrs
+                    state: restarted
+                    enabled: yes
+                  # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+                  ignore_errors: yes
+                - name: check if virtual-accelerator is active
+                  command: systemctl status virtual-accelerator
+                when: lineinfile_result.changed
       upgrade_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]}
       update_tasks:
         list_concat:
