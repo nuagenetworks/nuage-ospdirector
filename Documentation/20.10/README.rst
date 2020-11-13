@@ -169,15 +169,15 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.1_298  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.1_309  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.1_298  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-image-patching-scripts-16.1-20.10.1_309  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
    | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | selinux-policy-nuage                           | nuage-selinux                                                                             |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.1-draft    |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.1          |
    | packages       |                                                |                                                                                           |
    |----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | 6windgate-dpdk                                 | nuage-avrs-el8                                                                            |
