@@ -1248,6 +1248,15 @@ For AVRS, also include the following role and environment files.
         * nuage_roles_data.yaml
         * compute-avrs-multirole-environment.yaml
 
+    .. Note::
+
+        For AVRS there are some issues with running overcloud deploy twice on the same AVRS compute.
+        This impacts certain scenarios such as scale-out with an overcloud that has an AVRS node.
+        To work around this issue, please blacklist existing overcloud AVRS nodes before running a
+        scale-out. More information on how to use a blacklist during overcloud deploy can be found in the
+        RHOSP documentation https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/scaling-overcloud-nodes#blacklisting-nodes
+
+
 For SR-IOV, also include the following role and environment files.
 
         * nuage_roles_data.yaml
