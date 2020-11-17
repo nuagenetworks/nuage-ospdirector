@@ -468,7 +468,7 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
 
    * RhelUserName (optional) is the user name for the Red Hat Enterprise Linux (RHEL) subscription.
    * RhelPassword (optional) is the password for the Red Hat Enterprise Linux subscription.
-   * RhelPool (optional) is the Red Hat Enterprise Linux pool to which the base packages are subscribed.
+   * RhelPool (optional) is the Red Hat Enterprise Linux pool to which the base packages are subscribed. If deployment type is AVRS, than this should be a pool id with access to OpenStack 16.x RPM's repository
    * RhelSatUrl (optional) is the URL for the Red Hat Satellite server.
    * RhelSatOrg (optional) is the organization for the Red Hat Satellite server.
    * RhelSatActKey (optional) is the activation key for the Red Hat Satellite server.

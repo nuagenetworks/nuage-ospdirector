@@ -20,7 +20,8 @@ RhelUserName: ''
 # optional
 RhelPassword: ''
 
-# Pool to subscribe to for base packages
+# Pool to subscribe to for base packages, if deployment type is AVRS, than
+#   this should be a pool id with access to OpenStack 16.x RPM's repository
 # type: string
 # optional
 RhelPool: ''

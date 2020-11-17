@@ -62,7 +62,6 @@ rhel_subs_type = ''
 #####
 
 def install_nuage_packages():
-
     cmds = '''
 #### Installing Nuage Packages
 yum install --setopt=skip_missing_names_on_install=False -y %s
@@ -79,15 +78,15 @@ yum clean all
 #####
 
 def download_avrs_packages():
-
     cmds = '''
 #### Downloading Nuage Avrs and 6wind Packages
+yum install -y yum-utils
 mkdir -p /6wind
 rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
-yum install -y --setopt=skip_missing_names_on_install=False \
+yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind python3-pyelftools* \
 6windgate* %s nuage-metadata-agent virtual-accelerator*
-yum install -y --setopt=skip_missing_names_on_install=False \
+yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
 yum install --setopt=skip_missing_names_on_install=False -y createrepo
 yum clean all
@@ -105,8 +104,8 @@ def check_deployment_type(nuage_config):
           " Please enter:\n ['vrs'] --> for VRS/OVRS/SRIOV deployment\n " \
           "['avrs'] --> for AVRS + VRS/OVRS/SRIOV deployment\n " % \
           nuage_config["DeploymentType"]
-    if(all(deployment_type in constants.VALID_DEPLOYMENT_TYPES
-           for deployment_type in nuage_config["DeploymentType"])):
+    if (all(deployment_type in constants.VALID_DEPLOYMENT_TYPES
+            for deployment_type in nuage_config["DeploymentType"])):
         logger.info("Overcloud Image will be patched with Nuage %s "
                     "rpms" % nuage_config["DeploymentType"])
     else:
@@ -122,8 +121,8 @@ def check_rhel_subscription_type(nuage_config):
     key_set_portal = ["RhelPassword", "RhelUserName", "RhelPool"]
 
     if all(nuage_config.get(key) for key in
-            key_set_satellite):  # RH satellite
-            return constants.RHEL_SUB_SATELLITE
+           key_set_satellite):  # RH satellite
+        return constants.RHEL_SUB_SATELLITE
     elif all(nuage_config.get(key) for key in
              key_set_portal):  # RH portal
         return constants.RHEL_SUB_PORTAL
@@ -166,6 +165,7 @@ def check_config(nuage_config):
 
     check_deployment_type(nuage_config)
 
+
 ####
 # Image Patching
 ####
@@ -190,7 +190,8 @@ def image_patching(nuage_config):
                           satellite_key=nuage_config.get("RhelSatActKey"),
                           proxy_hostname=nuage_config.get("ProxyHostname"),
                           proxy_port=nuage_config.get("ProxyPort"),
-                          rhel_sub_type=rhel_subs_type)
+                          rhel_sub_type=rhel_subs_type,
+                          deployment_type=nuage_config.get("DeploymentType"))
     install_nuage_python_ovs_packages()
     uninstall_packages()
 
@@ -240,7 +241,7 @@ def main():
             logger.error(
                 'Error parsing file {filename}: {exc}. \n'
                 'Please fix and try again with correct yaml file.'
-                .format(filename=args.nuage_config, exc=exc))
+                    .format(filename=args.nuage_config, exc=exc))
             sys.exit(1)
 
     if nuage_config.get("logFileName"):
