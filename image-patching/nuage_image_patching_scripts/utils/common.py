@@ -167,7 +167,7 @@ def copy_repo_file(image, repofile):
 
 def rhel_subscription(username, password, pool, satellite_url, satellite_org,
                       satellite_key, proxy_hostname, proxy_port,
-                      rhel_sub_type):
+                      rhel_sub_type, deployment_type):
     subscription_command = ''
     if proxy_hostname and proxy_port:
         subscription_command += (
@@ -193,8 +193,8 @@ def rhel_subscription(username, password, pool, satellite_url, satellite_org,
         )
     else:
         subscription_command += (
-            "subscription-manager register"
-            " --username='%s' --password='%s' --force \n" % (username, password)
+            "subscription-manager register "
+            "--username='%s' --password='%s' --force \n" % (username, password)
         )
         subscription_command += (
             "subscription-manager attach --pool='%s'\n" % pool
@@ -202,9 +202,16 @@ def rhel_subscription(username, password, pool, satellite_url, satellite_org,
     subscription_command += (
         "sudo subscription-manager repos "
         "--enable=rhel-8-for-x86_64-baseos-rpms "
-        "--enable=rhel-8-for-x86_64-appstream-rpms  "
+        "--enable=rhel-8-for-x86_64-appstream-rpms "
         "--enable=rhel-8-for-x86_64-highavailability-rpms \n "
     )
+    if "avrs" in deployment_type:
+        subscription_command += (
+            "sudo subscription-manager repos "
+            "--enable=openstack-%s-for-rhel-8-x86_64-rpms \n "
+            % constants.RHOSP_VERSION
+        )
+
     constants.PATCHING_SCRIPT += subscription_command
 
 

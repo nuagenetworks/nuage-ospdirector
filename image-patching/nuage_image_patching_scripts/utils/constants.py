@@ -33,3 +33,4 @@ VALID_DEPLOYMENT_TYPES = ['vrs', 'avrs']
 RHEL_SUB_PORTAL = "portal"
 RHEL_SUB_SATELLITE = "satellite"
 RHEL_SUB_DISABLED = "disabled"
+RHOSP_VERSION = "16.1"
