@@ -48,29 +48,6 @@ def file_exists(filename):
                      "script" % filename)
         sys.exit(1)
 
-
-#####
-# Generates nauge_local_registry_images.yaml, with Nuage conatiner
-# names and push destination
-#
-
-def generate_local_registry_nuage_images(nuage_config):
-    dirPath = os.path.dirname(os.path.abspath(__file__))
-    ENV = Environment(loader=FileSystemLoader('%s/' % dirPath))
-    nuage_images_file_name = 'nuage_local_registry_images.yaml'
-    j2_nuage_images_file_name = nuage_images_file_name + '.j2'
-    file_exists(dirPath + '/' + j2_nuage_images_file_name)
-    nuage_images_file = ENV.get_template(j2_nuage_images_file_name)
-    logger.info("Rendering nuage_local_registry_images.yaml file")
-    with open('%s/%s' % (dirPath, nuage_images_file_name),
-              'w') as local_images_file:
-        local_images_file.write(
-            nuage_images_file.render(nuage_config=nuage_config))
-    logger.info("Rendering nuage_local_registry_images.yaml is "
-                "completed")
-    return nuage_images_file_name
-
-
 #####
 # Generates nuage_overcloud_images.yaml with Nuage container names
 # that need to be pulld by overcloud nodes during deployment
@@ -104,11 +81,24 @@ def generate_nuage_overcloud_images(nuage_config):
 # remove them all from undercloud machine.
 #####
 
-def pull_retag_push_nuage_images(config_file):
-    upload_cmd = 'openstack overcloud container image upload   ' \
-                 '--config-file  ' + config_file + ' --verbose'
+def pull_retag_push_nuage_images(nuage_config):
     logger.info("Pulling the Nuage Container images to Local registry")
-    subprocess.call(upload_cmd, shell=True)
+    for image in nuage_config['nuage_images']:
+        image_path = '{}/nuagenetworks/rhosp{}-openstack-{}-{}:{}'.format(
+            nuage_config['registry_url'],
+            nuage_config['version'],
+            image,
+            nuage_config['release'],
+            nuage_config['tag'])
+        pull_cmd = 'podman pull {}'.format(image_path)
+
+        subprocess.call(pull_cmd, shell=True)
+
+        push_cmd = 'sudo openstack tripleo container image push {} ' \
+                   '--registry-url {} --local'.format(
+                    image_path,
+                    nuage_config['local_registry'])
+        subprocess.call(push_cmd, shell=True)
 
 
 def main():
@@ -121,9 +111,8 @@ def main():
     with open(args.nuage_config) as nuage_config:
         nuage_config = yaml.load(nuage_config)
 
-    config_file = generate_local_registry_nuage_images(nuage_config)
     generate_nuage_overcloud_images(nuage_config)
-    pull_retag_push_nuage_images(config_file)
+    pull_retag_push_nuage_images(nuage_config)
 
 
 if __name__ == "__main__":
