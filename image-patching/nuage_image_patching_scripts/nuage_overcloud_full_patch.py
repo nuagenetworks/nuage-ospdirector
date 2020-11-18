@@ -84,10 +84,16 @@ yum install -y yum-utils
 mkdir -p /6wind
 rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind *6windgate* iptables*6windgate* \
+ebtables*6windgate*
+yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind python3-pyelftools* \
-6windgate* %s nuage-metadata-agent virtual-accelerator*
+%s nuage-metadata-agent virtual-accelerator*
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
+yumdownloader -y --setopt=skip_missing_names_on_install=False \
+--downloadonly --downloaddir=/6wind python3-pyroute2
+
 yum install --setopt=skip_missing_names_on_install=False -y createrepo
 yum clean all
 ''' % constants.NUAGE_AVRS_PACKAGE
