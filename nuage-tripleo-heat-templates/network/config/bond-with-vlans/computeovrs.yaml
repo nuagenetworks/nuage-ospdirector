@@ -6,6 +6,20 @@ parameters:
     default: ''
     description: IP address/subnet on the ctlplane network
     type: string
+  ControlPlaneStaticRoutes:
+    default: []
+    description: >
+      Routes for the ctlplane network traffic.
+      JSON route e.g. [{'destination':'10.0.0.0/16', 'nexthop':'10.0.0.1'}]
+      Unless the default is changed, the parameter is automatically resolved
+      from the subnet host_routes attribute.
+    type: json
+  ControlPlaneMtu:
+    default: 1500
+    description: The maximum transmission unit (MTU) size(in bytes) that is
+      guaranteed to pass through the data path of the segments in the network.
+      (The parameter is automatically resolved from the ctlplane network's mtu attribute.)
+    type: number
   StorageIpSubnet:
     default: ''
     description: IP address/subnet on the storage network
@@ -14,14 +28,31 @@ parameters:
     default: ''
     description: IP address/subnet on the storage_mgmt network
     type: string
+  StorageMtu:
+    default: 1500
+    description: The maximum transmission unit (MTU) size(in bytes) that is
+      guaranteed to pass through the data path of the segments in the
+      Storage network.
+    type: number
   InternalApiIpSubnet:
     default: ''
     description: IP address/subnet on the internal_api network
     type: string
+  InternalApiMtu:
+    default: 1500
+    description: The maximum transmission unit (MTU) size(in bytes) that is
+      guaranteed to pass through the data path of the segments in the
+      InternalApi network.
+    type: number
   TenantIpSubnet:
     default: ''
     description: IP address/subnet on the tenant network
     type: string
+  TenantMtu:
+    default: 1500
+    description: The maximum transmission unit (MTU) size(in bytes) that is
+      guaranteed to pass through the data path of the segments in the
+      Tenant network.
   ExternalIpSubnet:
     default: ''
     description: IP address/subnet on the external network
@@ -75,9 +106,6 @@ parameters:
     default: []
     description: A list of DNS servers (2 max for some implementations) that will be added to resolv.conf.
     type: comma_delimited_list
-  EC2MetadataIp: # Override this via parameter_defaults
-    description: The IP address of the EC2 metadata server.
-    type: string
   MellanoxTenantPort1:
     description: Mellanox Tenant Port1
     type: string
@@ -85,6 +113,23 @@ parameters:
     description: Mellanox Tenant Port2
     type: string
 resources:
+  MinViableMtu:
+  # This resource resolves the minimum viable MTU for interfaces, bonds and
+  # bridges that carry multiple VLANs. Each VLAN may have different MTU. The
+  # bridge, bond or interface must have an MTU to allow the VLAN with the
+  # largest MTU.
+  type: OS::Heat::Value
+  properties:
+    type: number
+    value:
+      yaql:
+        expression: $.data.max()
+        data:
+          - {get_param: ControlPlaneMtu}
+          - {get_param: StorageMtu}
+          - {get_param: InternalApiMtu}
+          - {get_param: TenantMtu}
+
   OsNetConfigImpl:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -98,6 +143,8 @@ resources:
               network_config:
               - type: interface
                 name: nic1
+                mtu:
+                  get_param: ControlPlaneMtu
                 use_dhcp: false
                 addresses:
                 - ip_netmask:
@@ -106,12 +153,11 @@ resources:
                     - - get_param: ControlPlaneIp
                       - get_param: ControlPlaneSubnetCidr
                 routes:
-                - ip_netmask: 169.254.169.254/32
-                  next_hop:
-                    get_param: EC2MetadataIp
-                - default: true
-                  next_hop:
-                    get_param: ControlPlaneDefaultRoute
+                  list_concat_unique:
+                    - get_param: ControlPlaneStaticRoutes
+                    - - default: true
+                        next_hop:
+                          get_param: ControlPlaneDefaultRoute
               # Linux bond for Offload VRS Compute nodes
               - type: linux_bond
                 name: infra-bond
