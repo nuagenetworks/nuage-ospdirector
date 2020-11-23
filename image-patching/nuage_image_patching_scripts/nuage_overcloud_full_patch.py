@@ -75,6 +75,11 @@ yum clean all
 
 #####
 # Function to download Nuage AVRS packages that are required
+#   The packages qemu-kvm libvirt python3-libvirt libvirt-libs
+#   python2-ipaddress python2-six have dependencies rhel8 modular or
+#   the package is a rhel8 modular rpm. Modular rpms are not processed
+#   properly by createrepo. Hence, they need to be installed on the
+#   overcloud image.
 #####
 
 def download_avrs_packages():
@@ -82,19 +87,21 @@ def download_avrs_packages():
 #### Downloading Nuage Avrs and 6wind Packages
 yum install -y yum-utils
 mkdir -p /6wind
+yum install --setopt=skip_missing_names_on_install=False -y createrepo \
+qemu-kvm libvirt python3-libvirt libvirt-libs python2-ipaddress python2-six \
+
 rpm -q kernel | awk '{ print substr($1,8) }' > /kernel-version
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind *6windgate* iptables*6windgate* \
-ebtables*6windgate*
+ebtables*6windgate* --resolve
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind python3-pyelftools* \
-%s nuage-metadata-agent virtual-accelerator*
+%s nuage-metadata-agent virtual-accelerator* --resolve
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
---downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs*
+--downloadonly --downloaddir=/6wind selinux-policy-nuage-avrs* --resolve
 yumdownloader -y --setopt=skip_missing_names_on_install=False \
 --downloadonly --downloaddir=/6wind python3-pyroute2
 
-yum install --setopt=skip_missing_names_on_install=False -y createrepo
 yum clean all
 ''' % constants.NUAGE_AVRS_PACKAGE
     constants.PATCHING_SCRIPT += cmds + '\n'
