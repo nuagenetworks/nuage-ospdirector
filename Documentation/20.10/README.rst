@@ -2178,7 +2178,7 @@ compute-avrs-environment.yaml for AVRS Integration
         NovaComputeCpuDedicatedSet: [10-15]
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
-        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -2199,7 +2199,7 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
         NovaComputeCpuDedicatedSet: [5-7]
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1"
-        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
         FastPathDPVI: "0"
         FastPathOffload: "off"
@@ -2210,7 +2210,7 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
         NovaComputeCpuDedicatedSet: [10-15]
         FastPathNics: "0000:06:00.1 0000:06:00.2"
         FastPathMask: "1,9"
-        FastPathNicDescriptors: "--nb-rxd=4096 --nb-txd=4096"
+        FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
         FastPathDPVI: "0"
         FastPathOffload: "off"
