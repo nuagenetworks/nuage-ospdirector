@@ -328,7 +328,7 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
 
 ::
 
-    $ podman login registry.connect.redhat.com
+    $ sudo podman login registry.connect.redhat.com
     Username: ${REGISTRY-SERVICE-ACCOUNT-USERNAME}
     Password: ${REGISTRY-SERVICE-ACCOUNT-PASSWORD}
     Login Succeeded!
