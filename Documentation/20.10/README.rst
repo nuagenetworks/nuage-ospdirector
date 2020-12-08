@@ -1732,9 +1732,6 @@ The following parameters are mapped to values in the /etc/fast-path.env on the N
     FastPathNicDescriptors =====>    FPNSDK_OPTIONS
     Maps to FPNSDK_OPTIONS. FPNSDK_OPTIONS specifies additional FPNSDK options.
 
-    FastPathDPVI           =====>    DPVI_MASK
-    Maps to DPVI_MASK. DPVI_MASK defines the cores allocated to exception packets processing.
-
     FastPathOptions        =====>    FP_OPTIONS
     Maps to FP_OPTIONS. FP_OPTIONS specifies additional fast path options.
 
@@ -2174,7 +2171,6 @@ compute-avrs-environment.yaml for AVRS Integration
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
-        FastPathDPVI: "0"
         FastPathOffload: "off"
 
 
@@ -2195,7 +2191,6 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
         FastPathMask: "1"
         FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
-        FastPathDPVI: "0"
         FastPathOffload: "off"
 
       ComputeAvrsDualParameters:
@@ -2206,7 +2201,6 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
         FastPathMask: "1,9"
         FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
         FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
-        FastPathDPVI: "0"
         FastPathOffload: "off"
 
 
