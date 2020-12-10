@@ -309,6 +309,9 @@ outputs:
                 enabled: yes
               # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
               ignore_errors: yes
+            - name: Wait for interfaces to be configured
+              pause:
+                seconds: 30
             - name: check if virtual-accelerator is active
               command: systemctl status virtual-accelerator
             when: lineinfile_result.changed
@@ -369,6 +372,9 @@ outputs:
                 wait_for_connection:
                   delay: 10
                   timeout: 240 # 4 min timeout
+              - name: Wait for interfaces to be configured
+                pause:
+                  seconds: 30
               - name: check if virtual-accelerator is active
                 command: systemctl status virtual-accelerator
               - name: Remove va_update file if virtual-accelerator-base is updated
@@ -378,3 +384,47 @@ outputs:
               when: virtual_accelerator_base_update_file.stat.exists
             when: (step|int == 4)
       fast_forward_upgrade_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, fast_forward_upgrade_tasks]}
+      post_update_tasks:
+        - name: Set params in fast-path.env file
+          lineinfile:
+            dest: /etc/fast-path.env
+            line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+            regexp: '^: \$[{]{{ item.param }}:='
+            state: present
+            create: yes
+          loop:
+              - { param: 'FP_MASK', val: { get_attr: [RoleParametersValue, value, FP_MASK] }}
+              - { param: 'FP_PORTS', val: { get_attr: [RoleParametersValue, value, FP_PORTS] }}
+              - { param: 'CORE_PORT_MAPPING', val: { get_attr: [RoleParametersValue, value, CORE_PORT_MAPPING] }}
+              - { param: 'FP_MEMORY', val: { get_attr: [RoleParametersValue, value, FP_MEMORY] }}
+              - { param: 'VM_MEMORY', val: { get_attr: [RoleParametersValue, value, VM_MEMORY] }}
+              - { param: 'NB_MBUF', val: { get_attr: [RoleParametersValue, value, NB_MBUF] }}
+              - { param: 'FP_OFFLOAD', val: { get_attr: [RoleParametersValue, value, FP_OFFLOAD] }}
+              - { param: 'FPNSDK_OPTIONS', val: { get_attr: [RoleParametersValue, value, FPNSDK_OPTIONS] }}
+              - { param: 'DPVI_MASK', val: { get_attr: [RoleParametersValue, value, DPVI_MASK] }}
+              - { param: 'FP_OPTIONS', val: { get_attr: [RoleParametersValue, value, FP_OPTIONS] }}
+          register: lineinfile_result
+          when: item.val != ''
+        - name: Set params in cpuset.env file
+          lineinfile:
+            dest: /etc/cpuset.env
+            line: ": ${{ '{' }}{{ item.param }}:={{ item.val }}{{ '}' }}"
+            regexp: '^: \$[{]{{ item.param }}:='
+            state: present
+            create: yes
+          loop:
+            - { param: 'CPUSET_ENABLE', val: { get_attr: [RoleParametersValue, value, CPUSET_ENABLE] }}
+        - block:
+          - name: Restarting AVRS service
+            service:
+              name: avrs
+              state: restarted
+              enabled: yes
+            # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
+            ignore_errors: yes
+          - name: Wait for interfaces to be configured
+            pause:
+              seconds: 30
+          - name: check if virtual-accelerator is active
+            command: systemctl status virtual-accelerator
+          when: lineinfile_result.changed
