@@ -138,14 +138,14 @@ Upgrade Workflow
 4. Get the latest Nuage docker images from the Red Hat Partner Registry by following these instructions in Phase 8. Nuage Docker Containers from `5.4.1/README.rst <../../README.rst>`_
 
 
-5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud to use HW CPP functionality on AVRS computes, follow 5.a
+5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud. In order to use HW CPP functionality on AVRS computes, update the FastPathNIc configuration before doing the 'update converge', as explained below :
 
-    a. Overcloud deployment has 3 major steps:
+    a. An Overcloud Upgrade has 3 major steps:
         * openstack overcloud update prepare
         * openstack overcloud update run --nodes <role-name>
         * openstack overcloud update converge
 
-        Once overcloud update run finished, before running openstack overcloud update converge, below config needs to be placed in compute-avrs-environment.yaml
+        Once 'openstack overcloud update run' finished, before running 'openstack overcloud update converge', update the compute-avrs-environment.yaml template, e.g. add :
 
         ::
 
