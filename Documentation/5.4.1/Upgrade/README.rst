@@ -140,12 +140,13 @@ Upgrade Workflow
 
 5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud. In order to use HW CPP functionality on AVRS computes, update the FastPathNIc configuration before doing the 'update converge', as explained below :
 
-    a. An Overcloud Upgrade has 3 major steps:
+    a. An Overcloud Upgrade has 3 major steps
+
         * openstack overcloud update prepare
         * openstack overcloud update run --nodes <role-name>
         * openstack overcloud update converge
 
-        Once 'openstack overcloud update run' finished, before running 'openstack overcloud update converge', update the compute-avrs-environment.yaml template, e.g. add :
+       Once 'openstack overcloud update run' finished, before running 'openstack overcloud update converge', update the compute-avrs-environment.yaml template, e.g. add :
 
         ::
 
