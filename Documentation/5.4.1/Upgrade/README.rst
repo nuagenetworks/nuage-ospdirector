@@ -138,13 +138,15 @@ Upgrade Workflow
 4. Get the latest Nuage docker images from the Red Hat Partner Registry by following these instructions in Phase 8. Nuage Docker Containers from `5.4.1/README.rst <../../README.rst>`_
 
 
-5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud. In order to use HW CPP functionality on AVRS computes, update the FastPathNIc configuration before doing the 'update converge', as explained below :
+5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud.
 
     a. An Overcloud Upgrade has 3 major steps
 
         * openstack overcloud update prepare
         * openstack overcloud update run --nodes <role-name>
         * openstack overcloud update converge
+
+    b. In order to use HW CPP functionality on AVRS computes, update the FastPathNIc configuration before doing the 'update converge.
 
        Once 'openstack overcloud update run' finished, before running 'openstack overcloud update converge', update the compute-avrs-environment.yaml template, e.g. add :
 
@@ -153,6 +155,7 @@ Upgrade Workflow
             FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
 
 
+       For more information and details about the HW CPP feature and parameters please refer to the VSP documentation.
 
 6. Run the image patching on Z12 (rhel-7.8) overcloud-full image using the latest Nuage packages to update the Overcloud image. Follow these instructions: `README.md <../../../image-patching/README_5.0.md>`_
 
