@@ -19,7 +19,7 @@ NUAGE_AVRS_PACKAGE = "nuage-openvswitch-6wind"
 NUAGE_PACKAGES = "nuage-puppet-modules " \
                  "nuage-openstack-neutronclient " \
                  "selinux-policy-nuage nuage-bgp"
-NUAGE_DEPENDENCIES = "python2 perl-JSON lldpad python3-httplib2 " \
+NUAGE_DEPENDENCIES = "python2 perl-JSON python3-httplib2 " \
                      "libvirt mstflint"
 
 NUAGE_VRS_PACKAGE = "nuage-openvswitch nuage-metadata-agent"

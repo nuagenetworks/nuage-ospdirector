@@ -188,7 +188,6 @@ outputs:
                     - python2
                     - python3-httplib2
                     - libvirt
-                    - lldpad
                     - nuage-puppet-modules
                     - selinux-policy-nuage
                     - nuage-bgp

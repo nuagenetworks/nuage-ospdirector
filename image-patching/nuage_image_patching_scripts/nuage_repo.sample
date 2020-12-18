@@ -20,7 +20,6 @@ gpgcheck=1
 # This repo should contain following packages:
 # libvirt
 # perl-JSON
-# lldpad
 # python2
 # python3-httplib2
 # python2-ipaddress
