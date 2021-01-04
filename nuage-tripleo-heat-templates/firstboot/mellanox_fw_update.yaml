@@ -66,7 +66,6 @@ resources:
       parts:
         - config: {get_resource: install_dependecies}
         - config: {get_resource: mellanox_fw_update}
-        - config: {get_resource: add_connectx_steering_mode_config_service}
 
   install_dependecies:
     type: OS::Heat::SoftwareConfig
@@ -681,64 +680,6 @@ resources:
             $ESWITCH_HAIRPIN_TOT_BUFFER_SIZE: {get_param: ESWITCH_HAIRPIN_TOT_BUFFER_SIZE}
             $ESWITCH_HAIRPIN_DESCRIPTORS: {get_param: ESWITCH_HAIRPIN_DESCRIPTORS}
 
-  add_connectx_steering_mode_config_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      config: |
-        #!/bin/bash
-
-        set -e
-
-        echo "Adding script at: /usr/bin/connectx_steering_mode_config.sh"
-        cat > /usr/bin/connectx_steering_mode_config.sh <<EOF
-        #!/bin/bash
-
-        mode="smfs"
-
-        for pdev in \$(/usr/sbin/lspci -d 15b3: -D | awk '{print \$1}')
-        do
-                if devlink dev param show pci/\${pdev} name flow_steering_mode 2>/dev/null | grep -q flow_steering_mode ; then
-                        # ignore VFs
-                        if /usr/sbin/lspci -s \${pdev} | grep -qi Virtual ; then
-                                continue
-                        fi
-
-                        msg=\$(devlink dev param set pci/\${pdev} name flow_steering_mode value \${mode} cmode runtime 2>&1)
-                        if [ \$? -eq 0 ]; then
-                                echo "connectx_steering_mode_config: \${pdev}: flow_steering_mode set to '\${mode}'" > /dev/kmsg
-                        else
-                                echo "connectx_steering_mode_config: \${pdev}: \$msg" > /dev/kmsg
-                        fi
-                else
-                        echo "connectx_steering_mode_config: \${pdev}: flow_steering_mode devlink param not supported, skipping.'" > /dev/kmsg
-                fi
-        done
-        EOF
-
-        chmod +x /usr/bin/connectx_steering_mode_config.sh
-
-        echo "Adding service conf file at: /etc/systemd/system/connectx_steering_mode_config.service"
-        cat > /etc/systemd/system/connectx_steering_mode_config.service <<EOF
-        [Unit]
-        Description=connectx_steering_mode_config: Set SW Steering mode
-        After=systemd-udev-settle.service
-        Before=sriov_config.service
-
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/connectx_steering_mode_config.sh
-
-        [Install]
-        WantedBy=multi-user.target
-        EOF
-
-        echo "Enabling the service to run on boot..."
-        systemctl daemon-reload
-        systemctl enable connectx_steering_mode_config
-
-        echo "Done"
-        echo "Checking service status:"
-        systemctl status connectx_steering_mode_config
 
 outputs:
   # This means get_resource from the parent template will get the userdata, see:
