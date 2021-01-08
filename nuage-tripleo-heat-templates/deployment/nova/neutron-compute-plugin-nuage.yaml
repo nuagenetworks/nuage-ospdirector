@@ -192,3 +192,16 @@ outputs:
                     - selinux-policy-nuage
                     - nuage-bgp
               when: nuage_base_check.rc != 0
+        - when: step|int == 2
+          block:
+            - name: Check if manager is present
+              shell: >
+                /usr/bin/ovs-vsctl get-manager
+              failed_when: false
+              register: manager_check
+            - name: Start a vsctl manager so nova can directly access the ovs database
+              shell: >
+                /usr/bin/ovs-vsctl --timeout=5 --id=@manager -- create Manager
+                "target=\"ptcp:6640:127.0.0.1\"" -- add Open_vSwitch .
+                manager_options @manager
+              when: "'ptcp:6640:127.0.0.1' not in manager_check.stdout"
