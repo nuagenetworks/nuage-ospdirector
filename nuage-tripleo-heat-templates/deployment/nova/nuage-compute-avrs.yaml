@@ -156,7 +156,6 @@ outputs:
     description: Role data for the Nova Compute service.
     value:
       service_name: {get_attr: [NovaComputeAvrsDockerBase, role_data, service_name]}
-      config_settings: {get_attr: [NovaComputeAvrsDockerBase, role_data, config_settings]}
       logging_source: {get_attr: [NovaComputeAvrsDockerBase, role_data, logging_source]}
       logging_groups: {get_attr: [NovaComputeAvrsDockerBase, role_data, logging_groups]}
       service_config_settings: {get_attr: [NovaComputeAvrsDockerBase, role_data, service_config_settings]}
@@ -167,6 +166,14 @@ outputs:
       workflow_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, workflow_tasks]}
       external_post_deploy_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, external_post_deploy_tasks]}
       host_prep_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, host_prep_tasks]}
+      config_settings:
+        map_merge:
+          - get_attr: [ NovaComputeAvrsDockerBase, role_data, config_settings ]
+          - tripleo.neutron_compute_plugin_nuage.firewall_rules:
+              '101 metadata agent':
+                chain: 'FORWARD'
+                iniface: 'qbr+'
+                state: ['INVALID']
       deploy_steps_tasks:
         list_concat:
         - {get_attr: [NovaComputeAvrsDockerBase, role_data, deploy_steps_tasks]}
