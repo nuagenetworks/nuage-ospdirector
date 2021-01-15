@@ -2015,6 +2015,8 @@ neutron-nuage-config.yaml
       NeutronTypeDrivers: 'vxlan'
       NeutronNetworkType: 'vxlan'
       NeutronMechanismDrivers: 'nuage'
+      #  Use below NeutronMechanismDrivers config for AVRS deployments (order is important)
+      #  NeutronMechanismDrivers: "ovs-fp,nuage"
       NeutronPluginExtensions: 'nuage_network,nuage_subnet,nuage_port,port_security'
       NeutronFlatNetworks: '*'
       NeutronTunnelIdRanges: ''
@@ -2039,6 +2041,12 @@ neutron-nuage-config.yaml
         neutron::config::plugin_nuage_config:
           RESTPROXY/nuage_pat:
             value: legacy_disabled
+      #  Enable below config for AVRS deployments
+      #  neutron::config::plugin_ml2_config:
+      #    ml2_fp/ovs_agent_required:
+      #       value: False
+      #    ml2_fp/allowed_network_types:
+      #       value: 'vxlan,gre,vlan'
 
 
 neutron-sriov.yaml
