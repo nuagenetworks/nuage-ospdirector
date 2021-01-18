@@ -619,7 +619,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
     openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeAvrs ComputeOvrs ComputeSriov
 
 
-.. Note:: It is not mandatory to create nuage_roles_data.yaml with all the roles shown in the example. You can specify only the required ones for your deployment.
+.. Note:: Only specify the required roles for your deployment. The error `Property ContainerNovaComputeAvrsImage not assigned` will be thrown when including the AVRS role in this step without having AVRS in your deployment.
 
 4. Create ``node-info.yaml`` in /home/stack/templates/ and specify the roles and number of nodes.
 
