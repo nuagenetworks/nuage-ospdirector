@@ -1,5 +1,5 @@
 # !/usr/bin/python3
-# Copyright 2020 NOKIA
+# Copyright 2020,2021 NOKIA
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -162,6 +162,7 @@ def copy_repo_file(image, repofile):
 
 #####
 # Function to add RHEL subscription using guestfish
+# https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/partner_integration/overcloud_images
 #####
 
 
@@ -199,20 +200,36 @@ def rhel_subscription(username, password, pool, satellite_url, satellite_org,
         subscription_command += (
             "subscription-manager attach --pool='%s'\n" % pool
         )
-    subscription_command += (
-        "sudo subscription-manager repos "
-        "--enable=rhel-8-for-x86_64-baseos-rpms "
-        "--enable=rhel-8-for-x86_64-appstream-rpms "
-        "--enable=rhel-8-for-x86_64-highavailability-rpms \n "
-    )
-    if "avrs" in deployment_type:
         subscription_command += (
-            "sudo subscription-manager repos "
-            "--enable=openstack-%s-for-rhel-8-x86_64-rpms \n "
-            % constants.RHOSP_VERSION
+            "subscription-manager release --set=%s\n" %
+            constants.RHEL_VERSION
         )
-
+    # Documentation suggest to also enable the following repos
+    # but testing shows enabling "fast-datapath-for-rhel-8-x86_64-rpms" and
+    #   "ansible-2.9-for-rhel-8-x86_64-rpms" do not really make a difference
+    #   and openstack-16.1-for-rhel-8-x86_64-rpms is also only need for avrs deployments
+    # But enabeling anyway for future
+    subscription_command += (
+        "subscription-manager repos "
+        "--enable=rhel-8-for-x86_64-baseos-eus-rpms "
+        "--enable=rhel-8-for-x86_64-appstream-eus-rpms "
+        "--enable=rhel-8-for-x86_64-highavailability-eus-rpms "
+        "--enable=fast-datapath-for-rhel-8-x86_64-rpms "
+        "--enable=ansible-2.9-for-rhel-8-x86_64-rpms "
+        "--enable=openstack-16.1-for-rhel-8-x86_64-rpms "
+        "--enable=advanced-virt-for-rhel-8-x86_64-rpms \n "
+    )
     constants.PATCHING_SCRIPT += subscription_command
+
+
+def select_dnf_modules_versions():
+    constants.PATCHING_SCRIPT += (
+        "dnf module disable -y container-tools:rhel8\n"
+        "dnf module enable -y container-tools:%s\n"
+        "dnf module disable -y virt:rhel\n"
+        "dnf module enable -y virt:%s"
+        % (constants.DNF_VERSION_CONTAINER_TOOLS, constants.DNF_VERSION_VIRT, )
+    )
 
 
 #####
@@ -223,6 +240,7 @@ def rhel_subscription(username, password, pool, satellite_url, satellite_org,
 def rhel_remove_subscription(rhel_sub_type=None):
     cmd = '''
 #### Removing RHEL Subscription
+subscription-manager remove --all\n
 subscription-manager unregister
 '''
     if rhel_sub_type == constants.RHEL_SUB_SATELLITE:

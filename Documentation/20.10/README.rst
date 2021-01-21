@@ -445,7 +445,7 @@ When using the *No Patching* feature, skip this phase and follow the instruction
 Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2):
 
 
-.. Note:: Please use rhel8 machine for image patching and do not run this on Undercloud Director (https://bugs.launchpad.net/tripleo/+bug/1823226)
+.. Note:: Please use rhel8 machine for image patching. Running image patching on the Undercloud Director might trigger https://bugs.launchpad.net/tripleo/+bug/1823226, interfering with the undercloud containerized ironic conductor
 
 
 1. Install the required packages: libguestfs-tools and python-yaml

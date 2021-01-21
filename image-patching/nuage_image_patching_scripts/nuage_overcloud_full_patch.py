@@ -1,5 +1,5 @@
 # !/usr/bin/python3
-# Copyright 2020 NOKIA
+# Copyright 2020,2021 NOKIA
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -205,6 +205,8 @@ def image_patching(nuage_config):
                           proxy_port=nuage_config.get("ProxyPort"),
                           rhel_sub_type=rhel_subs_type,
                           deployment_type=nuage_config.get("DeploymentType"))
+
+    select_dnf_modules_versions()
     install_nuage_python_ovs_packages()
     uninstall_packages()
 
