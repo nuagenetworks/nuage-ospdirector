@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 =========================================================================================
-Integrating Nuage VSP 6.0.10-HW VTEP solution with Red Hat OpenStack Platform Director 13
+Integrating Nuage VSP 6.0.13-HW VTEP solution with Red Hat OpenStack Platform Director 13
 =========================================================================================
 
 This document has the following topics:
@@ -143,7 +143,7 @@ In this phase, get the Generate CMS ID and Image Pull scripts by using the follo
     Example:
 
     cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6010.1
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6013.1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -167,11 +167,11 @@ Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 
 Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.10 with 13.0-2 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-10:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-10:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-10:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-10:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-10:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-latest:13.0-206
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-latest:13.0-206
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-latest:13.0-206
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-latest:13.0-208
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-latest:13.0-215
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -202,8 +202,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 6.0.10 please enter following
-    release: 6-0-10
+    # for example: Nuage release 6.0.13 please enter following
+    release: 6-0-latest
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -675,7 +675,7 @@ neutron-nuage-config.yaml
           RESTPROXY/cms_id:
             value: '152bab92-8ce9-4394-aabc-0b111457948a'
       NeutronDebug: true
-      NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,router,segments,NuageNetTopology'
+      NeutronServicePlugins: 'NuagePortAttributes,NuageAPI,NuageNetTopology,router,segments,trunk'
       NeutronTypeDrivers: vlan,vxlan,flat
       NeutronNetworkType: vlan
       # mind: order matters:
