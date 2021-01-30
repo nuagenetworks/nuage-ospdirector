@@ -2014,6 +2014,7 @@ neutron-nuage-config.yaml
       NeutronDBSyncExtraParams: '--config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --config-file /etc/neutron/plugins/nuage/plugin.ini'
       NeutronTypeDrivers: 'vxlan'
       NeutronNetworkType: 'vxlan'
+      NeutronFirewallDriver: 'noop'
       NeutronMechanismDrivers: 'nuage'
       #  Use below NeutronMechanismDrivers config for AVRS deployments (order is important)
       #  NeutronMechanismDrivers: "ovs-fp,nuage"
