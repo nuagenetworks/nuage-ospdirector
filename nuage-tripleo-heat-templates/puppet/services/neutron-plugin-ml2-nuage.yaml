@@ -89,7 +89,7 @@ parameters:
 resources:
 
   NeutronMl2Base:
-    type: /usr/share/openstack-tripleo-heat-templates/puppet/services/neutron-plugin-ml2.yaml
+    type: ./neutron-plugin-ml2.yaml
     properties:
       ServiceData: {get_param: ServiceData}
       ServiceNetMap: {get_param: ServiceNetMap}
