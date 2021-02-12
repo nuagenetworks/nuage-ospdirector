@@ -5,90 +5,160 @@ description: >
 
 parameters:
   ServiceData:
-    default: {}
+    default: { }
     description: Dictionary packing service data
     type: json
   ServiceNetMap:
-    default: {}
+    default: { }
     description: Mapping of service_name -> network name. Typically set
-                 via parameter_defaults in the resource registry.  This
-                 mapping overrides those in ServiceNetMapDefaults.
+      via parameter_defaults in the resource registry.  This
+      mapping overrides those in ServiceNetMapDefaults.
     type: json
   DefaultPasswords:
-    default: {}
+    default: { }
     type: json
   RoleName:
     default: ''
     description: Role name on which the service is applied
     type: string
   RoleParameters:
-    default: {}
+    default: { }
     description: Parameters specific to the role
     type: json
   EndpointMap:
-    default: {}
+    default: { }
     description: Mapping of service endpoint -> protocol. Typically set
-                 via parameter_defaults in the resource registry.
+      via parameter_defaults in the resource registry.
     type: json
   # Config specific parameters, to be provided via parameter_defaults
   NeutronNuageNetPartitionName:
     description: Specifies the title that you will see on the VSD
     type: string
     default: 'default_name'
-
   NeutronNuageVSDIp:
     description: IP address and port of the Virtual Services Directory
     type: string
-
   NeutronNuageVSDUsername:
     description: Username to be used to log into VSD
     type: string
-
   NeutronNuageVSDPassword:
     description: Password to be used to log into VSD
     type: string
-
   NeutronNuageVSDOrganization:
     description: Organization parameter required to log into VSD
     type: string
     default: 'organization'
-
   NeutronNuageBaseURIVersion:
     description: URI version to be used based on the VSD release
     type: string
     default: 'default_uri_version'
-
   NeutronNuageCMSId:
     description: Cloud Management System ID (CMS ID) to distinguish between OS instances on the same VSD
     type: string
-
   UseForwardedFor:
     description: Treat X-Forwarded-For as the canonical remote address. Only enable this if you have a sanitizing proxy.
     type: boolean
     default: false
-
   NuageDefaultAllowNonIP:
     description: To allow non-IP traffic by default
     type: boolean
     default: false
-
   NuageGpgKeys:
     type: comma_delimited_list
-    default: []
+    default: [ ]
     description: Nuage GPG keys
 
 resources:
-
   NeutronMl2Base:
     type: /usr/share/openstack-tripleo-heat-templates/deployment/neutron/neutron-plugin-ml2.yaml
-
     properties:
-      ServiceData: {get_param: ServiceData}
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      EndpointMap: {get_param: EndpointMap}
-      RoleName: {get_param: RoleName}
-      RoleParameters: {get_param: RoleParameters}
+      ServiceData: { get_param: ServiceData }
+      ServiceNetMap: { get_param: ServiceNetMap }
+      DefaultPasswords: { get_param: DefaultPasswords }
+      EndpointMap: { get_param: EndpointMap }
+      RoleName: { get_param: RoleName }
+      RoleParameters: { get_param: RoleParameters }
+
+  EnsureNoAVRSIptables:
+    type: OS::Heat::Value
+    properties:
+      value:
+        # The 6wind iptables, eptables, .. that are in the nuage repo for
+        #   AVRS are seen as newer versions and thus yum update will
+        #   install those, even on the controller where they do not belong
+        #   a consequence of using 1 repo for all (not an issue in fresh
+        #   deploy) since there is no yum update there
+        #   To fix this, we will search which repo contains nuage bits
+        #   and add the relevant packages to its excludes
+        # This is done in step 1 of deploy_steps_tasks and thus post Red Hat subscription
+        # And also in step 1 of update_task does not really matter that much, since we expect that the new repo is in
+        #   place before the controller is updated
+        - when: step|int == 1
+          block:
+            - name: Find the repo containing nuage bits
+              vars:
+                # For controller, we base our selves on the neutron client
+                query_package: nuage-openstack-neutronclient
+              shell: >
+                repoquery -i {{ query_package }} 2>/dev/null
+              register: repoquery_output
+            - name: For all the repos containing nuage bits, exclude 6wind packages
+              become: yes
+              vars:
+                exclude_packages:
+                  - iptables
+                  - iptables-libs
+                  - iptables-services
+                  - ebtables
+                  - iptables-utils
+              shell: >
+                yum config-manager
+                --setopt={{ repo.split(':')[1] | trim }}.exclude={{ exclude_packages | join(',') }}
+                --save
+              loop: "{{ repoquery_output.stdout_lines }}"
+              when: '"Repository " in repo'
+              loop_control:
+                loop_var: repo
+
+  NoPatchInstallNuageControlller:
+    type: OS::Heat::Value
+    properties:
+      value:
+        # This is done in step 1 of deploy_steps_tasks and thus post Red Hat subscription
+        - when: step|int == 1
+          block:
+            # With the discontinuing of patching this should always be true the first time it is run
+            - name: Check if Nuage is installed or not
+              shell: rpm -q nuage-openstack-neutronclient selinux-policy-nuage
+              register: nuage_check
+              failed_when: false
+            - when: nuage_check.rc != 0
+              name: Installing Nuage Packages and Dependencies
+              block:
+                # Only install when nuage is not installed already.
+                - name: set nuage_gpg_keys fact
+                  set_fact:
+                    nuage_gpg_keys: { get_param: NuageGpgKeys }
+                - name: Adding nuage_gpg_keys on overcloud node
+                  rpm_key:
+                    state: present
+                    key: "{{ item }}"
+                  with_items:
+                    - "{{ nuage_gpg_keys }}"
+                  when:
+                    - nuage_gpg_keys != []
+                - debug:
+                    msg: "No NuageGpgKeys Environment variable is set for this deployment"
+                  when:
+                    - nuage_gpg_keys == []
+                - name: Install Nuage Neutron Client on overcloud controller node
+                  yum:
+                    name: "{{ packages }}"
+                    state: present
+                  vars:
+                    packages:
+                      - nuage-openstack-neutronclient
+                      - selinux-policy-nuage
 
 outputs:
   role_data:
@@ -97,51 +167,64 @@ outputs:
       service_name: neutron_plugin_ml2_nuage
       config_settings:
         map_merge:
-          - get_attr: [NeutronMl2Base, role_data, config_settings]
-          - neutron::plugins::ml2::nuage::nuage_net_partition_name: {get_param: NeutronNuageNetPartitionName}
-            neutron::plugins::ml2::nuage::nuage_vsd_ip: {get_param: NeutronNuageVSDIp}
-            neutron::plugins::ml2::nuage::nuage_vsd_username: {get_param: NeutronNuageVSDUsername}
-            neutron::plugins::ml2::nuage::nuage_vsd_password: {get_param: NeutronNuageVSDPassword}
-            neutron::plugins::ml2::nuage::nuage_vsd_organization: {get_param: NeutronNuageVSDOrganization}
-            neutron::plugins::ml2::nuage::nuage_base_uri_version: {get_param: NeutronNuageBaseURIVersion}
-            neutron::plugins::ml2::nuage::nuage_cms_id: {get_param: NeutronNuageCMSId}
-            neutron::plugins::ml2::nuage::nuage_default_allow_non_ip: {get_param: NuageDefaultAllowNonIP}
-            nova::api::use_forwarded_for: {get_param: UseForwardedFor}
+          - get_attr: [ NeutronMl2Base, role_data, config_settings ]
+          - neutron::plugins::ml2::nuage::nuage_net_partition_name: { get_param: NeutronNuageNetPartitionName }
+            neutron::plugins::ml2::nuage::nuage_vsd_ip: { get_param: NeutronNuageVSDIp }
+            neutron::plugins::ml2::nuage::nuage_vsd_username: { get_param: NeutronNuageVSDUsername }
+            neutron::plugins::ml2::nuage::nuage_vsd_password: { get_param: NeutronNuageVSDPassword }
+            neutron::plugins::ml2::nuage::nuage_vsd_organization: { get_param: NeutronNuageVSDOrganization }
+            neutron::plugins::ml2::nuage::nuage_base_uri_version: { get_param: NeutronNuageBaseURIVersion }
+            neutron::plugins::ml2::nuage::nuage_cms_id: { get_param: NeutronNuageCMSId }
+            neutron::plugins::ml2::nuage::nuage_default_allow_non_ip: { get_param: NuageDefaultAllowNonIP }
+            nova::api::use_forwarded_for: { get_param: UseForwardedFor }
       step_config: |
         include tripleo::profile::base::neutron::plugins::ml2
       metadata_settings:
-        get_attr: [NeutronMl2Base, role_data, metadata_settings]
+        get_attr: [ NeutronMl2Base, role_data, metadata_settings ]
       deploy_steps_tasks:
-        - when: step|int == 1
-          block:
-            - name: Check if Nuage is installed or not
-              shell: rpm -q nuage-openstack-neutronclient selinux-policy-nuage
-              register: nuage_check
-              failed_when: false
-            - name: Installing Nuage Packages and Dependencies
+        list_concat:
+          - get_attr: [ EnsureNoAVRSIptables, value ]
+          - get_attr: [ NoPatchInstallNuageControlller, value ]
+      update_tasks:
+        list_concat:
+          - get_attr: [ EnsureNoAVRSIptables, value ]
+          - - when: (step|int == 3)
               block:
-              # Only install when nuage is not installed already.
-              - name: set nuage_gpg_keys fact
-                set_fact:
-                  nuage_gpg_keys: {get_param: NuageGpgKeys }
-              - name: Adding nuage_gpg_keys on overcloud node
-                rpm_key:
-                  state: present
-                  key: "{{ item }}"
-                with_items:
-                  - "{{ nuage_gpg_keys }}"
-                when:
-                  - nuage_gpg_keys != []
-              - debug:
-                  msg: "No NuageGpgKeys Environment variable is set for this deployment"
-                when:
-                  - nuage_gpg_keys == []
-              - name: Install Nuage Neutron Client on overcloud controller node
-                yum:
-                  name: "{{ packages }}"
-                  state: present
-                vars:
-                  packages:
-                    - nuage-openstack-neutronclient
-                    - selinux-policy-nuage
-              when: nuage_check.rc != 0
+                # Could be that the below is no longer relevant in the newest
+                # versions of nuage
+                - name: check if nuage-openvswitch is installed
+                  shell: rpm -q nuage-openvswitch
+                  register: nuage_openvswitch_check
+                  ignore_errors: True
+                - block:
+                    - name: check if python-openvswitch-nuage is present in the repo
+                      command: repoquery --all python-openvswitch-nuage
+                      register: python_openvswitch_nuage_output
+                    - name: Installing python-openvswitch-nuage
+                      yum:
+                        name: python-openvswitch-nuage
+                        state: present
+                      when: python_openvswitch_nuage_output.stdout != ''
+                    - name: Check if nuage-bgp is installed
+                      shell: rpm -qa | grep -q nuage-bgp
+                      failed_when: false
+                      register: nuage_bgp_check
+                    - name: Check and update nuage-bgp package
+                      block:
+                        - name: check if nuage-bgp is updating
+                          shell: yum check-update nuage-bgp
+                          register: nuage_bgp_update_check
+                          failed_when: nuage_bgp_update_check.rc not in [0, 100]
+                          changed_when: nuage_bgp_update_check.rc == 100
+                        - name: Updating nuage-bgp package
+                          block:
+                            - name: Update nuage-bgp with noscripts flag
+                              shell: yum --setopt=tsflags=noscripts install nuage-bgp -y
+                            - name: Reload daemon and restart nuage-bgp
+                              systemd:
+                                state: restarted
+                                daemon_reload: yes
+                                name: nuage-bgp
+                          when: nuage_bgp_update_check.rc == 100
+                      when: nuage_bgp_check.rc == 0
+                  when: nuage_openvswitch_check.rc == 0
