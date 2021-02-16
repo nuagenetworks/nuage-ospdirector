@@ -1,5 +1,5 @@
 # !/usr/bin/python3
-# Copyright 2020 NOKIA
+# Copyright 2020,2021 NOKIA
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -34,3 +34,6 @@ RHEL_SUB_PORTAL = "portal"
 RHEL_SUB_SATELLITE = "satellite"
 RHEL_SUB_DISABLED = "disabled"
 RHOSP_VERSION = "16.1"
+RHEL_VERSION = '8.2'
+DNF_VERSION_CONTAINER_TOOLS = '2.0'
+DNF_VERSION_VIRT = '8.2'
