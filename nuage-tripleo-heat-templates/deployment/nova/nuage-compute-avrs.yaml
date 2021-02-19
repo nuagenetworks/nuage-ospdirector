@@ -229,6 +229,16 @@ outputs:
                         - qemu-kvm
                         - libvirt
                         - python3-libvirt
+                  - name: Ensure libvirtd is not active on compute (outside of nova container)
+                    # Disable the libvirt service
+                    #   Otherwise after a reboot of the overcloud hypervisor
+                    #   the libvirtd service will be interfering with the overcloud
+                    #   libvirt container.
+                    #   Libvirt is needed on overcloud for VRS to get vm-node
+                    service:
+                      name: libvirtd
+                      state: stopped
+                      enabled: no
                   - name: install virtual-accelerator-base
                     yum:
                       name: virtual-accelerator-base
