@@ -4,8 +4,8 @@ version: 16
 # Currently supported values are [registry.connect.redhat.com]
 registry_url: registry.connect.redhat.com
 # Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-# for exmaple: Nuage release 20-10-1 please enter following
-release: 20-10-1
+# for exmaple: Nuage release 20-10-3 please enter following
+release: 20-10-3
 # Tag for AVRS container images
 tag: latest
 # Undercloud Local Registry IP Address:Port <hostname>.ctlplane.localdomain:8787
