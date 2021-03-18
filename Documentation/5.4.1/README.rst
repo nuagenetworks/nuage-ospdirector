@@ -168,7 +168,7 @@ In this phase, get the Nuage Tripleo Heat Templates, image patching files, and t
     Example:
 
     cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.541U16.1
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.541U17.1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -182,20 +182,20 @@ In this phase, you prepare the Red Hat OpenStack and Nuage containers for the in
 Phase 3.1: Configure the Container Image Source and Pull the Red Hat OpenStack Containers
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This release is supported only on RHEL 7.8. The list of RHEL 7.8 based overcloud container images that were used for qualification can be found on the wiki: https://github.com/nuagenetworks/nuage-ospdirector/wiki/upstream-container-list-tested-with-Nuage-5.4.1.U16-(RHEL-7.8 OSPD13z12).
+This release is supported only on RHEL 7.8. The list of RHEL 7.8 based overcloud container images that were used for qualification can be found on the wiki: https://github.com/nuagenetworks/nuage-ospdirector/wiki/upstream-container-list-tested-with-Nuage-5.4.1.U17-(RHEL-7.8 OSPD13z12).
 
 
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 5.4.1 U16 with 13.0-1 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 5.4.1 U17 with 13.0-1 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u16:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u16:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u16:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u16:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u16:13.0-2
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-5-4-1-u16:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u17:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u17:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u17:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u17:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u17:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-nova-compute-5-4-1-u17:13.0-2
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -226,8 +226,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 5.4.1 U16 please enter following
-    release: 5-4-1-u16
+    # for example: Nuage release 5.4.1 U17 please enter following
+    release: 5-4-1-u17
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -384,7 +384,7 @@ The repository contents may change depending on the roles configured for your de
    |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | selinux-policy-nuage-avrs                    | nuage-avrs-selinux                                                                        |
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | nuage-openstack                                                                           |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | https://github.com/nuagenetworks/topology-collector/releases/tag/release-5.4.1.U17        |
    | packages       |                                              |                                                                                           |
    |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
@@ -1079,7 +1079,7 @@ Phase 6: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "5.4.1-523-nuage"
+        ovs_version: "5.4.1-548-nuage"
 
 
 Phase 7: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -1111,19 +1111,19 @@ For a local repository for Nuage OpenStack packages and Red Hat OpenStack-depend
     ::
 
          [nuage]
-         name=nuage_osp13_5.4.1.u16_nuage
+         name=nuage_osp13_5.4.1.u17_nuage
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
          enabled=1
          gpgcheck=1
 
          [nuage_vrs]
-         name=nuage_osp13_5.4.1.u16_nuage_vrs
+         name=nuage_osp13_5.4.1.u17_nuage_vrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
          enabled=0
          gpgcheck=1
 
          [nuage_avrs]
-         name=nuage_osp13_5.4.1.u16_nuage_avrs
+         name=nuage_osp13_5.4.1.u17_nuage_avrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
          enabled=0
          gpgcheck=1
@@ -1156,19 +1156,19 @@ For a local repository for Nuage packages and a Red Hat Subscription for depende
    ::
 
          [nuage]
-         name=nuage_osp13_5.4.1.u16_nuage
+         name=nuage_osp13_5.4.1.u17_nuage
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_extra
          enabled=1
          gpgcheck=1
 
          [nuage_vrs]
-         name=nuage_osp13_5.4.1.u16_nuage_vrs
+         name=nuage_osp13_5.4.1.u17_nuage_vrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/nuage_vrs
          enabled=0
          gpgcheck=1
 
          [nuage_avrs]
-         name=nuage_osp13_5.4.1.u16_nuage_avrs
+         name=nuage_osp13_5.4.1.u17_nuage_avrs
          baseurl=http://1.2.3.4/nuage_osp13_5.4.1/avrs
          enabled=0
          gpgcheck=1

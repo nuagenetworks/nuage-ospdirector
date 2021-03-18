@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ===================================
-Minor Upgrade to Release 5.4.1 U16
+Minor Upgrade to Release 5.4.1 U17
 ===================================
 
 .. contents::
@@ -9,15 +9,15 @@ Minor Upgrade to Release 5.4.1 U16
    :depth: 3
 
 
-Use this documentation when upgrading between Nuage minor releases. The process applies to upgrades from Release 5.4.1U12 with RH OSPD13z12 with RHEL 7.8 or later to Release 5.4.1U16 with RH OSPD13z12 with RHEL 7.8.
+Use this documentation when upgrading between Nuage minor releases. The process applies to upgrades from Release 5.4.1U12 with RH OSPD13z12 with RHEL 7.8 or later to Release 5.4.1U17 with RH OSPD13z12 with RHEL 7.8.
 
 During this process:
 
-1. Nuage components are updated to 5.4.1.U16
+1. Nuage components are updated to 5.4.1.U17
 2. Red Hat OpenStack stays as OSPD13z12.
 3. Red Hat Enterprise Linux stays as 7.8
 
-Note: Nuage 5.4.1.U16 release is supported with RHEL 7.8. Make sure the Red Hat Openstack Platform Director packages are updated to the z12 stream during the minor Nuage update process.
+Note: Nuage 5.4.1.U17 release is supported with RHEL 7.8. Make sure the Red Hat Openstack Platform Director packages are updated to the z12 stream during the minor Nuage update process.
 
 
 It is assumed the operator is familiar with Red Hat OpenStack Platform Director upgrades, VSP installation, the distribution-specific installation and upgrade practices, and the specific requirements for operations in a production environment.
@@ -26,7 +26,7 @@ It is assumed the operator is familiar with Red Hat OpenStack Platform Director 
 Upgrade Paths
 -------------
 
-In this release, you can upgrade only from Queens 5.4.1 U12(RH OSPD13z12) to Queens 5.4.1 U16(RH OSPD13z12).
+In this release, you can upgrade only from Queens 5.4.1 U12(RH OSPD13z12) to Queens 5.4.1 U17(RH OSPD13z12).
 
 
 These upgrade paths are not described in this document:
@@ -52,7 +52,7 @@ The basic configuration includes:
 Before the Upgrade
 --------------------
 
-1. Create the following repositories containing 5.4.1U16 nuage packages:
+1. Create the following repositories containing 5.4.1U17 nuage packages:
 
 
     * Nuage_base_repo:
@@ -70,7 +70,7 @@ Before the Upgrade
         - It contains nuage-metadata-agent, nuage-openvswitch (avrs), nuage-selinux-avrs, and 6WIND packages.
         - Enable this repository on the Nova Compute AVRS nodes.
 
-2. Make sure the Nuage 5.4.1.U16 repository and Red Hat repositories for OSPD 13 Z12 are enabled on all Overcloud nodes.
+2. Make sure the Nuage 5.4.1.U17 repository and Red Hat repositories for OSPD 13 Z12 are enabled on all Overcloud nodes.
 
 3. Please run "yum clean all" to clean the old yum cache on all your overcloud nodes after enabling above yum repositories.
 
@@ -85,7 +85,7 @@ Upgrade Workflow
 
 2. Back up the configuration files for your deployment.
 
-     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. Before getting the new Nuage 5.4.1 U16 nuage-ospdirector/nuage-tripleoheat-templates, back up the existing files and then replace them with the new 5.4.1 U16 codebase.
+     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. Before getting the new Nuage 5.4.1 U17 nuage-ospdirector/nuage-tripleoheat-templates, back up the existing files and then replace them with the new 5.4.1 U17 codebase.
 
     a. Back up the templates and environment files from /home/stack/nuage-ospdirector to /home/stack/nuage-ospdirector-bk.
 
@@ -163,58 +163,60 @@ Upgrade Workflow
 Post Upgrade Verifications
 --------------------------
 
-  - The computes should have the 5.4.1.U12 nuage-openvswitch version.
+  - The computes should have the 5.4.1.U17 nuage-openvswitch version.
 
         ::
 
             [heat-admin@overcloud-compute-1 ~]$ sudo ovs-appctl version
-            ovs-vswitchd (Open vSwitch) 5.4.1-523-nuage
-            Compiled Jul  9 2020 22:38:51
+            ovs-vswitchd (Open vSwitch) 5.4.1-544-nuage
+            Compiled Mar  4 2021 03:13:30
             Open vSwitch base release: 0x250
 
             [heat-admin@overcloud-computeavrs-1 ~]$ sudo ovs-appctl version
-            ovs-vswitchd (Open vSwitch) 5.4.1-523-6wind-nuage
-            Compiled Jul  9 2020 23:00:28
+            ovs-vswitchd (Open vSwitch) 5.4.1-544-6wind-nuage
+            Compiled Mar  4 2021 03:11:24
             Open vSwitch base release: 0x250
 
 
-  - The computes should have the 5.4.1.U16 nuage rmps
+  - The computes should have the 5.4.1.U17 nuage rmps
 
         ::
 
             [heat-admin@overcloud-compute-1 ~]$ rpm -qa | grep nuage
-            nuage-metadata-agent-5.4.1-523.el7.x86_64
-            selinux-policy-nuage-5.4.1-443.el7.x86_64
-            nuage-bgp-5.4.1-483.x86_64
-            nuage-openstack-neutronclient-6.5.0-5.4.1_524_nuage.noarch
-            nuage-openvswitch-5.4.1-523.el7.x86_64
+            selinux-policy-nuage-5.4.1-518.el7.x86_64
+            nuage-bgp-5.4.1-544.x86_64
+            python-openvswitch-nuage-5.4.1-544.6wind.el7.x86_64
+            nuage-openstack-neutronclient-6.5.0-5.4.1_545_nuage.noarch
+            nuage-openvswitch-5.4.1-544.el7.x86_64
             nuage-puppet-modules-5.4-0.x86_64
-            python-openvswitch-nuage-5.4.1-523.el7.x86_64
+            nuage-metadata-agent-5.4.1-544.el7.x86_64
 
             [heat-admin@overcloud-computeavrs-1 ~]$ rpm -qa | grep "nuage\|6wind\|virtual"
-            6windgate-linux-fp-sync-4.23.12.NUAGE.13-0.x86_64
-            nuage-bgp-5.4.1-483.x86_64
-            6windgate-dpdk-pmd-virtio-host-4.23.12.NUAGE.13-0.x86_64
-            6windgate-linux-fp-sync-fptun-4.23.12.NUAGE.13-0.x86_64
-            6windgate-fpn-sdk-dpdk-4.23.12.NUAGE.13-0.x86_64
-            nuage-openvswitch-5.4.1-523.6wind.el7.x86_64
-            selinux-policy-nuage-5.4.1-443.el7.x86_64
-            6windgate-tools-common-libs-daemonctl-4.23.12.NUAGE.13-0.x86_64
-            6windgate-tools-common-libs-pyroute2-0.4.13-6windgate.4.23.12.NUAGE.13.x86_64
-            nuage-metadata-agent-5.4.1-523.6wind.el7.x86_64
-            6windgate-linux-fp-sync-vrf-4.23.12.NUAGE.13-0.x86_64
-            6windgate-product-base-4.23.12.NUAGE.13-0.x86_64
-            virtual-accelerator-base-1.9.12.NUAGE.13-0.x86_64
-            6windgate-dpdk-pmd-mellanox-rdma-core-4.23.12.NUAGE.13-0.x86_64
             6windgate-fp-ovs-4.23.12.NUAGE.13-0.x86_64
-            nuage-openstack-neutronclient-6.5.0-5.4.1_524_nuage.noarch
+            nuage-openvswitch-5.4.1-544.6wind.el7.x86_64
+            6windgate-fpn-sdk-dpdk-4.23.12.NUAGE.13-0.x86_64
+            6windgate-linux-fp-sync-4.23.12.NUAGE.13-0.x86_64
+            selinux-policy-nuage-5.4.1-518.el7.x86_64
+            nuage-bgp-5.4.1-544.x86_64
+            6windgate-dpdk-pmd-mellanox-rdma-core-4.23.12.NUAGE.13-0.x86_64
+            6windgate-tools-common-libs-pyroute2-0.4.13-6windgate.4.23.12.NUAGE.13.x86_64
             6windgate-tools-common-libs-libconsole-4.23.12.NUAGE.13-0.x86_64
-            6windgate-fp-4.23.12.NUAGE.13-0.x86_64
-            selinux-policy-nuage-avrs-5.4.1-443.el7.x86_64
-            python-openvswitch-nuage-5.4.1-523.6wind.el7.x86_64
+            6windgate-dpdk-pmd-virtio-host-4.23.12.NUAGE.13-0.x86_64
+            nuage-metadata-agent-5.4.1-544.6wind.el7.x86_64
+            python-openvswitch-nuage-5.4.1-544.6wind.el7.x86_64
+            nuage-openstack-neutronclient-6.5.0-5.4.1_545_nuage.noarch
+            selinux-policy-nuage-avrs-5.4.1-518.el7.x86_64
+            6windgate-tools-common-libs-daemonctl-4.23.12.NUAGE.13-0.x86_64
+            6windgate-linux-fp-sync-fptun-4.23.12.NUAGE.13-0.x86_64
+            virtual-accelerator-base-1.9.12.NUAGE.13-0.x86_64
+            nuage-puppet-modules-5.4-0.x86_64
+            6windgate-linux-fp-sync-vrf-4.23.12.NUAGE.13-0.x86_64
             6windgate-dpdk-4.23.12.NUAGE.13-0.x86_64
             6windgate-linux-fp-sync-ovs-4.23.12.NUAGE.13-0.x86_64
-            nuage-puppet-modules-5.4-0.x86_64
+            6windgate-fp-4.23.12.NUAGE.13-0.x86_64
+            6windgate-product-base-4.23.12.NUAGE.13-0.x86_64
+            python-pyelftools-0.24-6windgate.4.23.12.NUAGE.13.x86_64
+
 
 
   - The computes should now have the Nuage VXLAN iptables rule as stateless
@@ -225,18 +227,18 @@ Post Upgrade Verifications
             ACCEPT     udp  --  anywhere             anywhere             multiport dports 4789 /* 118 neutron stateless vxlan networks ipv4 */
 
 
-  - The controllers should have the 5.4.1.U16 nuage and RHEL 7.8 RHOSP container images
+  - The controllers should have the 5.4.1.U17 nuage and RHEL 7.8 RHOSP container images
 
         ::
 
             [heat-admin@overcloud-controller-0  ~]$ sudo docker ps | grep nuagenetworks
             CONTAINER ID        IMAGE                                                                                COMMAND                  CREATED             STATUS                       PORTS               NAMES
-            7934af1bd9bf        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u16:latest   "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       neutron_api
-            720c3881257f        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u16:latest         "dumb-init --singl..."   About an hour ago   Up About an hour                                 heat_api_cron
-            2bac3ff0d02f        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u16:latest     "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_api_cfn
-            32d15910de69        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u16:latest      "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_engine
-            a345d417faa0        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u16:latest         "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_api
-            2b3529c1ab4d        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u16:latest          "dumb-init --singl..."   About an hour ago   Up About an hour                                 horizon
+            7934af1bd9bf        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-neutron-server-5-4-1-u17:latest   "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       neutron_api
+            720c3881257f        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u17:latest         "dumb-init --singl..."   About an hour ago   Up About an hour                                 heat_api_cron
+            2bac3ff0d02f        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-cfn-5-4-1-u17:latest     "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_api_cfn
+            32d15910de69        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-engine-5-4-1-u17:latest      "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_engine
+            a345d417faa0        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-heat-api-5-4-1-u17:latest         "dumb-init --singl..."   About an hour ago   Up About an hour (healthy)                       heat_api
+            2b3529c1ab4d        192.168.200.1:8787/nuagenetworks/rhosp13-openstack-horizon-5-4-1-u17:latest          "dumb-init --singl..."   About an hour ago   Up About an hour                                 horizon
 
 
 - The kmods are properly build for AVRS computes
@@ -247,3 +249,4 @@ Post Upgrade Verifications
             fpn-sdk, 4.23.12.NUAGE.13, 3.10.0-1127.19.1.el7.x86_64, x86_64: installed
             fptun, 4.23.12.NUAGE.13, 3.10.0-1127.19.1.el7.x86_64, x86_64: installed
             vrf, 4.23.12.NUAGE.13, 3.10.0-1127.19.1.el7.x86_64, x86_64: installed
+
