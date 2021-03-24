@@ -71,6 +71,16 @@ yum clean all
 ''' % (constants.NUAGE_DEPENDENCIES, constants.NUAGE_VRS_PACKAGE,
        constants.NUAGE_PACKAGES)
     constants.PATCHING_SCRIPT += cmds + '\n'
+    # Disable the libvirt service
+    #   Otherwise after a reboot of the overcloud hypervisor
+    #   the libvirtd service will be interfering with the overcloud
+    #   libvirt container.
+    #   Libvirt is needed on overcloud for VRS to get vm-node
+    constants.PATCHING_SCRIPT += (
+        "systemctl disable libvirtd; "
+        "systemctl stop libvirtd \n"
+    )
+
 
 
 #####
