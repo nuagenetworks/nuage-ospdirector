@@ -574,8 +574,11 @@ Sample Environment Files
 The following templates show examples of parameters used in a hardware VTEP deployment.
 
 
+
 containers-prepare-parameter.yaml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note: Make sure to use the correct z-version in the tag for upstream containers.
 
 ::
 
@@ -610,7 +613,7 @@ containers-prepare-parameter.yaml
             namespace: registry.redhat.io/rhosp-rhel8
             neutron_driver: null
             rhel_containers: false
-            tag: '16.1'
+            tag: '16.1.6' # Update to qualified z-stream for nuage release
           tag_from_label: '{version}-{release}'
           excludes:
             - horizon

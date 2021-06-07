@@ -29,7 +29,7 @@ parameter_defaults:
         namespace: registry.redhat.io/rhosp-rhel8
         neutron_driver: null
         rhel_containers: false
-        tag: '16.1'
+        tag: '16.1.6' # Update to qualified z-stream for nuage release
       tag_from_label: '{version}-{release}'
       excludes:
         - horizon

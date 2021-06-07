@@ -264,7 +264,7 @@ Phase 2.3: Prepare Nuage Containers
 In this phase, you prepare Nuage containers for the integration.
 
 
-1. Add the below contents to /home/stack/containers-prepare-parameter.yaml. A complete file can be found in `Sample Environment Files`_.
+1. Add the below contents to /home/stack/containers-prepare-parameter.yaml. A complete file can be found in `Sample Environment Files`_. Make sure to use the correct z-version in the tag for upstream containers.
 
 ::
 
@@ -514,7 +514,7 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
     nuage-image-patching --nuage-config nuage_patching_config.yaml
 
 
-.. Note:: If the image patching fails, remove the partially patched overcloud-full.qcow2 and create a copy of it from the backup image before retrying the image patching workflow.
+.. Note:: If the image patching fails, remove the partially patched overcloud-full.qcow2 and create a copy of it from the backup image before retrying the image patching workflow. When hitting errors with Red Hat subscription during patching, you might need to go to https://access.redhat.com/management/systems and remove the previous system using same name.
 
     ::
 
