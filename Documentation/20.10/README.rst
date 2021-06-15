@@ -351,7 +351,7 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     release: 20-10-4
     #Tag for AVRS container images
     tag: latest
-    # Undercloud Local Registry IP Address:Port <hostname>.ctlplane.localdomain:8787
+    # Undercloud Local Registry Hostname:Port, in a default deployment it should look like: <hostname undercloud>.ctlplane.localdomain:8787
     local_registry: undercloud.ctlplane.localdomain:8787
     #List of AVRS containers
     nuage_images: ['nova-compute', 'neutron-openvswitch-agent']
