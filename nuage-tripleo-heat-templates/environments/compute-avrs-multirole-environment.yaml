@@ -8,8 +8,11 @@ parameter_defaults:
     NovaComputeCpuDedicatedSet: [5-7]
     FastPathNics: "0000:06:00.1 0000:06:00.2"
     FastPathMask: "1"
-    FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
-    FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+    FastPathNicDescriptors: "--rx-cp-filter-mode=phys:dedicated-queue,virt:software-filter,excp:software-filter --tx-cp-filter-mode=all:software-filter --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=all:75% --tx-cp-filter-threshold=all:75%"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=40000 --max-nfct=500000"
+    VmMemory: "auto"
+    NbMbuf: "+65536"
+    FastPathMemory: "auto"
     FastPathOffload: "off"
 
   ComputeAvrsDualParameters:
@@ -18,7 +21,10 @@ parameter_defaults:
     NovaComputeCpuDedicatedSet: [10-15]
     FastPathNics: "0000:06:00.1 0000:06:00.2"
     FastPathMask: "1,9"
-    FastPathNicDescriptors: "--rx-cp-filter-mode=dedicated-queue --tx-cp-filter-mode=software-filter --cp-filter-virtual-ports=enable --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=75% --tx-cp-filter-threshold=75%"
-    FastPathOptions: "--mod-opt=fp-vswitch:--flows=250000 --max-nfct=500000"
+    FastPathNicDescriptors: "--rx-cp-filter-mode=phys:dedicated-queue,virt:software-filter,excp:software-filter --tx-cp-filter-mode=all:software-filter --cp-filter-cpu-budget=10 --nb-rxd=4096 --nb-txd=4096 --rx-cp-filter-threshold=all:75% --tx-cp-filter-threshold=all:75%"
+    FastPathOptions: "--mod-opt=fp-vswitch:--flows=40000 --max-nfct=500000"
+    VmMemory: "auto"
+    NbMbuf: "+65536"
+    FastPathMemory: "auto"
     FastPathOffload: "off"
 
