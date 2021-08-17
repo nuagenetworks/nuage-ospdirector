@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ===================================
-Major Upgrade to Release 6.0.7
+Major Upgrade to Release 6.0.17
 ===================================
 
 .. contents::
@@ -9,12 +9,12 @@ Major Upgrade to Release 6.0.7
    :depth: 3
 
 
-Use this documentation when upgrading between major Nuage releases. The process applies to updates from Release 5.4.1 U6 (Z7) to Release 6.0.7 (Z11). During this process:
+Use this documentation when upgrading between major Nuage releases. The process applies to updates from Release 5.4.1 U17 (Z12) to Release 6.0.17 (Z16). During this process:
 
- 1. Nuage components are updated to 6.0.7.
- 2. Red Hat OpenStack is updated to Z11.
+ 1. Nuage components are updated to 6.0.17.
+ 2. Red Hat OpenStack is updated to Z16.
 
-Note:  Nuage 6.0.7 release is supported with RHEL 7.7. Make sure the Red Hat packages are updated to the Z11 stream during the major Nuage update process.
+Note:  Nuage 6.0.17 release is supported with RHEL 7.9. Make sure the Red Hat packages are updated to the Z16 stream during the major Nuage update process.
 
 It is assumed the operator is familiar with Red Hat OpenStack Platform Director (OSPD) updates, VSP installation, the distribution-specific installation and update practices, and the specific requirements for operations in a production environment.
 
@@ -22,14 +22,12 @@ It is assumed the operator is familiar with Red Hat OpenStack Platform Director 
 Upgrade Paths
 -------------
 
-In this release, you can upgrade VRS and SR-IOV only from OSP Director 13 (Z7) + 5.4.1 U6 to OSP Director 13 (Z11) + 6.0.7.
-AVRS upgrade from 5.4.1 U6 is not supported in this release.
-
+In this release, you can upgrade VRS and SR-IOV only from OSP Director 13 (Z12) + 5.4.1 U17 to OSP Director 13 (Z16) + 6.0.17.
 
 These upgrade paths are not described in this document:
 
-    * Upgrade from OpenStack releases before Queens 5.4.1 U6
-    * Upgrade from VSP releases before Release 5.4.1 U6
+    * Upgrade from OpenStack releases before Queens 5.4.1 U17
+    * Upgrade from VSP releases before Release 5.4.1 U17
 
 
 Basic Configuration
@@ -38,23 +36,13 @@ Basic Configuration
 The basic configuration includes:
 
    * One or more Controller nodes
-   * One or more Compute nodes (hypervisors) running the VRS and/or SR-IOV nodes running OSP Director 13 (Z7) + 5.4.1 U6
-
-
-Known Issues
-------------
-
-**During the upgrade of OSPD 13 from Z7 to Z11, users will experience the issue described in https://bugzilla.redhat.com/show_bug.cgi?id=1813642.**
-
-**Contact the Red Hat Support team for more information.**
-
-.. Note:: This upgrade assumes the users get the required information on resolving this issue  <https://bugzilla.redhat.com/show_bug.cgi?id=1813642>`_ before starting the upgrade process.
+   * One or more Compute nodes (hypervisors) running the VRS and/or SR-IOV nodes running OSP Director 13 (Z12) + 5.4.1 U17
 
 
 Before the Upgrade
 --------------------
 
-1. Create a single repository containing 6.0.7 Nuage packages. The repository contents may change depending on the roles configured for your deployment.
+1. Create a single repository containing 6.0.17 Nuage packages. The repository contents may change depending on the roles configured for your deployment.
 
     ::
 
@@ -81,7 +69,7 @@ Before the Upgrade
        +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
 
-2. Make sure the Nuage 6.0.7 repository and Red Hat repositories for OSPD 13 Z11 are enabled on all Overcloud nodes.
+2. Make sure the Nuage 6.0.17 repository and Red Hat repositories for OSPD 13 Z16 are enabled on all Overcloud nodes.
 
 3. Run ``yum clean all`` to clean the old yum cache on all your Overcloud modes after enabling the above yum repositories.
 
@@ -89,14 +77,14 @@ Before the Upgrade
 Update Workflow
 ---------------
 
-1. Update container image source and Undercloud to OSP Director 13 Z11 by following Chapters 1, 2 and 3 from https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/index
+1. Update container image source and Undercloud to OSP Director 13 Z16 by following Chapters 1, 2 and 3 from https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/index
 
 .. Note:: Refer to the releaes notes for more information on the container images and packages on the Undercloud that are qualified in Nuage testing.
 
 
 2. Back up the configuration files for your deployment.
 
-     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. Before getting the new Nuage 6.0.7 nuage-ospdirector/nuage-tripleoheat-templates, back up the existing files and then replace them with the new 6.0.7 codebase.
+     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. Before getting the new Nuage 6.0.17 nuage-ospdirector/nuage-tripleoheat-templates, back up the existing files and then replace them with the new 6.0.17 codebase.
 
     a. Back up the templates and environment files from /home/stack/nuage-ospdirector to /home/stack/nuage-ospdirector-bk.
 
@@ -108,7 +96,7 @@ Update Workflow
     b. Get the tar files for the update one of these ways:
 
        * Download them from https://github.com/nuagenetworks/nuage-ospdirector/releases
-       * Use ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release>``. For example, enter ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.607.1``.
+       * Use ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release>``. For example, enter ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6017.1``.
 
 
     c. Copy the nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector-osp-13.<release>/nuage-tripleo-heat-templates to /home/stack/ directory on undercloud.
@@ -153,13 +141,13 @@ Update Workflow
 
     a. Get the environment values from the /home/stack/nuage-ospdirector-bk directory and update all the templates and environment files for the deployment, such as neutron-nuage/nova-nuage.
 
-    b. Make sure the resource_registry section of neutron-nuage-config.yaml contains the following line, which are required for 6.0.7:
+    b. Make sure the resource_registry section of neutron-nuage-config.yaml contains the following line, which are required for 6.0.17:
 
         ::
 
             OS::TripleO::Services::NeutronCorePlugin: ../docker/services/neutron-plugin-ml2-nuage.yaml
 
-    c. Make sure `parameter_defaults` section in  neutron-nuage-config.yaml contains following configurations, which are required for 6.0.7:
+    c. Make sure `parameter_defaults` section in  neutron-nuage-config.yaml contains following configurations, which are required for 6.0.17:
 
         ::
 
@@ -174,7 +162,7 @@ Update Workflow
                   PLUGIN/enable_ingress_replication:
                     value: false
 
-    d. Make sure the resource_registry section of nova-nuage-config.yaml contains the following line, which are required for 6.0.7:
+    d. Make sure the resource_registry section of nova-nuage-config.yaml contains the following line, which are required for 6.0.17:
 
         ::
 
@@ -189,11 +177,11 @@ Update Workflow
 6. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud
 
 
-7. Once the overcloud update is complete, enable the Nuage 6.0.7 repository on the Undercloud and update nuage-topology-collector using:
+7. Once the overcloud update is complete, enable the Nuage 6.0.17 repository on the Undercloud and update nuage-topology-collector using:
 
     ::
 
         $ sudo yum update nuage-topology-collector -y
 
 
-8. Run the image patching on Z11 (rhel-7.7) overcloud-full image using the latest Nuage packages to update the Overcloud images in glance. Follow the instructions in Phase 4.3: Modify the Overcloud Image from `6.0/README.rst <../../README.rst>`_
+8. Run the image patching on Z17 (rhel-7.9) overcloud-full image using the latest Nuage packages to update the Overcloud images in glance. Follow the instructions in Phase 4.3: Modify the Overcloud Image from `6.0/README.rst <../../README.rst>`_

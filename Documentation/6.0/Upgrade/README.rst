@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 ===================================
-Minor Update to Release 6.0.7
+Minor Update to Release 6.0.17
 ===================================
 
 .. contents::
@@ -9,9 +9,9 @@ Minor Update to Release 6.0.7
    :depth: 3
 
 
-Use this documentation when updating between nuage minor releases. The process applies to updates from Release 6.0.5 to Release 6.0.7. During this process, the Nuage components are updated to 6.0.7.
+Use this documentation when updating between nuage minor releases. The process applies to updates from Release 6.0.7 to Release 6.0.17. During this process, the Nuage components are updated to 6.0.17.
 
-Note:  Nuage 6.0.7 release is supported with RHEL 7.7. Please make sure Red Hat packages are not updated to newer versions during the Nuage minor update process.
+Note:  Nuage 6.0.17 release is supported with RHEL 7.9. Please make sure Red Hat packages are not updated to newer versions during the Nuage minor update process.
 
 It is assumed the operator is familiar with Red Hat OpenStack Platform Director updates, VSP installation, the distribution-specific installation and update practices, and the specific requirements for operations in a production environment.
 
@@ -19,13 +19,13 @@ It is assumed the operator is familiar with Red Hat OpenStack Platform Director 
 Update Paths
 -------------
 
-In this release, you can update only from OSP Director 13 + 6.0.5 to OSP Director 13 + 6.0.7.
+In this release, you can update only from OSP Director 13 + 6.0.7 to OSP Director 13 + 6.0.17.
 
 
 These update paths are not described in this document:
 
-    * Update from OpenStack releases before Queens 6.0.5
-    * Update from VSP releases before Release 6.0.5
+    * Update from OpenStack releases before Queens 6.0.7
+    * Update from VSP releases before Release 6.0.7
 
 
 Basic Configuration
@@ -34,7 +34,7 @@ Basic Configuration
 The basic configuration includes:
 
    * One or more Controller node(s)
-   * One or more Compute nodes (hypervisors) running the VRS, SR-IOV, AVRS or OVRS nodes running Release 6.0.5
+   * One or more Compute nodes (hypervisors) running the VRS, SR-IOV, AVRS nodes running Release 6.0.7
 
 
 
@@ -43,7 +43,7 @@ Before the Update
 
 1. If you are updating an AVRS node, migrate all your VMs on the node to an AVRS Compute node that is not being updated. Perform the steps in the "Live Migrate a Virtual Machine" section in https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/migrating-virtual-machines-between-compute-nodes-osp#live-migrate-a-vm-osp
 
-2. Create a single repository containing 6.0.7 Nuage packages. Enable this repository on all overcloud nodes. The repository contents may change depending on the roles configured for your deployment.
+2. Create a single repository containing 6.0.17 Nuage packages. Enable this repository on all overcloud nodes. The repository contents may change depending on the roles configured for your deployment.
 
     ::
 
@@ -115,7 +115,7 @@ Before the Update
 3. For this update, there are a couple of new dependency packages that need to be installed on Avrs nodes. Please make sure Avrs nodes have access to the "rhel-7-server-rpms" repo. The state of all the Red Hat repos should be disabled and during update Nuage will enable "rhel-7-server-rpms" for installing new dependency packages.
 
 
-4. Please make sure only nuage 6.0.7 repo is enabled and all other repos are disabled on all overcloud nodes for this update.
+4. Please make sure only nuage 6.0.17 repo is enabled and all other repos are disabled on all overcloud nodes for this update.
 
 .. Note:: During our update testing, where overcloud nodes are subscribed to Red Hat Subscription since fresh deployment i.e using `openstack overcloud deploy` command, we had to set `rhel_reg_force: false` inside `environment-rhel-registration.yaml`. This way the repolist on overcloud nodes that is done in step-3 won't be changed during update.
 
@@ -129,7 +129,7 @@ Update Workflow
 
 1. Back up the configuration files for your deployment.
 
-     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. To get new the Nuage 6.0.7 nuage-ospdirector/nuage-tripleoheat-templates, back up the files before replacing the existing ones with new 6.0.7 codebase.
+     In the following example, all the templates and environment files for your deployment are in the /home/stack/nuage-ospdirector directory. To get new the Nuage 6.0.17 nuage-ospdirector/nuage-tripleoheat-templates, back up the files before replacing the existing ones with new 6.0.17 codebase.
 
     a. Back up the templates and environment files from /home/stack/nuage-ospdirector to /home/stack/nuage-ospdirector-bk.
 
@@ -141,7 +141,7 @@ Update Workflow
     b. Get the tar files for the update one of these ways:
 
        * Download them from https://github.com/nuagenetworks/nuage-ospdirector/releases
-       * Use ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release>``. For example, enter ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.607.1``.
+       * Use ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b <release>``. For example, enter ``git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6017.1``.
 
 
     c. Copy the nuage-tripleo-heat-templates folder from /home/stack/nuage-ospdirector-osp-13.<release>/nuage-tripleo-heat-templates to /home/stack/ directory on undercloud.
@@ -208,7 +208,7 @@ Update Workflow
 5. To update the Overcloud deployment, follow these instructions: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/keeping_red_hat_openstack_platform_updated/assembly-updating_the_overcloud
 
 
-6. Once the overcloud update is complete, enable nuage 6.0.7 repo on undercloud and update nuage-topology-collector using:
+6. Once the overcloud update is complete, enable nuage 6.0.17 repo on undercloud and update nuage-topology-collector using:
 
     ::
 
