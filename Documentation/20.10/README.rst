@@ -157,7 +157,7 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                  | nuage-openstack                                                                           |
    | Common         +------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-16.1-20.10.5_54           | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-puppet-modules-16.1-20.10.6_57           | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                           | nuage-vrs-el8 or nuage-avrs-el8                                                           |
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -169,15 +169,15 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.5_551  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.6_631  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.5_551  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-image-patching-scripts-16.1-20.10.5_631  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
    | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | selinux-policy-nuage                           | nuage-selinux                                                                             |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.5          |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.6          |
    | packages       |                                                |                                                                                           |
    |----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | 6windgate-dpdk                                 | nuage-avrs-el8                                                                            |
@@ -285,7 +285,7 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-5"
+            name_suffix: "-20-10-6"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -298,14 +298,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-5" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-6" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
 
 
 Phase 2.4: Pull AVRS Containers from the Red Hat Catalog (This step is only necessary for AVRS deployments.)
@@ -313,10 +313,10 @@ Phase 2.4: Pull AVRS Containers from the Red Hat Catalog (This step is only nece
 
 In this phase, you pull the AVRS containers for the integration.
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.5 with 16.1-2 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.6 with 16.1-1 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-5:16.1-2
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-5:16.1-2
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-6:16.1-1
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-6:16.1-1
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -347,8 +347,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 16
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 20.10.5 please enter following
-    release: 20-10-5
+    # for example: Nuage release 20.10.6 please enter following
+    release: 20-10-6
     #Tag for AVRS container images
     tag: latest
     # Undercloud Local Registry Hostname:Port, in a default deployment it should look like: <hostname undercloud>.ctlplane.localdomain:8787
@@ -1417,7 +1417,7 @@ Phase 5: Verify that OpenStack Platform Director Has Been Deployed Successfully
                 Interface "svc-rl-tap1"
             Port "svc-rl-tap2"
                 Interface "svc-rl-tap2"
-        ovs_version: "20.10.5-294-nuage"
+        ovs_version: "20.10.6-364-nuage"
 
 
 Phase 6: Install the nuage-openstack-neutronclient RPM in the Undercloud (Optional)
@@ -1861,7 +1861,7 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-5"
+            name_suffix: "-20-10-6"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -1874,14 +1874,14 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-5" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-6" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
 
 
 nuage-overcloud-resource-registry.yaml
@@ -2445,6 +2445,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-16.1-20.10.5_54), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-16.1-20.10.6_57), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_

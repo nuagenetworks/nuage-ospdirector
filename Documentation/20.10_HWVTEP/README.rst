@@ -146,11 +146,11 @@ The hardware VTEP solution needs the following packages.
    | Common         |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.5_551  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.6_631  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.5          |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.6          |
    | packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
 
@@ -203,7 +203,7 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-5"
+            name_suffix: "-20-10-6"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -216,14 +216,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-5" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-6" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
 
 
 Phase 3: Prepare the Overcloud
@@ -625,7 +625,7 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-5"
+            name_suffix: "-20-10-6"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
@@ -638,14 +638,14 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-5" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-6" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-5:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-6:latest
 
 
 network-environment.yaml
