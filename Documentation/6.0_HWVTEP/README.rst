@@ -1,7 +1,7 @@
 .. Don't use default python highlighting for code blocks http://www.sphinx-doc.org/en/stable/markup/code.html
 
 =========================================================================================
-Integrating Nuage VSP 6.0.13-HW VTEP solution with Red Hat OpenStack Platform Director 13
+Integrating Nuage VSP 6.0.19-HW VTEP solution with Red Hat OpenStack Platform Director 13
 =========================================================================================
 
 This document has the following topics:
@@ -143,7 +143,7 @@ In this phase, get the Generate CMS ID and Image Pull scripts by using the follo
     Example:
 
     cd /home/stack
-    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6013.1
+    git clone https://github.com/nuagenetworks/nuage-ospdirector.git -b 13.6019.1
     ln -s nuage-ospdirector/nuage-tripleo-heat-templates .
 
 
@@ -165,13 +165,13 @@ https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.13 with 13.0-1 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.19 with 13.0-1 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-13:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-13:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-13:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-13:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-13:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-19:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-19:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-19:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-19:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-19:13.0-1
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -202,8 +202,8 @@ The Nuage containers are now available in the Red Hat Partner Container Catalog.
     #OpenStack version number
     version: 13
     #Nuage Release and format is <Major-release, use '-' instead of '.'>-<Minor-release>-<Updated-release>
-    # for example: Nuage release 6.0.13 please enter following
-    release: 6-0-13
+    # for example: Nuage release 6.0.19 please enter following
+    release: 6-0-19
     #Tag for Nuage container images
     tag: latest
     #Undercloud Local Registry IP Address:PORT
@@ -296,7 +296,7 @@ The hardware VTEP solution needs the following packages to be downloaded from No
    | Nuage Common   | nuage-openstack-neutronclient                | nuage-openstack                                                                           |
    | Packages       |                                              |                                                                                           |
    +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | https://github.com/nuagenetworks/topology-collector/releases/tag/release-6.0.13           |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | https://github.com/nuagenetworks/topology-collector/releases/tag/release-6.0.19           |
    | packages       |                                              |                                                                                           |
    |----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
