@@ -165,13 +165,13 @@ https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html
 Phase 3.2: Pull the Nuage Containers from the Red Hat Catalog
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.19 with 13.0-1 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 6.0.19 with 13.0-2 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-19:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-19:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-19:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-19:13.0-1
-* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-19:13.0-1
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-cfn-6-0-19:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-api-6-0-19:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-heat-engine-6-0-19:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-horizon-6-0-19:13.0-2
+* registry.connect.redhat.com/nuagenetworks/rhosp13-openstack-neutron-server-6-0-19:13.0-2
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
