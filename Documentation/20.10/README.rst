@@ -405,7 +405,6 @@ You only need to configure the roles for your deployment and assign the roles to
    * Compute node with VRS only
    * Compute node with VRS and SR-IOV
    * Compute node with AVRS only
-   * Compute node with OVRS only
 
 
 Phase 3.1: Register and Inspect the Bare Metal Nodes
@@ -481,8 +480,8 @@ Follow these steps to modify the the Overcloud qcow image (overcloud-full.qcow2)
    * ImageName (required) is the name and absolute path of the qcow2 image (for example, /root/overcloud-full.qcow2).
    * DeploymentType (required) is for type of deployment specifed by the user. Select *vrs* or *avrs*.
 
-     - For any combination of VRS, OVRS and SR-IOV deployments, specify the deployment type as ["vrs"].
-     - For any combination of AVRS, OVRS, VRS and SR-IOV, specify the deployment type as ["avrs"].
+     - For any combination of VRS and SR-IOV deployments, specify the deployment type as ["vrs"].
+     - For any combination of AVRS, VRS and SR-IOV, specify the deployment type as ["avrs"].
 
    * RhelUserName (optional) is the user name for the Red Hat Enterprise Linux (RHEL) subscription.
    * RhelPassword (optional) is the password for the Red Hat Enterprise Linux subscription.
@@ -601,7 +600,7 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
 
         cp /usr/share/openstack-tripleo-heat-templates/roles/* /home/stack/nuage-tripleo-heat-templates/roles/
 
-2. Create the ComputeAvrs, ComputeOvrs, ComputeAvrsSingle and ComputeAvrsDual Nuage Compute roles, by following command:
+2. Create the ComputeAvrs, ComputeAvrsSingle and ComputeAvrsDual Nuage Compute roles, by following command:
 
    ::
 
@@ -618,14 +617,14 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
     openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute <role> <role> ...
 
     Example:
-    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeAvrs ComputeOvrs ComputeSriov
+    openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeAvrs ComputeSriov
 
 
 .. Note:: Only specify the required roles for your deployment. The error `Property ContainerNovaComputeAvrsImage not assigned` will be thrown when including the AVRS role in this step without having AVRS in your deployment.
 
 4. Create ``node-info.yaml`` in /home/stack/templates/ and specify the roles and number of nodes.
 
-  This example shows how to create a *node-info.yaml* file for deployment with three Controller, two Compute, two ComputeAvrs, two ComputeOvrs, and two ComputeSriov roles:
+  This example shows how to create a *node-info.yaml* file for deployment with three Controller, two Compute, two ComputeAvrs, and two ComputeSriov roles:
 
 ::
 
@@ -645,8 +644,6 @@ In this phase, you add the Nuage Heat templates and dataplane roles for the Nuag
       ComputeCount: 2
       OvercloudComputeAvrsFlavor: computeavrs
       ComputeAvrsCount: 2
-      OvercloudComputeOvrsFlavor: computeovrs
-      ComputeOvrsCount: 2
       OvercloudComputeSriovFlavor: computesriov
       ComputeSriovCount: 2
 
@@ -698,8 +695,6 @@ For sample environment files, go to `Sample Environment Files`_.
    | VRS            | Compute                                            |
    |----------------+----------------------------------------------------+
    | AVRS           | ComputeAvrs, ComputeAvrsSingle, or ComputeAvrsDual |
-   +----------------+----------------------------------------------------+
-   | OVRS           | ComputeOvrs                                        |
    |----------------+----------------------------------------------------+
    | SR-IOV         | ComputeSriov                                       |
    +----------------+----------------------------------------------------+
@@ -846,44 +841,6 @@ Multiple AVRS Roles (ComputeAvrsSingle and ComputeAvrsDual)
           Go to `Parameters Required for Nuage AVRS`_ for the mapping between parameters in the environment files to the parameters in `cpuset.env`.
 
 
-Offload VRS Role (ComputeOvrs)
-'''''''''''''''''''''''''''''''''
-
-    OVRS improves performance by offloading the vSwitch or vRouter to a hardware `eswitch` on the NICs in some NFVi deployments. This feature provides higher performance in NFVi deployments that are I/O heavy. For more information about OVRS, go to the *VSP User Guide*.
-
-    To enable Offload VRS (OVRS) with Mellanox ConnectX-5 NICs, perform the following steps:
-
-    1. Create a flavor and profile for ComputeOvrs:
-
-       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools#tagging-nodes-into-profiles for the detailed steps.
-
-    ::
-
-        openstack flavor create --id auto --ram 4096 --disk 40 --vcpus 1 computeovrs
-        openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="computeovrs" computeovrs
-
-
-    2. Assign OVRS Compute nodes with the appropriate profiles:
-
-    ::
-
-       openstack baremetal node set --property capabilities='profile:computeovrs,boot_option:local' <node-uuid>
-
-
-    3. As part of the Overcloud deployment, the Mellanox firstboot template ``/home/stack/nuage-tripleo-heat-templates/firstboot/mellanox_fw_update.yaml`` updates firmware on the Mellanox ConnectX-5 NIC interface.
-
-       Create a firmware (FW) folder for all the Mellanox Firmware bin files on a machine on which the httpd server is running. You can use the Undercloud to do this.
-
-    ::
-
-        $ mkdir -p /var/www/html/FW_<VERSION>
-
-
-    4. Download and place all the Mellanox Firmware bins to the folder created in the previous step and set ``BIN_DIR_URL`` in ``/home/stack/nuage-tripleo-heat-templates/environments/mellanox-environment.yaml`` to the above URL.
-
-       For an example, go to `Sample Environment Files`_.
-
-
 SR-IOV Role (ComputeSriov)
 '''''''''''''''''''''''''''
 
@@ -950,7 +907,6 @@ Network Isolation
     * computeavrssingle.yaml expects the ComputeAvrssingle nodes to have three interfaces, where the first interface is for provisioning and the rest are for Linux bonding with VLANs for all networks.
     * computeavrsdual.yaml expects the ComputeAvrsdual nodes to have three interfaces, where the first interface is for provisioning and the rest ones are for Linux bonding with VLANs for all networks.
     * computesriov.yaml expects the ComputeSriov nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces are for Linux bonding with VLANs for all networks except the Tenant network. The others are for creating VF's for SR-IOV to configure Linux bonding with VLANs for the Tenant network.
-    * computeovrs.yaml expects the ComputeOvrs nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces are for Linux bonding with VLANs for all networks except the Tenant network. The others are for OVRS with the Mellanox ConnectX-5 NICs to configure Linux bonding with VLANs for the Tenant network.
 
     The following example shows the changes to the sample network template for the Linux bonding with VLANs for all interface types.
 
@@ -1046,197 +1002,6 @@ Network Isolation
 
 
 
-    **OVRS using a Single Mellanox ConnectX-5 NIC**
-
-    1. Nuage provides `single-nic-hw-offload network templates <../../nuage-tripleo-heat-templates/network/config/single-nic-hw-offload/>`_ for deploying the Overcloud Controller and ComputeOvrs by configuring a single Mellanox ConnectX-5 NIC for OVRS.
-
-    2. By default, the Nuage-provided network templates support the following topology. You can modify these network templates to match your topology.
-
-       * controller.yaml expects the Controller nodes to have three interfaces, where the first interface is for provisioning, the second one is for all networks except the Tenant network with VLANs, and the third one is only for the Tenant without VLANs.
-       * computeovrs.yaml expects the ComputeOvrs nodes to have three interfaces, where the first interface is for provisioning, the second one is for all networks except the Tenant network with VLANs, and the Mellanox ConnectX-5 NIC interface (third interface) is only for the Tenant without VLANs.
-
-
-    3. These are the changes to the sample network template changes for a single Mellanox ConnectX-5 NIC:
-
-       ::
-
-           - Define "MellanoxTenantPort1" as type string in parameters section
-
-               ...
-                   MellanoxTenantPort1:
-                     description: Mellanox Tenant Port1
-                     type: string
-               ...
-
-      This is a sample network_config for the Mellanox ConnectX-5 NIC on Compute nodes using the os-net-config:
-
-       ::
-
-              ...
-                  - type: sriov_pf
-                    name:
-                      get_param: MellanoxTenantPort1
-                    link_mode: switchdev
-                    numvfs: 15
-                    use_dhcp: false
-                    addresses:
-                    - ip_netmask:
-                        get_param: TenantIpSubnet
-              ...
-
-
-
-    **VF lag with VLANs for Mellanox ConnectX-5 NICs**
-
-    1. Nuage uses the default Linux bridge and Linux bonding.
-
-    2. Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ to deploy the Overcloud Controller and ComputeOvrs by configuring Linux bonding with VLANs.
-
-    3. By default, the Nuage-provided network template supports the following topology. You can modify the template to match your topology.
-
-       * computeovrs.yaml expects the ComputeOvrs nodes to have five interfaces. The first interface is for provisioning. The second and third interfaces for Linux bonding with VLANs for all networks except the Tenant network. The rest are for OVRS using Mellanox ConnectX-5 NICs to configure Linux bonding with VLANs for the Tenant network.
-
-    4. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs without controlplane protection.
-
-    ::
-
-        - Define "MellanoxTenantPort1" and "MellanoxTenantPort2" as type string in parameters section
-
-            ...
-                MellanoxTenantPort1:
-                  description: Mellanox Tenant Port1
-                  type: string
-                MellanoxTenantPort2:
-                  description: Mellanox Tenant Port2
-                  type: string
-            ...
-
-    - This is a sample network_config for Linux Bonding over Mellanox ConnectX-5 NICs on Compute nodes using the os-net-config.
-
-    ::
-
-            ...
-              - type: linux_bond
-                name: tenant-bond
-                dns_servers:
-                  get_param: DnsServers
-                bonding_options:
-                  get_param: BondInterfaceOvsOptions
-                members:
-                 - type: sriov_pf
-                   name:
-                    get_param: MellanoxTenantPort1
-                  link_mode: switchdev
-                  numvfs: 8
-                  promisc: true
-                  use_dhcp: false
-                  primary: true
-                - type: sriov_pf
-                  name:
-                    get_param: MellanoxTenantPort2
-                  link_mode: switchdev
-                  numvfs: 8
-                  promisc: true
-                  use_dhcp: false
-              - type: vlan
-                device: tenant-bond
-                vlan_id:
-                  get_param: TenantNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: TenantIpSubnet
-            ...
-
-
-    5. These are the changes in the sample network template for Linux bonding with VLANs for OVRS with Mellanox ConnectX-5 NICs with control plane protection. Control plane protection is performed by steering control plane traffic to a dedicated NIC Rx queue. This is achieved by configuring a set of ethtool configuration on each PF.
-
-    ::
-
-        - Define "MellanoxTenantPort1" and "MellanoxTenantPort2" as type string in parameters section
-
-            ...
-                MellanoxTenantPort1:
-                  description: Mellanox Tenant Port1
-                  type: string
-                MellanoxTenantPort2:
-                  description: Mellanox Tenant Port2
-                  type: string
-                TenantPortEthtoolOptions:
-                  description: Port ethtool options for Control Plane Protectionn
-                  type: string
-            ...
-
-    - This is the sample network_config for Linux Bonding over Mellanox ConnectX-5 NICs on Compute nodes using the os-net-config.
-
-    ::
-
-            ...
-              - type: linux_bond
-                name: tenant-bond
-                dns_servers:
-                  get_param: DnsServers
-                bonding_options:
-                  get_param: BondInterfaceOvsOptions
-                members:
-                 - type: sriov_pf
-                   name:
-                    get_param: MellanoxTenantPort1
-                  link_mode: switchdev
-                  numvfs: 8
-                  promisc: true
-                  use_dhcp: false
-                  primary: true
-                  ethtool_opts:
-                    get_param: TenantPortEthtoolOptions
-                - type: sriov_pf
-                  name:
-                    get_param: MellanoxTenantPort2
-                  link_mode: switchdev
-                  numvfs: 8
-                  promisc: true
-                  use_dhcp: false
-                  ethtool_opts:
-                    get_param: TenantPortEthtoolOptions
-              - type: vlan
-                device: tenant-bond
-                vlan_id:
-                  get_param: TenantNetworkVlanID
-                addresses:
-                - ip_netmask:
-                    get_param: TenantIpSubnet
-            ...
-
-    - Later define the parameter inside network-environment.yaml and set this to appropriate values.
-
-     The following set of ethtool options need to be configured.
-
-     1) additional Rx queues::
-
-          ethtool -L ${DEVICE} combined <lower of 60 or number of CPU’s available on the host>
-
-     2) general RSS for the NIC queues to be received by all but 2 queues::
-
-          ethtool -X ${DEVICE} <number of queues from above minus 2. Ie. if -L = 60, then -X = 58>
-
-     3) rules and steering for the control plane traffic::
-
-         Openflow: ethtool -U ${DEVICE} flow-type tcp4 src-port 6633 action <(value from #1) - 1> above loc 1
-         JSON RPC: ethtool -U ${DEVICE} flow-type tcp4 src-port 7406 action <(value from #1) - 1> above loc 2
-         Statistics: ethtool -U ${DEVICE} flow-type tcp4 src-port 39090 action <(value from #1) - 1> above loc 3
-         BGP: ethtool -U ${DEVICE} flow-type tcp4 src-port 179 action <(value from #1) - 1> above loc 4
-
-     An example of how to set this for a setup with 60 queues total is shown below
-
-     ::
-
-         TenantPortEthtoolOptions: "-L ${DEVICE} combined 60; -X ${DEVICE} equal 58; -U ${DEVICE} flow-type tcp4 src-port 6633 action 59 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 59 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 59 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 59 loc 4"
-
-
-     An example of how to set this for a setup with 40 queues total is shown below
-
-     ::
-
-         TenantPortEthtoolOptions: "-L ${DEVICE} combined 40; -X ${DEVICE} equal 38; -U ${DEVICE} flow-type tcp4 src-port 6633 action 39 loc 1; -U ${DEVICE} flow-type tcp4 src-port 7406 action 39 loc 2; -U ${DEVICE} flow-type tcp4 src-port 39090 action 39 loc 3;-U ${DEVICE} flow-type tcp4 src-port 179 action 39 loc 4"
 
     .. Note::
 
@@ -1280,12 +1045,6 @@ For SR-IOV, also include the following role and environment files.
         * nuage_roles_data.yaml
         * neutron-sriov.yaml
 
-For OVRS, also include the following role and environment files.
-
-        * nuage_roles_data.yaml
-        * ovs-hw-offload.yaml
-        * mellanox-environment.yaml
-
 1. For VRS Overcloud deployment, use one of the following commands:
 
 ::
@@ -1302,25 +1061,15 @@ For OVRS, also include the following role and environment files.
     For multiple AVRS roles deployment, use:
     openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml  -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
-2. For OVRS using Mellanox ConnectX-5 NICs, use:
 
-::
-
-    For hardware offloading using a single Mellanox ConnectX-5 NIC:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml  -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-single-nic-hw-offload.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/mellanox-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/ovs-hw-offload.yaml --ntp-server ntp-server
-
-    For VF lag with VLANs using Mellanox ConnectX-5 NICs:
-    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml  -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/mellanox-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/ovs-hw-offload.yaml --ntp-server ntp-server
-
-
-3. For SR-IOV, use following command:
+2. For SR-IOV, use following command:
 
 ::
 
    openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/templates/neutron-sriov.yaml --ntp-server ntp-server --timeout timeout
 
 
-4. For VRS Linux-bonding HA deployment with Nuage, use the following:
+3. For VRS Linux-bonding HA deployment with Nuage, use the following:
 
 ::
 
@@ -1333,7 +1082,7 @@ For OVRS, also include the following role and environment files.
     openstack overcloud deploy --templates -r /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nuage_overcloud_images.yaml -e /home/stack/containers-prepare-parameter.yaml -e /home/stack/templates/node-info.yaml -e /home/stack/nuage-tripleo-heat-templates/nuage-overcloud-resource-registry.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/network-environment.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/net-bond-with-vlans.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/neutron-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/nova-nuage-config.yaml -e /home/stack/nuage-tripleo-heat-templates/environments/compute-avrs-multirole-environment.yaml --ntp-server ntp-server --timeout timeout
 
 
-5. For VRS, SR-IOV, and AVRS deployment with Nuage using Linux-bonding, use the following:
+4. For VRS, SR-IOV, and AVRS deployment with Nuage using Linux-bonding, use the following:
 
 ::
 
@@ -1350,12 +1099,9 @@ where:
    * ``neutron-sriov.yaml`` has the Neutron SR-IOV-specific parameter values.
    * ``network-environment.yaml`` configures additional network environment variables.
    * ``network-isolation.yaml`` enables the creation of networks for isolated Overcloud traffic.
-   * ``net-single-nic-hw-offload.yaml``  configures an IP address with a VLAN on each network except for the Tenant network.
    * ``net-bond-with-vlans.yaml`` configures an IP address and a pair of bonded NICs on each network.
    * ``nuage_overcloud_images.yaml`` has AVRS specific images.
-   * ``ovs-hw-offload.yaml`` enables OVS hardware offloading on OVRS Compute nodes.
    * ``compute-avrs-environment.yaml``  configures the parameters for ComputeAvrs.
-   * ``mellanox-environment.yaml`` has the Mellanox First Boot Firmware configuration.
    * ``ntp-server`` has the NTP settings for the Overcloud nodes.
 
 
@@ -1467,8 +1213,8 @@ For a local repository for Nuage OpenStack packages and Red Hat OpenStack-depend
 ::
 
     ImageName: "overcloud-full.qcow2"
-      # ["vrs"] --> VRS/OVRS/SRIOV deployment
-      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
+      # ["vrs"] --> VRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RpmPublicKey: ['RPM-GPG-Nuage-key', 'RPM-GPG-SOMEOTHER-key']
     RepoFile: './nuage_ospd16.repo'
@@ -1492,8 +1238,8 @@ For a local repository for Nuage packages and a Red Hat Subscription for depende
 ::
 
     ImageName: "/root/overcloud-full.qcow2"
-      # ["vrs"] --> VRS/OVRS/SRIOV deployment
-      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
+      # ["vrs"] --> VRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RhelUserName: 'abc'
     RhelPassword: '***'
@@ -1515,8 +1261,8 @@ For a Red Hat Satellite Server for Nuage packages and Red Hat-dependent packages
 ::
 
     ImageName: "/root/overcloud-full.qcow2"
-      # ["vrs"] --> VRS/OVRS/SRIOV deployment
-      # ["avrs"] --> AVRS + VRS/OVRS/SRIOV deployment
+      # ["vrs"] --> VRS/SRIOV deployment
+      # ["avrs"] --> AVRS + VRS/SRIOV deployment
     DeploymentType: ["vrs"]
     RhelSatUrl: 'https://satellite.example.com'
     RhelSatOrg: 'example_organization'
@@ -1744,68 +1490,6 @@ The following parameters are mapped to values in the /etc/cpuset.env on the Nova
 
     CpuSetEnable        =====>    CPUSET_ENABLE
     Maps to CPUSET_ENABLE. CPUSET_ENABLE enabled (1) or disabled (0) the cpuset
-
-
-
-Parameters Required for OVRS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The following parameter is mapped to values in the /etc/default/grub file on the OVRS-enabled Compute nodes:
-
-::
-
-    KernelArgs
-    Maps to GRUB_CMDLINE_LINUX parameter. This is used to enable SRIOV feature in kernel.
-
-
-The following parameter is used for Tune-d profile activation on the OVRS-enabled Compute nodes:
-
-::
-
-    TunedProfileName
-    Tuned Profile to apply to the host
-
-
-The following parameter is mapped to config value required to enable OVS hardware offloading on the OVRS-enabled Compute nodes:
-
-::
-
-    OvsHwOffload
-    Maps to OVS config value other_config:hw-offload.
-
-The following parameters are config values used while updating the Mellanox ConnectX-5 NIC firmware on OVRS-enabled Compute nodes:
-
-::
-
-    ESWITCH_IPV4_TTL_MODIFY_ENABLE
-    Enable TTL modification by E-Switch
-
-    PRIO_TAG_REQUIRED_EN
-    Priority tag required
-
-    FORCE_UPDATE
-    Force update the fw even if it's older version
-
-    NUM_OF_VFS
-    Max number of vfs
-
-    DEV_WHITE_LIST
-    List of MLNX devices PCIs to be processed. If the value is empty, all MLNX devices will be processed.
-    Example, ['0000:04:00.0', '0000:81:00.0']
-
-    ESWITCH_HAIRPIN_TOT_BUFFER_SIZE: {"*": "17"}
-    If a single key of "*" is provided, then its value will set to all indexes.
-    If you need to set configuration for a set of specific indexes, you can pass the
-    value as below for index 2 to be 17 and index 3 to be 16
-    Example, {"2": "17", "3": "16"}
-    Make sure to choose only the PCI ends with 0
-
-    ESWITCH_HAIRPIN_DESCRIPTORS: {"*": "11"}
-    If a single key of "*" is provided, then its value will set to all indexes.
-    If you need to set configuration for a set of specific indexes, you can pass the
-    value as below for index 2 to be 17 and index 3 to be 16
-    Example, {"2": "17", "3": "16"}
-    Make sure to choose only the PCI ends with 0
 
 Sample Environment Files
 -------------------------
@@ -2150,21 +1834,6 @@ node-info.yaml for HA and Linux-Bond HA Deployments
       ControllerCount: 3
       ComputeCount: 1
 
-node-info.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    parameter_defaults:
-      # OvercloudControllerFlavor is the flavor to use for Controller nodes
-      OvercloudControllerFlavor: control
-      # OvercloudComputeOvrsFlavor  is the flavor to use for Offload VRS Compute nodes
-      OvercloudComputeOvrsFlavor: computeovrs
-      # ControllerCount is number of Controller nodes
-      ControllerCount: 1
-      # ComputeOvrsCount  is number of Offload VRS Compute nodes
-      ComputeOvrsCount: 2
-
 compute-avrs-environment.yaml for AVRS Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2224,96 +1893,6 @@ compute-avrs-multirole-environment.yaml for AVRS Integration
         NbMbuf: "+65536"
         FastPathMemory: "auto"
         FastPathOffload: "off"
-
-
-ovs-hw-offload.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    parameter_defaults:
-
-      NovaSchedulerDefaultFilters: ['RetryFilter','AvailabilityZoneFilter','ComputeFilter','ComputeCapabilitiesFilter','ImagePropertiesFilter','ServerGroupAntiAffinityFilter','ServerGroupAffinityFilter','PciPassthroughFilter']
-      NovaSchedulerAvailableFilters: ["nova.scheduler.filters.all_filters","nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter"]
-
-      # Kernel arguments for ComputeOvrs node
-      ComputeOvrsParameters:
-        KernelArgs: "intel_iommu=on iommu=pt hugepagesz=1G hugepages=32 default_hugepagesz=1G pci=realloc"
-        #NOTE: By default TunedProfileName is set to "cpu-partitioning" in ovrs-role.yaml.
-        # If IsolCpusList is not set in your environment, then leave TunedProfileName below to set to empty string.
-        # If planning on setting IsolCpusList in your environment
-        #   1. You can comment the below line to set TunedProfileName to "cpu-partitioning" or
-        #   2. You can pass your custom Tuned Profile to apply to the host
-        TunedProfileName: ""
-        OvsHwOffload: True
-        # Mapping of SR-IOV PF interface to neutron physical_network.
-        # In case of Vxlan/GRE physical_network should be null.
-        # In case of flat/vlan the physical_network should as configured in neutron.
-        NovaPCIPassthrough:
-          - devname: "ens15f0"
-            physical_network: null
-          - devname: "ens15f1"
-            physical_network: null
-
-
-mellanox-environment.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    parameter_defaults:
-      ################
-      # Nic's params #
-      ################
-      MellanoxTenantPort1: "ens15f0"
-      MellanoxTenantPort2: "ens15f1"
-
-      ########################
-      # FIRST Boot FW config #
-      ########################
-
-      BIN_DIR_URL: "http://192.168.24.1/FW_16_25_0310/"
-      NUM_OF_VFS: 64
-      SRIOV_EN: True
-      ESWITCH_IPV4_TTL_MODIFY_ENABLE: True
-      PRIO_TAG_REQUIRED_EN: True
-      DEV_WHITE_LIST: []
-      ESWITCH_HAIRPIN_TOT_BUFFER_SIZE: {"*": "17"}
-      ESWITCH_HAIRPIN_DESCRIPTORS: {"*": "11"}
-
-
-net-bond-with-vlans.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    resource_registry:
-      # Network Interface templates to use (these files must exist). You can
-      # override these by including one of the net-*.yaml environment files,
-      # such as net-bond-with-vlans.yaml, or modifying the list here.
-      # Port assignments for the Controller
-      OS::TripleO::Controller::Net::SoftwareConfig:
-        ../network/config/bond-with-vlans/controller.yaml
-      # Port assignments for the Compute
-      OS::TripleO::Compute::Net::SoftwareConfig:
-        ../network/config/bond-with-vlans/compute.yaml
-      # Port assignments for the ComputeSriov
-      OS::TripleO::ComputeSriov::Net::SoftwareConfig:
-        ../network/config/bond-with-vlans/computesriov.yaml
-      # Port assignments for the ComputeOvrs
-      OS::TripleO::ComputeOvrs::Net::SoftwareConfig: ../network/config/bond-with-vlans/computeovrs.yaml
-
-
-net-single-nic-hw-offload.yaml for OVRS Deployments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    resource_registry:
-      # Port assignments for the Controller
-      OS::TripleO::Controller::Net::SoftwareConfig: ../network/config/single-nic-hw-offload/controller.yaml
-      # Port assignments for the ComputeOvrs
-      OS::TripleO::ComputeOvrs::Net::SoftwareConfig: ../network/config/single-nic-hw-offload/computeovrs.yaml
 
 
 node-info.yaml for SR-IOV Deployments
