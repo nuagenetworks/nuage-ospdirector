@@ -146,7 +146,7 @@ The hardware VTEP solution needs the following packages.
    | Common         |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_710  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+

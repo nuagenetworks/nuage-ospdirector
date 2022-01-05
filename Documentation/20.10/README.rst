@@ -169,9 +169,9 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_710  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.7_710  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-image-patching-scripts-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
    | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -313,10 +313,10 @@ Phase 2.4: Pull AVRS Containers from the Red Hat Catalog (This step is only nece
 
 In this phase, you pull the AVRS containers for the integration.
 
-Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.7 with 16.1-1 as an example (this version may change):
+Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.7 with 16.1-3 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-7:16.1-1
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-7:16.1-1
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-7:16.1-3
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-7:16.1-3
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -1535,7 +1535,7 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             namespace: registry.redhat.io/rhosp-rhel8
             neutron_driver: null
             rhel_containers: false
-            tag: '16.1.6' # Update to qualified z-stream for nuage release
+            tag: '16.1.7' # Update to qualified z-stream for nuage release
           tag_from_label: '{version}-{release}'
           excludes:
             - horizon
