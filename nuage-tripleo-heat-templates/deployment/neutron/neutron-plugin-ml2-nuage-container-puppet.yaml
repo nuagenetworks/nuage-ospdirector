@@ -5,19 +5,19 @@ description: >
 
 parameters:
   EndpointMap:
-    default: {}
+    default: { }
     description: Mapping of service endpoint -> protocol. Typically set
-                 via parameter_defaults in the resource registry.
+      via parameter_defaults in the resource registry.
     type: json
   ServiceData:
-    default: {}
+    default: { }
     description: Dictionary packing service data
     type: json
   ServiceNetMap:
-    default: {}
+    default: { }
     description: Mapping of service_name -> network name. Typically set
-                 via parameter_defaults in the resource registry.  This
-                 mapping overrides those in ServiceNetMapDefaults.
+      via parameter_defaults in the resource registry.  This
+      mapping overrides those in ServiceNetMapDefaults.
     type: json
   ContainerNeutronConfigImage:
     description: The container image to use for the neutron config_volume
@@ -29,7 +29,7 @@ parameters:
     description: Role name on which the service is applied
     type: string
   RoleParameters:
-    default: {}
+    default: { }
     description: Parameters specific to the role
     type: json
 
@@ -38,32 +38,33 @@ resources:
   NeutronBase:
     type: OS::TripleO::Docker::NeutronMl2PluginBase
     properties:
-      EndpointMap: {get_param: EndpointMap}
-      ServiceData: {get_param: ServiceData}
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      RoleName: {get_param: RoleName}
-      RoleParameters: {get_param: RoleParameters}
+      EndpointMap: { get_param: EndpointMap }
+      ServiceData: { get_param: ServiceData }
+      ServiceNetMap: { get_param: ServiceNetMap }
+      DefaultPasswords: { get_param: DefaultPasswords }
+      RoleName: { get_param: RoleName }
+      RoleParameters: { get_param: RoleParameters }
 
   NeutronContainerBase:
     type: /usr/share/openstack-tripleo-heat-templates/deployment/neutron/neutron-plugin-ml2-container-puppet.yaml
     properties:
-      EndpointMap: {get_param: EndpointMap}
-      ServiceData: {get_param: ServiceData}
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      RoleName: {get_param: RoleName}
-      RoleParameters: {get_param: RoleParameters}
+      EndpointMap: { get_param: EndpointMap }
+      ServiceData: { get_param: ServiceData }
+      ServiceNetMap: { get_param: ServiceNetMap }
+      DefaultPasswords: { get_param: DefaultPasswords }
+      RoleName: { get_param: RoleName }
+      RoleParameters: { get_param: RoleParameters }
 
 outputs:
   role_data:
     description: Role data for the Neutron ML2 Plugin Nuage role.
     value:
-      service_name: {get_attr: [NeutronContainerBase, role_data, service_name]}
-      config_settings: {get_attr: [NeutronContainerBase, role_data, config_settings]}
-      service_config_settings: {get_attr: [NeutronContainerBase, role_data, service_config_settings]}
-      metadata_settings: {get_attr: [NeutronContainerBase, role_data, metadata_settings]}
-      puppet_config: {get_attr: [NeutronContainerBase, role_data, puppet_config]}
-      kolla_config: {}
-      docker_config: {}
-      deploy_steps_tasks: {get_attr: [NeutronBase, role_data, deploy_steps_tasks]}
+      service_name: { get_attr: [ NeutronContainerBase, role_data, service_name ] }
+      config_settings: { get_attr: [ NeutronContainerBase, role_data, config_settings ] }
+      service_config_settings: { get_attr: [ NeutronContainerBase, role_data, service_config_settings ] }
+      metadata_settings: { get_attr: [ NeutronContainerBase, role_data, metadata_settings ] }
+      puppet_config: { get_attr: [ NeutronContainerBase, role_data, puppet_config ] }
+      kolla_config: { }
+      docker_config: { }
+      deploy_steps_tasks: { get_attr: [ NeutronBase, role_data, deploy_steps_tasks ] }
+      update_tasks: { get_attr: [ NeutronBase, role_data, update_tasks ] }

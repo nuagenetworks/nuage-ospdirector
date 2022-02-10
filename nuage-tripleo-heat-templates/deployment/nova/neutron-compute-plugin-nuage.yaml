@@ -4,30 +4,30 @@ description: >
   OpenStack Neutron Compute Nuage plugin
 parameters:
   ServiceData:
-    default: {}
+    default: { }
     description: Dictionary packing service data
     type: json
   ServiceNetMap:
-    default: {}
+    default: { }
     description: Mapping of service_name -> network name. Typically set
-                 via parameter_defaults in the resource registry.  This
-                 mapping overrides those in ServiceNetMapDefaults.
+      via parameter_defaults in the resource registry. This
+      mapping overrides those in ServiceNetMapDefaults.
     type: json
   DefaultPasswords:
-    default: {}
+    default: { }
     type: json
   RoleName:
     default: ''
     description: Role name on which the service is applied
     type: string
   RoleParameters:
-    default: {}
+    default: { }
     description: Parameters specific to the role
     type: json
   EndpointMap:
-    default: {}
+    default: { }
     description: Mapping of service endpoint -> protocol. Typically set
-                 via parameter_defaults in the resource registry.
+      via parameter_defaults in the resource registry.
     type: json
   NovaPassword:
     description: The password for the nova service and db account
@@ -83,17 +83,16 @@ parameters:
       - role_specific
   VrsExtraConfigs:
     description: Extra config params and values for nuage-openvswitch
-    default: {}
+    default: { }
     type: json
     tags:
       - role_specific
   NuageGpgKeys:
     type: comma_delimited_list
-    default: []
+    default: [ ]
     description: Nuage GPG keys
 
 resources:
-
   RoleParametersValue:
     type: OS::Heat::Value
     properties:
@@ -103,10 +102,10 @@ resources:
           - map_replace:
             - nuage::vrs::enable_hw_offload: OvsHwOffload
               nuage::vrs::vrs_extra_configs: VrsExtraConfigs
-            - values: {get_param: [RoleParameters]}
+            - values: { get_param: [ RoleParameters ] }
           - values:
-              OvsHwOffload: {get_param: OvsHwOffload}
-              VrsExtraConfigs: {get_param: VrsExtraConfigs}
+              OvsHwOffload: { get_param: OvsHwOffload }
+              VrsExtraConfigs: { get_param: VrsExtraConfigs }
 
 outputs:
   role_data:
@@ -115,18 +114,18 @@ outputs:
       service_name: neutron_compute_plugin_nuage
       config_settings:
         map_merge:
-          - get_attr: [RoleParametersValue, value]
-          - nuage::vrs::active_controller: {get_param: NuageActiveController}
-            nuage::vrs::standby_controller: {get_param: NuageStandbyController}
-            nuage::vrs::bridge_mtu: {get_param: NuageBridgeMTU}
-            nuage::metadataagent::metadata_port: {get_param: NuageMetadataPort}
-            nuage::metadataagent::nova_metadata_port: {get_param: NuageNovaMetadataPort}
-            nuage::metadataagent::metadata_secret: {get_param: NuageMetadataProxySharedSecret}
-            nuage::metadataagent::nova_client_version: {get_param: NuageNovaClientVersion}
-            nuage::metadataagent::nova_os_username: {get_param: NuageNovaOsUsername}
-            nuage::metadataagent::metadata_agent_start_with_ovs: {get_param: NuageMetadataAgentStartWithOvs}
-            nuage::metadataagent::nova_api_endpoint_type: {get_param: NuageNovaApiEndpoint}
-            nuage::metadataagent::nova_region_name: {get_param: NuageNovaRegionName}
+          - get_attr: [ RoleParametersValue, value ]
+          - nuage::vrs::active_controller: { get_param: NuageActiveController }
+            nuage::vrs::standby_controller: { get_param: NuageStandbyController }
+            nuage::vrs::bridge_mtu: { get_param: NuageBridgeMTU }
+            nuage::metadataagent::metadata_port: { get_param: NuageMetadataPort }
+            nuage::metadataagent::nova_metadata_port: { get_param: NuageNovaMetadataPort }
+            nuage::metadataagent::metadata_secret: { get_param: NuageMetadataProxySharedSecret }
+            nuage::metadataagent::nova_client_version: { get_param: NuageNovaClientVersion }
+            nuage::metadataagent::nova_os_username: { get_param: NuageNovaOsUsername }
+            nuage::metadataagent::metadata_agent_start_with_ovs: { get_param: NuageMetadataAgentStartWithOvs }
+            nuage::metadataagent::nova_api_endpoint_type: { get_param: NuageNovaApiEndpoint }
+            nuage::metadataagent::nova_region_name: { get_param: NuageNovaRegionName }
             tripleo::profile::base::neutron::agents::nuage::nova_os_tenant_name: 'service'
             tripleo::profile::base::neutron::agents::nuage::nova_os_password: {get_param: NovaPassword}
             tripleo::profile::base::neutron::agents::nuage::nova_auth_ip: {get_param: [EndpointMap, KeystoneInternal, host]}
@@ -140,62 +139,62 @@ outputs:
               failed_when: false
               register: nuage_base_check
             - name: Installing nuage base packages
-              block:
-              - name: set nuage_gpg_keys fact
-                set_fact:
-                  nuage_gpg_keys: {get_param: NuageGpgKeys}
-              - name: Adding nuage_gpg_keys on overcloud node
-                rpm_key:
-                  state: present
-                  key: "{{ item }}"
-                with_items:
-                  - "{{ nuage_gpg_keys }}"
-                when:
-                  - nuage_gpg_keys != []
-              - debug:
-                  msg: "No NuageGpgKeys Environment variable is set for this deployment"
-                when:
-                  - nuage_gpg_keys == []
-              - name: Install python openvswitch nuage
-                yum:
-                  name: python-openvswitch-nuage
-                  state: present
-              - name: Get upstream openvswitch name
-                register: ovs_pkg_name
-                shell:
-                  rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
-              - name: Remove upstream openvswitch amd network-scripts-openvswitch
-                yum:
-                  name: "{{ item }}"
-                  state: absent
-                with_items:
-                  - "{{ ovs_pkg_name.stdout }}"
-                  - "network-scripts-{{ ovs_pkg_name.stdout }}"
-                when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
-              - name: Installing nuage packages dependencies and base packages
-                yum:
-                  name: "{{ packages }}"
-                  state: present
-                vars:
-                  packages:
-                    - perl-JSON
-                    - python2
-                    - python3-httplib2
-                    - libvirt
-                    - nuage-puppet-modules
-                    - selinux-policy-nuage
-                    - nuage-bgp
-              - name: Ensure libvirtd is not active on compute (outside of nova container)
-                # Disable the libvirt service
-                #   Otherwise after a reboot of the overcloud hypervisor
-                #   the libvirtd service will be interfering with the overcloud
-                #   libvirt container.
-                #   Libvirt is needed on overcloud for VRS to get vm-node
-                service:
-                  name: libvirtd
-                  state: stopped
-                  enabled: no
               when: nuage_base_check.rc != 0
+              block:
+                - name: set nuage_gpg_keys fact
+                  set_fact:
+                    nuage_gpg_keys: { get_param: NuageGpgKeys }
+                - name: Adding nuage_gpg_keys on overcloud node
+                  rpm_key:
+                    state: present
+                    key: "{{ item }}"
+                  with_items:
+                    - "{{ nuage_gpg_keys }}"
+                  when:
+                    - nuage_gpg_keys != []
+                - debug:
+                    msg: "No NuageGpgKeys Environment variable is set for this deployment"
+                  when:
+                    - nuage_gpg_keys == []
+                - name: Install python openvswitch nuage
+                  yum:
+                    name: python-openvswitch-nuage
+                    state: latest
+                - name: Get upstream openvswitch name
+                  register: ovs_pkg_name
+                  shell:
+                    rpm -qa | awk -F- '/^(openvswitch[0-9]+\.[0-9]+-|openvswitch-2)/{print $1}'
+                - name: Remove upstream openvswitch amd network-scripts-openvswitch
+                  yum:
+                    name: "{{ item }}"
+                    state: absent
+                  with_items:
+                    - "{{ ovs_pkg_name.stdout }}"
+                    - "network-scripts-{{ ovs_pkg_name.stdout }}"
+                  when: "{{ (ovs_pkg_name.stdout | length) > 0 }}"
+                - name: Installing nuage packages dependencies and base packages
+                  yum:
+                    name: "{{ packages }}"
+                    state: latest
+                  vars:
+                    packages:
+                      - perl-JSON
+                      - python2
+                      - python3-httplib2
+                      - libvirt
+                      - nuage-puppet-modules
+                      - selinux-policy-nuage
+                      - nuage-bgp
+                - name: Ensure libvirtd is not active on compute (outside of nova container)
+                  # Disable the libvirt service
+                  #   Otherwise after a reboot of the overcloud hypervisor
+                  #   the libvirtd service will be interfering with the overcloud
+                  #   libvirt container.
+                  #   Libvirt is needed on overcloud for VRS to get vm-node
+                  service:
+                    name: libvirtd
+                    state: stopped
+                    enabled: no
         - when: step|int == 2
           block:
             - name: Check if manager is present
@@ -209,3 +208,43 @@ outputs:
                 "target=\"ptcp:6640:127.0.0.1\"" -- add Open_vSwitch .
                 manager_options @manager
               when: "'ptcp:6640:127.0.0.1' not in manager_check.stdout"
+      update_tasks:
+        #common - Applies to all steps
+        #step0 - Validation
+        #step1 - Stop all OpenStack services.
+        #step2 - Stop all Pacemaker-controlled services
+        #step3 - Package update and new package installation
+        #step4 - Start OpenStack service required for database upgrade
+        #step5 - Upgrade database
+        - block:
+            - name: check if python-openvswitch-nuage is present in the repo
+              command: repoquery --all python-openvswitch-nuage
+              register: python_openvswitch_nuage_output
+            - name: Installing python-openvswitch-nuage
+              yum:
+                name: python-openvswitch-nuage
+                state: latest
+              when: python_openvswitch_nuage_output.stdout != ''
+            - name: Check if nuage-bgp is installed
+              shell: rpm -qa | grep -q nuage-bgp
+              failed_when: false
+              register: nuage_bgp_check
+            - name: Check and update nuage-bgp package
+              block:
+                - name: check if nuage-bgp is updating
+                  shell: yum check-update nuage-bgp
+                  register: nuage_bgp_update_check
+                  failed_when: nuage_bgp_update_check.rc not in [0, 100]
+                  changed_when: nuage_bgp_update_check.rc == 100
+                - name: Updating nuage-bgp package
+                  block:
+                    - name: Update nuage-bgp with noscripts flag
+                      shell: yum --setopt=tsflags=noscripts install nuage-bgp -y
+                    - name: Reload daemon and restart nuage-bgp
+                      systemd:
+                        state: restarted
+                        daemon_reload: yes
+                        name: nuage-bgp
+                  when: nuage_bgp_update_check.rc == 100
+              when: nuage_bgp_check.rc == 0
+          when: (step|int == 3)
