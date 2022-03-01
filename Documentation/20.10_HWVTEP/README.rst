@@ -36,8 +36,8 @@ Requirements and Best Practices
 
 For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD] and Virtualized Services Controller [VSC]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD and VSC) should already be deployed.
 
-For Red Hat OpenStack Platform Director 16.1 requirements and best practices, see the Red Hat upstream documentation:
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/
+For Red Hat OpenStack Platform Director 16.2 requirements and best practices, see the Red Hat upstream documentation:
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/
 
 
 Recommended Topologies
@@ -123,7 +123,7 @@ Phase 1: Install Red Hat OpenStack Platform Director
 
 To prepare for the Nuage VSP integration, install Director on the Undercloud system by following the steps in the Red Hat documentation:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/director_installation_and_configuration
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/director_installation_and_configuration
 
 
 Phase 2: Prepare Nuage Repository and Containers
@@ -146,11 +146,11 @@ The hardware VTEP solution needs the following packages.
    | Common         |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.2-20.10.9_912  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       |                                                |                                                                                           |
    | Packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.6          |
+   | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)    | https://github.com/nuagenetworks/topology-collector/releases/tag/release-20.10.9          |
    | packages       |                                                |                                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
 
@@ -203,11 +203,11 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-7"
+            name_suffix: "-20-10-9"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
-            tag: 'latest'
+            tag: '16.2-1'
           includes:
             - horizon
             - heat-engine
@@ -216,14 +216,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-7" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-9" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-9:16.2-1
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-9:16.2-1
 
 
 Phase 3: Prepare the Overcloud
@@ -236,9 +236,9 @@ The process includes modifying the Overload image and environment file, creating
 **Role**: A role is a personality assigned to a node where a specific set of operations is allowed.
 For more information about roles, see the Red Hat OpenStack documentation:
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/planning-your-overcloud
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/planning-your-overcloud
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
 
 You only need to configure the roles for your deployment and assign the roles to the appropriate nodes.
 
@@ -248,7 +248,7 @@ Phase 3.1: Register and Inspect the Bare Metal Nodes
 
 In the Red Hat OpenStack Platform Director documentation, follow the steps using the CLI *up to where* the ``openstack overcloud deploy`` command is run:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
 
 To verify the Ironic node status, follow these steps:
 
@@ -613,7 +613,7 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             namespace: registry.redhat.io/rhosp-rhel8
             neutron_driver: null
             rhel_containers: false
-            tag: '16.1.6' # Update to qualified z-stream for nuage release
+            tag: '16.2.2' # Update to qualified z-stream for nuage release
           tag_from_label: '{version}-{release}'
           excludes:
             - horizon
@@ -625,11 +625,11 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-7"
+            name_suffix: "-20-10-9"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
-            tag: 'latest'
+            tag: '16.2-1'
           includes:
             - horizon
             - heat-engine
@@ -638,14 +638,14 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-7" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-9" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-9:16.2-1
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-9:16.2-1
 
 
 network-environment.yaml
