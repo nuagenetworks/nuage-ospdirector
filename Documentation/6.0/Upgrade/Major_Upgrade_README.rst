@@ -41,8 +41,9 @@ The basic configuration includes:
 
 Before the Upgrade
 --------------------
+1. If you are updating an AVRS node, migrate all your VMs on the node to an AVRS Compute node that is not being updated. Perform the steps in the "Live Migrate a Virtual Machine" section in https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html/director_installation_and_usage/migrating-virtual-machines-between-compute-nodes-osp#live-migrate-a-vm-osp
 
-1. Create a single repository containing 6.0.17 Nuage packages. The repository contents may change depending on the roles configured for your deployment.
+2. Create a single repository containing 6.0.17 Nuage packages. The repository contents may change depending on the roles configured for your deployment.
 
     ::
 
@@ -63,15 +64,53 @@ Before the Upgrade
        | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
        |                | selinux-policy-nuage                         | nuage-selinux                                                                             |
        +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-dpdk                               | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       | Accelerated    | 6windgate-dpdk-pmd-mellanox-rdma-core        | nuage-avrs-el7                                                                            |
+       | VRS (AVRS)     +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       | 6WIND          | 6windgate-dpdk-pmd-virtio-host               | nuage-avrs-el7                                                                            |
+       | Packages       +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-fp                                 | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-fp-ovs                             | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-fpn-sdk-dpdk                       | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-linux-fp-sync                      | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-linux-fp-sync-fptun                | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-linux-fp-sync-ovs                  | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-linux-fp-sync-vrf                  | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-product-base                       | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-tools-common-libs-daemonctl        | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-tools-common-libs-libconsole       | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | 6windgate-tools-common-libs-pyroute2         | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | dkms                                         | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | nuage-openvswitch-6wind                      | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | python-pyelftools                            | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | virtual-accelerator-base                     | nuage-avrs-el7                                                                            |
+       |                +----------------------------------------------+-------------------------------------------------------------------------------------------+
+       |                | selinux-policy-nuage-avrs                    | nuage-avrs-selinux                                                                        |
+       +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
        | Nuage SR-IOV   | nuage-topology-collector (for Nuage SR-IOV)  | nuage-openstack                                                                           |
        | packages       |                                              |                                                                                           |
        |                |                                              |                                                                                           |
        +----------------+----------------------------------------------+-------------------------------------------------------------------------------------------+
 
 
-2. Make sure the Nuage 6.0.17 repository and Red Hat repositories for OSPD 13 Z16 are enabled on all Overcloud nodes.
+3. Make sure the Nuage 6.0.17 repository and Red Hat repositories for OSPD 13 Z16 are enabled on all Overcloud nodes.
 
-3. Run ``yum clean all`` to clean the old yum cache on all your Overcloud modes after enabling the above yum repositories.
+4. Run ``yum clean all`` to clean the old yum cache on all your Overcloud modes after enabling the above yum repositories.
 
 
 Update Workflow
@@ -131,7 +170,7 @@ Update Workflow
             openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute <role> <role> ...
 
             Example:
-            openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeSriov
+            openstack overcloud roles generate --roles-path /home/stack/nuage-tripleo-heat-templates/roles -o /home/stack/nuage-tripleo-heat-templates/templates/nuage_roles_data.yaml Controller Compute ComputeSriov ComputeAvrs
 
 
         .. Note:: It is not mandatory to create nuage_roles_data.yaml with all the roles shown in the example. You can specify only the required ones for your deployment.
