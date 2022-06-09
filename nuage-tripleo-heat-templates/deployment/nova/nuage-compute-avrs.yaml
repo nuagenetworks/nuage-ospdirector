@@ -313,15 +313,15 @@ outputs:
                 loop:
                   - { param: 'CPUSET_ENABLE', val: { get_attr: [RoleParametersValue, value, CPUSET_ENABLE] }}
               - block:
-                - name: Restarting AVRS service
+                - name: Restarting VA service
                   service:
-                    name: avrs
+                    name: virtual-accelerator.target
                     state: restarted
                     enabled: yes
                   # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
                   ignore_errors: yes
                 - name: check if virtual-accelerator is active
-                  command: systemctl status virtual-accelerator
+                  command: systemctl status virtual-accelerator.target
                 when: lineinfile_result.changed
       upgrade_tasks: {get_attr: [NovaComputeAvrsDockerBase, role_data, upgrade_tasks]}
       update_tasks:
@@ -338,7 +338,7 @@ outputs:
             - block:
               - name: Stop VA on AVRS nodes before AVRS upgrade
                 service:
-                  name: virtual-accelerator
+                  name: virtual-accelerator.target
                   state: stopped
               - name: Create va_update file if virtual-accelerator-base is updating
                 file:
@@ -373,9 +373,9 @@ outputs:
                 path: /tmp/va_update
               register: virtual_accelerator_base_update_file
             - block:
-              - name: Restarting AVRS service
+              - name: Restarting VA service
                 service:
-                  name: avrs
+                  name: virtual-accelerator.target
                   state: restarted
                   enabled: yes
                 # Network Service tends to fail when all the interfaces that are up did not get ip address on restart. So, we are ignoring this failure
@@ -387,7 +387,7 @@ outputs:
                   delay: 10
                   timeout: 100
               - name: check if virtual-accelerator is active
-                command: systemctl status virtual-accelerator
+                command: systemctl status virtual-accelerator.target
               - name: Remove va_update file if virtual-accelerator-base is updated
                 file:
                   path: /tmp/va_update

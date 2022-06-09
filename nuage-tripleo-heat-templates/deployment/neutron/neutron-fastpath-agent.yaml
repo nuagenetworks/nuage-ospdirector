@@ -140,7 +140,7 @@ outputs:
               template: |
                 #!/bin/bash
                 set -xe
-                /usr/bin/python /usr/bin/neutron-fastpath-agent \
+                /usr/bin/python3 /usr/bin/neutron-fastpath-agent \
                 --config-file /etc/neutron/rootwrap.conf \
                 --config-file /etc/neutron/neutron.conf \
                 --config-dir /etc/neutron/conf.d/common \
