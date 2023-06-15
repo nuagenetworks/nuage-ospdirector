@@ -37,8 +37,8 @@ Requirements and Best Practices
 
 For Nuage Networks Virtualized Services Platform (VSP) (Virtualized Services Directory [VSD] and Virtualized Services Controller [VSC]) requirements and best practices, see the *VSP User Guide* for the deployment requirements. Before deploying OpenStack, the VSP components (VSD and VSC) should already be deployed.
 
-For Red Hat OpenStack Platform Director 16.1 requirements and best practices, see the Red Hat upstream documentation:
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/
+For Red Hat OpenStack Platform Director 16.2 requirements and best practices, see the Red Hat upstream documentation:
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/
 
 
 Recommended Topologies
@@ -134,7 +134,7 @@ Phase 1: Install Red Hat OpenStack Platform Director
 
 To prepare for the Nuage VSP integration, install Director on the Undercloud system by following the steps in the Red Hat documentation:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/director_installation_and_configuration
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/director_installation_and_configuration
 
 
 Phase 2: Prepare Nuage Repository and Containers
@@ -157,7 +157,7 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage          | nuage-openstack-neutronclient                  | nuage-openstack                                                                           |
    | Common         +------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Packages       | nuage-puppet-modules-16.1-20.10.7_59           | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-puppet-modules-16.2-20.10.13_63           | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-metadata-agent                           | nuage-vrs-el8 or nuage-avrs-el8                                                           |
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -169,9 +169,9 @@ The repository contents may change depending on the roles configured for your de
    |                +------------------------------------------------+-------------------------------------------------------------------------------------------+
    |                | nuage-openstack-heat                           | nuage-openstack                                                                           |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
-   | Nuage OSP      | nuage-tripleo-heat-templates-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Nuage OSP      | nuage-tripleo-heat-templates-16.2-20.10.13_1248| https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    | Director       +----------------------------------------------+---------------------------------------------------------------------------------------------+
-   | Packages       | nuage-image-patching-scripts-16.1-20.10.7_722  | https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
+   | Packages       | nuage-image-patching-scripts-16.2-20.10.13_1248| https://github.com/nuagenetworks/nuage-ospdirector/tree/OSPD16/nuage-rpms                 |
    +----------------+------------------------------------------------+-------------------------------------------------------------------------------------------+
    | Nuage VRS      | nuage-openvswitch                              | nuage-vrs-el8                                                                             |
    | Packages       +------------------------------------------------+-------------------------------------------------------------------------------------------+
@@ -285,11 +285,11 @@ In this phase, you prepare Nuage containers for the integration.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-7"
+            name_suffix: "-20-10-latest"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
-            tag: 'latest'
+            tag: '20.10.13-16.2-1'
           includes:
             - horizon
             - heat-engine
@@ -298,14 +298,14 @@ In this phase, you prepare Nuage containers for the integration.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-7" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:20.10.13-16.2-1
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:20.10.13-16.2-1
 
 
 Phase 2.4: Pull AVRS Containers from the Red Hat Catalog (This step is only necessary for AVRS deployments.)
@@ -315,8 +315,8 @@ In this phase, you pull the AVRS containers for the integration.
 
 Nuage provides the customized OpenStack containers with Nuage plugins and extensions. The container names change from release to release. This is a sample from Release 20.10.7 with 16.1-3 as an example (this version may change):
 
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-7:16.1-3
-* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-7:16.1-3
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-nova-compute-20-10-latest:20.10.13-16.2-1
+* registry.connect.redhat.com/nuagenetworks/rhosp16-openstack-neutron-openvswitch-agent-20-10-latest:20.10.13-16.2-1
 
 For the list of containers against which the Nuage integration was tested, see the `Release Notes <https://github.com/nuagenetworks/nuage-ospdirector/releases>`_ for this release.
 
@@ -396,9 +396,9 @@ The process includes modifying the Overload image and environment file, creating
 **Role**: A role is a personality assigned to a node where a specific set of operations is allowed.
 For more information about roles, see the Red Hat OpenStack documentation:
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/planning-your-overcloud
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/planning-your-overcloud
 
-   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
+   * https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/advanced_overcloud_customization/chap-roles#sect-Creating_a_Custom_Roles_File
 
 You only need to configure the roles for your deployment and assign the roles to the appropriate nodes. For example, the network topology diagram in `Workflow Overview of the Nuage VSP Integration with OpenStack Platform Director`_ shows that each Compute node has different roles:
 
@@ -412,7 +412,7 @@ Phase 3.1: Register and Inspect the Bare Metal Nodes
 
 In the Red Hat OpenStack Platform Director documentation, follow the steps using the CLI *up to where* the ``openstack overcloud deploy`` command is run:
 
-https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
+https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
 
 To verify the Ironic node status, follow these steps:
 
@@ -586,7 +586,7 @@ Follow these instructions:
         NuageGpgKeys: ['http://1.2.3.4/Nuage-RPM-GPG-Key1', 'http://1.2.3.4/Nuage-RPM-GPG-Key2']
 
 
-3. Follow the instructions in the  Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/ansible-based-registration#registering-the-overcloud-to-red-hat-satellite>`_
+3. Follow the instructions in the  Red Hat documentation for `Registering to Red Hat Satellite Server <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/advanced_overcloud_customization/ansible-based-registration#registering-the-overcloud-to-red-hat-satellite>`_
 
 
 Phase 3.4: Create the Dataplane Roles and Update the Node Profiles
@@ -852,7 +852,7 @@ For more information, go to the "VSP OpenStack ML2 Driver Guide*.
 
     1. Create a flavor and profile for ComputeSriov:
 
-       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
+       Refer to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/creating-a-basic-overcloud-with-cli-tools
 
     ::
 
@@ -884,7 +884,7 @@ For more information, go to the "VSP OpenStack ML2 Driver Guide*.
 
        * Include  the *neutron-sriov.yaml* file in the Overcloud deployment command. For an example, go to `Sample Environment Files`_.
 
-         For more information, refer to the `CONFIGURING SR-IOV <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/network_functions_virtualization_planning_and_configuration_guide/part-sriov-nfv-configuration#sect-configuring-sriov>`_ section from Red Hat.
+         For more information, refer to the `CONFIGURING SR-IOV <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/network_functions_virtualization_planning_and_configuration_guide/part-sriov-nfv-configuration#sect-configuring-sriov>`_ section from Red Hat.
 
        .. Note:: Make sure that the physical network mappings parameters in neutron-nuage-config.yaml and neutron-sriov.yaml match with your hardware profile. To check interface information for your inspected nodes, run ``openstack baremetal introspection interface list [node uuid]``.
 
@@ -895,7 +895,7 @@ Network Isolation
 
    **Linux Bonding with VLANs**
 
-    The plugin uses the default Linux bridge and Linux bonding. Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/advanced_overcloud_customization/overcloud-network-interface-bonding for more information about Linux bonding on OpenStack.
+    The plugin uses the default Linux bridge and Linux bonding. Go to https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/advanced_overcloud_customization/overcloud-network-interface-bonding for more information about Linux bonding on OpenStack.
 
     To deploy the Overcloud Controller and ComputeSriov, Nuage provides `bond-with-vlans network templates <../../nuage-tripleo-heat-templates/network/config/bond-with-vlans/>`_ that configure the Linux bonding with VLANs.
 
@@ -1037,7 +1037,7 @@ For AVRS, also include the following role and environment files.
         This impacts certain scenarios such as scale-out with an overcloud that has an AVRS node.
         To work around this issue, please blacklist existing overcloud AVRS nodes before running a
         scale-out. More information on how to use a blacklist during overcloud deploy can be found in the
-        RHOSP documentation https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.1/html/director_installation_and_usage/scaling-overcloud-nodes#blacklisting-nodes
+        RHOSP documentation https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/scaling-overcloud-nodes#blacklisting-nodes
 
 
 For SR-IOV, also include the following role and environment files.
@@ -1535,7 +1535,7 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             namespace: registry.redhat.io/rhosp-rhel8
             neutron_driver: null
             rhel_containers: false
-            tag: '16.1.7' # Update to qualified z-stream for nuage release
+            tag: '16.2' # Update to qualified z-stream for nuage release
           tag_from_label: '{version}-{release}'
           excludes:
             - horizon
@@ -1547,11 +1547,11 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
         - push_destination: true
           set:
             name_prefix: "rhosp16-openstack-"
-            name_suffix: "-20-10-7"
+            name_suffix: "-20-10-latest"
             namespace: registry.connect.redhat.com/nuagenetworks
             neutron_driver: null
             rhel_containers: false
-            tag: 'latest'
+            tag: '20.10.13-16.2-1'
           includes:
             - horizon
             - heat-engine
@@ -1560,14 +1560,14 @@ Note: Make sure to use the correct z-version in the tag for upstream containers.
             - heat-api
 
 
-.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-7" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
+.. Note:: If during overcloud deploy image prepare, it tries to pull "nuagenetworks/rhosp16-openstack-neutron-server-ovn-20-10-latest" ("-ovn" was added to the name by overcloud deploy) please add below overwrites
    (https://bugzilla.redhat.com/show_bug.cgi?id=1844239):
 
 ::
 
     parameter_defaults:
-      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
-      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-7:latest
+      ContainerNeutronApiImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:20.10.13-16.2-1
+      ContainerNeutronConfigImage: undercloud.ctlplane.localdomain:8787/nuagenetworks/rhosp16-openstack-neutron-server-20-10-latest:20.10.13-16.2-1
 
 
 nuage-overcloud-resource-registry.yaml
@@ -2026,6 +2026,6 @@ Links to Nuage and OpenStack Resources
 
 * For the Heat templates used by OpenStack Platform Director, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates
 * For the Puppet manifests, go to http://git.openstack.org/cgit/openstack/tripleo-heat-templates/tree/puppet
-* For the nuage-puppet-modules RPM (nuage-puppet-modules-16.1-20.10.7_59), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
+* For the nuage-puppet-modules RPM (nuage-puppet-modules-16.2-20.10.13_63), go to `nuage-puppet-modules <../../nuage-puppet-modules>`_
 * For the scripts to patch the Overcloud qcow image, go to `nuage_image_patching_scripts <../../image-patching/nuage_image_patching_scripts>`_
 * For the files and script to generate the CMS ID, go to `Generate CMS ID <../../nuage-tripleo-heat-templates/scripts/generate-cms-id>`_
